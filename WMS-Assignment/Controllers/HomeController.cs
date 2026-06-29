@@ -5,14 +5,9 @@ using WMS_Assignment.Data;
 
 namespace WMS_Assignment.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController(DB Db) : Controller
     {
-        private readonly ApplicationDbContext _context;
-
-        public HomeController(ApplicationDbContext context)
-        {
-            _context = context;
-        }
+        private readonly DB _context;
 
         public async Task<IActionResult> Index()
         {
@@ -39,6 +34,7 @@ namespace WMS_Assignment.Controllers
         {
             return View();
         }
+
 
         public IActionResult Contact()
         {

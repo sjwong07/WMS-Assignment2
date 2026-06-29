@@ -7,9 +7,9 @@ namespace WMS_Assignment.Services
 {
     public class OrderService : IOrderService
     {
-        private readonly ApplicationDbContext _context;
+        private readonly DB _context;
 
-        public OrderService(ApplicationDbContext context)
+        public OrderService(DB context)
         {
             _context = context;
         }

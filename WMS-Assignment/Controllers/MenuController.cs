@@ -11,9 +11,9 @@ namespace WMS_Assignment.Controllers
     [Authorize]
     public class MenuController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly DB _context;
 
-        public MenuController(ApplicationDbContext context)
+        public MenuController(DB context)
         {
             _context = context;
         }

@@ -13,10 +13,10 @@ namespace WMS_Assignment.Controllers
     [Authorize]
     public class OrderController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly DB _context;
         private readonly IOrderService _orderService;
 
-        public OrderController(ApplicationDbContext context, IOrderService orderService)
+        public OrderController(DB context, IOrderService orderService)
         {
             _context = context;
             _orderService = orderService;

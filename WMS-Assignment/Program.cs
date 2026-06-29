@@ -4,15 +4,14 @@ using WMS_Assignment.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+
 builder.Services.AddControllersWithViews();
 
-// Configure Entity Framework with SQL Server Express
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
+builder.Services.AddDbContext<DB>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
-        sqlOptions => sqlOptions.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
+        sqlOptions => sqlOptions.MigrationsAssembly(typeof(DB).Assembly.FullName)));
 
-// Add custom services
+
 builder.Services.AddScoped<IOrderService, OrderService>();
 
 // Configure Authentication with Cookie
@@ -64,7 +63,7 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     try
     {
-        var context = services.GetRequiredService<ApplicationDbContext>();
+        var context = services.GetRequiredService<DB>();
         context.Database.EnsureCreated();
         // SeedData.Initialize(services);
     }

@@ -11,9 +11,9 @@ namespace WMS_Assignment.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly DB _context;
 
-        public AccountController(ApplicationDbContext context)
+        public AccountController(DB context)
         {
             _context = context;
         }
