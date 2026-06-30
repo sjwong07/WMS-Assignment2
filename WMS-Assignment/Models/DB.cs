@@ -17,7 +17,7 @@ public class DB(DbContextOptions options) : DbContext(options)
 
 public class Role
 {
-    [Key, MaxLength(10)]
+    [Key, MaxLength(100)]
     public string Id { get; set; }
 
     [MaxLength(100)]
@@ -26,7 +26,7 @@ public class Role
     [MaxLength(100)]
     public string Description { get; set; }
 
-    public List<Role> Roles { get; set; } = [];
+    
 }
 public class User
 {
@@ -62,7 +62,7 @@ public class User
     public string RoleId { get; set; }
     public Role Role { get; set; }
 
-    public List<User> Users { get; set; } = [];
+    
 
 }
 public class Category
@@ -76,7 +76,7 @@ public class Category
     [MaxLength(100)]
     public string Description { get; set; }
 
-    public List<Category> Categories { get; set; } = [];
+    
 
         
 }
@@ -97,17 +97,17 @@ public class MenuItem
     [Required]
     public decimal Price { get; set; }
 
-    [MaxLength(50)]
+    [MaxLength(10)]
     public string CategoryId { get; set; }
     public Category Category { get; set; }
 
-    public List<MenuItem> MenuItems { get; set; } = [];
+   
 }
 
 public class Table
 {
     [Key, MaxLength(100)]
-    public string Id { get; set; }
+    public int Id { get; set; }
 
     [Required]
     [MaxLength(10)]
