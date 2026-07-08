@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Reflection.Metadata;
 
 namespace WMS_Assignment.Models;
 #nullable disable warnings
@@ -33,31 +35,31 @@ public class User
     [Key, MaxLength(100)]
     public string Id { get; set; }
 
-    [Required]
+    
     [MaxLength(100)]
     public string Name {  get; set; }
 
-    [Required]
+    
     [MaxLength(100)]
     public string Email { get; set; }
 
-    [Required]
+    
     [MaxLength(100)]
     public string Password { get; set; }
 
-    [Required]
+    
     [MaxLength(100)]
     public string FirstName { get; set; }
 
-    [Required]
+   
     [MaxLength(100)]
     public string LastName { get; set; }
 
 
-    [Required]
+    
     public DateTime CreatedDate { get; set; }
 
-    [Required]
+    
     [MaxLength(100)]
     public string RoleId { get; set; }
     public Role Role { get; set; }
@@ -86,15 +88,15 @@ public class MenuItem
     [Key, MaxLength(100)]
     public string Id { get; set; }
 
-    [Required]
+   
     [MaxLength(50)]
     public string Name { get; set; }
 
-    [Required]
+   
     [MaxLength(100)]
     public string Description { get; set; }
 
-    [Required]
+    [Column(TypeName = "decimal(18,2)")]
     public decimal Price { get; set; }
 
     [MaxLength(10)]
@@ -109,15 +111,15 @@ public class Table
     [Key, MaxLength(100)]
     public int Id { get; set; }
 
-    [Required]
+    
     [MaxLength(10)]
     public string Number { get; set; }
 
-    [Required]
+   
     [MaxLength(10)]
     public int Capacity { get; set; }
 
-    [Required]
+    
     [MaxLength(30)]
     public string Location { get; set; }
 
