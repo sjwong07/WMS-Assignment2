@@ -7,7 +7,7 @@ public class HomeController(DB Db) : Controller
 {
     
 
-    public async Task<IActionResult> Index()
+    public IActionResult Index()
     {
        
 
