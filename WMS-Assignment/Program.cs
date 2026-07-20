@@ -8,7 +8,7 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddSqlServer<DB>($@"
     Data Source=(LocalDB)\MSSQLLocalDB;
-    AttachDbFilename={builder.Environment.ContentRootPath}\food.mdf;
+    AttachDbFilename={builder.Environment.ContentRootPath}\Restaurant.mdf;
 ");
 
 // Configure Authentication with Cookie
