@@ -12,7 +12,7 @@ using WMS_Assignment.Models;
 namespace WMS_Assignment.Migrations
 {
     [DbContext(typeof(DB))]
-    [Migration("20260720063616_CreateDB")]
+    [Migration("20260720065159_CreateDB")]
     partial class CreateDB
     {
         /// <inheritdoc />
@@ -90,12 +90,9 @@ namespace WMS_Assignment.Migrations
 
             modelBuilder.Entity("WMS_Assignment.Models.Table", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<string>("Id")
                         .HasMaxLength(100)
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("Capacity")
                         .HasMaxLength(10)

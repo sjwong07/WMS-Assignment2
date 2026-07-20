@@ -39,8 +39,7 @@ namespace WMS_Assignment.Migrations
                 name: "Tables",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", maxLength: 100, nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Capacity = table.Column<int>(type: "int", maxLength: 10, nullable: false),
                     TableType = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false)
                 },

@@ -92,7 +92,7 @@ public class MenuItem
 public class Table
 {
     [Key, MaxLength(100)]
-    public int Id { get; set; }
+    public string Id { get; set; }
 
 
     [MaxLength(10)]

@@ -87,12 +87,9 @@ namespace WMS_Assignment.Migrations
 
             modelBuilder.Entity("WMS_Assignment.Models.Table", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<string>("Id")
                         .HasMaxLength(100)
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("Capacity")
                         .HasMaxLength(10)
