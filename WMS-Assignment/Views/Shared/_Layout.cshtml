@@ -1,136 +1,45 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html en="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - WMS Restaurant</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    @RenderSection("Styles", required: false)
-</head>
+    <meta charset=" = "utf-8">
+    <meta name=" = "viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+    <link rel="stylesheet" href ="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+    <link rel="stylesheet" href="/css/menu.css">
+    <link rel="stylesheet" href="/css/site.css">
+    <link rel="stylesheet" href="/css/menu.css" asp-append-version="true">
+    @RenderSection("head",false)
+   </head>
+   <body>
+       <header>
+           <h1><a href="/"> The Silk Cafe </a></h1>
+       </header>
 
-<body>
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-            <div class="container">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
-                    <i class="fas fa-utensils"></i> WMS Restaurant
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
-                                <i class="fas fa-home"></i> Home
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Menu" asp-action="Index">
-                                <i class="fas fa-book"></i> Menu
-                            </a>
-                        </li>
-                        @if (User.Identity.IsAuthenticated)
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Order" asp-action="Index">
-                                    <i class="fas fa-shopping-cart"></i> My Orders
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Order" asp-action="Create">
-                                    <i class="fas fa-plus-circle"></i> New Order
-                                </a>
-                            </li>
-                            @if (User.IsInRole("Admin") || User.IsInRole("Staff"))
-                            {
-                                <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">
-                                        <i class="fas fa-cog"></i> Management
-                                    </a>
-                                    <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="Dashboard">Dashboard</a></li>
-                                        <li><a class="dropdown-item" asp-controller="Menu" asp-action="Manage">Manage Menu</a></li>
-                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="Tables">Manage Tables</a></li>
-                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="Users">Manage Users</a></li>
-                                        <li><a class="dropdown-item" asp-controller="Order" asp-action="Manage">Manage Orders</a></li>
-                                        <li><a class="dropdown-item" asp-controller="Order" asp-action="KitchenView">Kitchen View</a></li>
-                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="Reports">Reports</a></li>
-                                    </ul>
-                                </li>
-                            }
-                        }
-                    </ul>
-                    <ul class="navbar-nav">
-                        @if (User.Identity.IsAuthenticated)
-                        {
-                            <li class="nav-item">
-                                <span class="nav-link text-light">
-                                    <i class="fas fa-user"></i> @User.Identity.Name
-                                </span>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Account" asp-action="Logout">
-                                    <i class="fas fa-sign-out-alt"></i> Logout
-                                </a>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Account" asp-action="Login">
-                                    <i class="fas fa-sign-in-alt"></i> Login
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Account" asp-action="Register">
-                                    <i class="fas fa-user-plus"></i> Register
-                                </a>
-                            </li>
-                        }
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </header>
+       <nav>
+        <a href="/"> Home</a>
+        <a href="/Home/Product"> Food</a>
+        <a href="/Home/Cart"> Cart</a>
+        <a href="/Home.Login"> Pending</a>
+        <a href="/"> Pending</a>
+        <a href="/"> Pending</a>
+        <a href="/"> Pending</a>
+        <a href="/"> Pending</a>
+        <a href="/"> Pending</a>
+        <a href="/"> Pending</a>
+        <a href="/"> Pending</a>
+        <div></div>
+       </nav>
 
-    <main role="main" class="container mt-4">
-        @if (TempData["Success"] != null)
-        {
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="fas fa-check-circle"></i> @TempData["Success"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        }
-        @if (TempData["Error"] != null)
-        {
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        }
-        @if (TempData["Warning"] != null)
-        {
-            <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                <i class="fas fa-exclamation-triangle"></i> @TempData["Warning"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        }
+       <main>
+           <h1> ViewBag.Title</h1>
+           @RenderBody()
+       </main>
 
-        @RenderBody()
-    </main>
+       <footer>
+           Developed by<b> BAE SUZY</b> &middot;
+           COpyrighted &copy;@DateTime.Today.Year
+       </footer>
 
-    <footer class="border-top footer text-muted mt-5">
-        <div class="container">
-            &copy; @DateTime.Now.Year - WMS Restaurant Ordering System
-        </div>
-    </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
-</body>
+    </body>
 </html>
