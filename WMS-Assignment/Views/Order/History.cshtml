@@ -1,0 +1,49 @@
+﻿@model List<Order>
+
+@{
+    ViewData["Title"] = "Order History";
+    bool isStaffOrAdmin = User.IsInRole("RS01") || User.IsInRole("RA01");
+}
+
+<h2>Order History</h2>
+
+@if (!Model.Any())
+{
+    <p>No orders found.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Order Id</th>
+                @if (isStaffOrAdmin)
+                {
+                    <th>Customer</th>
+                }
+                <th>Table</th>
+                <th>Order Date</th>
+                <th>Status</th>
+                <th>Payment Status</th>
+                <th>Total Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in Model)
+            {
+                <tr>
+                    <td>@order.Id</td>
+                    @if (isStaffOrAdmin)
+                    {
+                        <td>@order.User?.Name</td>
+                    }
+                    <td>@order.Table?.Id</td>
+                    <td>@order.OrderDate.ToString("dd MMM yyyy, hh:mm tt")</td>
+                    <td>@order.Status</td>
+                    <td>@order.PaymentStatus</td>
+                    <td>RM @order.TotalAmount.ToString("0.00")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

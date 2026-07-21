@@ -11,6 +11,8 @@ public class DB(DbContextOptions options) : DbContext(options)
     public DbSet<Table> Tables { get; set; }
     public DbSet<FoodCategory> FoodCategories { get; set; }
     public DbSet<MenuItem> MenuItems { get; set; }
+    public DbSet<Order> Orders { get; set; }
+    public DbSet<OrderDetail> OrderDetails { get; set; }
 
 }
 
@@ -101,4 +103,56 @@ public class Table
     [MaxLength(20)]
     public string TableType { get; set; }
 
+}
+public class Order
+{
+    [Key, MaxLength(100)]
+    public string Id { get; set; }
+
+    [MaxLength(100)]
+    public string UserId { get; set; }
+    public User User { get; set; }
+
+    [MaxLength(100)]
+    public string TableId { get; set; }
+    public Table Table { get; set; }
+
+    public DateTime OrderDate { get; set; }
+
+    // e.g. Pending, Preparing, Served, Completed, Cancelled
+    [MaxLength(20)]
+    public string Status { get; set; }
+
+    public decimal TotalAmount { get; set; }
+
+    // e.g. Cash, Card, E-Wallet
+    [MaxLength(20)]
+    public string PaymentMethod { get; set; }
+
+    // e.g. Unpaid, Paid
+    [MaxLength(20)]
+    public string PaymentStatus { get; set; }
+
+    public List<OrderDetail> OrderDetails { get; set; }
+}
+
+public class OrderDetail
+{
+    [Key, MaxLength(100)]
+    public string Id { get; set; }
+
+    [MaxLength(100)]
+    public string OrderId { get; set; }
+    public Order Order { get; set; }
+
+    [MaxLength(100)]
+    public string MenuItemId { get; set; }
+    public MenuItem MenuItem { get; set; }
+
+    public int Quantity { get; set; }
+
+    // price snapshot at time of order, in case MenuItem price changes later
+    public decimal UnitPrice { get; set; }
+
+    public decimal SubTotal { get; set; }
 }
