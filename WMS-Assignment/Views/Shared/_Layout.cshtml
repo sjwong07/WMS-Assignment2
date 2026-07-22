@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿
+<!DOCTYPE html>
 <html en="en">
 <head>
     <meta charset=" = "utf-8">
@@ -15,11 +16,12 @@
            <h1><a href="/"> The Silk Cafe </a></h1>
        </header>
 
-       <nav>
+    
+        <nav>
         <a href="/"> Home</a>
-        <a href="/Home/Product"> Food</a>
+        <a href="/Product/Menu"> Menu</a>
         <a href="/Home/Cart"> Cart</a>
-        <a href="/Home.Login"> Pending</a>
+        <a href="/Home/Login"> Pending</a>
         <a href="/"> Pending</a>
         <a href="/"> Pending</a>
         <a href="/"> Pending</a>
@@ -31,7 +33,7 @@
        </nav>
 
        <main>
-           <h1> ViewBag.Title</h1>
+           <h1> @ViewBag.Title</h1>  
            @RenderBody()
        </main>
 
