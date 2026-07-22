@@ -9,40 +9,11 @@ namespace WMS_Assignment.Controllers;
 
 public class ProductController(DB db) : Controller
 {
-    public IActionResult Menu()
+    public async Task<IActionResult> Menu()
     {
-        return View();
-
+        var items = await db.MenuItems.Include(m => m.Category).ToListAsync();
+        var tables = await db.Tables.ToListAsync();
+        ViewBag.Tables = tables;
+        return View(items);
     }
-
-   
-    public IActionResult AdminMenu()
-    {
-        return View();
-    }
-
-    
-
-    public IActionResult Create()
-    {
-        return View();
-    }
-
-    public IActionResult Detail()
-    {
-        return View();
-    }
-
-    public IActionResult Update()
-    {
-        return View();
-    }
-
-    public IActionResult Delete()
-    {
-        return View();
-    }
-
-
-
 }

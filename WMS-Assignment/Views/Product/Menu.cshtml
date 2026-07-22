@@ -1,5 +1,43 @@
-﻿@{
-    ViewBag.Title = "";
+﻿@model List<MenuItem>
+
+@{
+    ViewData["Title"] = "Menu";
 }
-@ViewBag.Title
-<h1>Testing </h1>
+
+<h2>Menu</h2>
+
+<form asp-controller="Home" asp-action="AddToOrder" method="post">
+    <label>Table:</label>
+    <select name="tableId">
+        @foreach (var t in (List<Table>)ViewBag.Tables)
+        {
+            <option value="@t.Id">@t.Id (@t.TableType, seats @t.Capacity)</option>
+        }
+    </select>
+
+    <table>
+        <thead>
+            <tr>
+                <th></th>
+                <th>Item</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Qty</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td><input type="radio" name="menuItemId" value="@item.Id" /></td>
+                    <td>@item.Name</td>
+                    <td>@item.Description</td>
+                    <td>RM @item.Price.ToString("0.00")</td>
+                    <td><input type="number" name="quantity" value="1" min="1" style="width:60px" /></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <button type="submit">Add Selected Item to Order</button>
+</form>

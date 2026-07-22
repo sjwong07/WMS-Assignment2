@@ -12,12 +12,9 @@ public class OrderController(DB db) : Controller
     // GET: /Order/History
     public async Task<IActionResult> History()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? HttpContext.Session.GetString("TestUserId");
         var roleId = User.FindFirstValue(ClaimTypes.Role);
-        
 
-        // Staff (RS01) and Admin (RA01) see every order.
-        // Customer (RC01) sees only their own orders.
         bool isStaffOrAdmin = roleId == "RS01" || roleId == "RA01";
 
         var query = db.Orders

@@ -3,9 +3,10 @@ global using WMS_Assignment.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
+builder.Services.AddSession();
 builder.Services.AddControllersWithViews();
 builder.Services.AddAuthorization();
+
 
 builder.Services.AddSqlServer<DB>($@"
     Data Source=(LocalDB)\MSSQLLocalDB;
@@ -37,6 +38,7 @@ var app = builder.Build();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapDefaultControllerRoute();
