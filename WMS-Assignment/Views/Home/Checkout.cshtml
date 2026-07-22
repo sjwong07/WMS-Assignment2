@@ -1,6 +1,29 @@
-﻿namespace WMS_Assignment.Views.Home
-{
-    public class Checkout
-    {
-    }
+﻿@model Order
+
+@{
+    ViewData["Title"] = "Checkout";
 }
+
+<h2>Checkout</h2>
+<p>Total to Pay: RM @Model.TotalAmount.ToString("0.00")</p>
+
+<form asp-action="Checkout" method="post">
+    <input type="hidden" name="orderId" value="@Model.Id" />
+
+    <label>
+        <input type="radio" name="paymentMethod" value="Cash" checked="checked" /> Cash
+    </label>
+    <br />
+
+    <label>
+        <input type="radio" name="paymentMethod" value="Card" /> Card
+    </label>
+    <br />
+
+    <label>
+        <input type="radio" name="paymentMethod" value="E-Wallet" /> E-Wallet
+    </label>
+    <br />
+
+    <button type="submit">Confirm Payment</button>
+</form>
