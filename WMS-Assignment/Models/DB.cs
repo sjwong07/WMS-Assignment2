@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
 namespace WMS_Assignment.Models;
@@ -119,13 +119,13 @@ public class Order
 
     public DateTime OrderDate { get; set; }
 
-    // e.g. Pending, Preparing, Served, Completed, Cancelled
+    
     [MaxLength(20)]
     public string Status { get; set; }
 
     public decimal TotalAmount { get; set; }
 
-    // e.g. Cash, Card, E-Wallet
+    
     [MaxLength(20)]
     public string PaymentMethod { get; set; }
 
