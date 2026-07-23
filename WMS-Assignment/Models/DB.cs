@@ -32,14 +32,14 @@ public class User
     [Key, MaxLength(100)]
     public string Id { get; set; }
 
+    [MaxLength(100)]
+    public string Username { get; set; }   
 
     [MaxLength(100)]
     public string Name { get; set; }
 
-
     [MaxLength(100)]
     public string Email { get; set; }
-
 
     [MaxLength(100)]
     public string Password { get; set; }
@@ -49,15 +49,13 @@ public class User
 
     [MaxLength(100)]
     public string LastName { get; set; }
-    public DateTime CreatedDate { get; set; }
 
+    public DateTime CreatedDate { get; set; }
 
     [MaxLength(100)]
     public string RoleId { get; set; }
+
     public Role Role { get; set; }
-
-
-
 }
 public class FoodCategory
 {

@@ -27,6 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Views\Member\" />
     <Folder Include="Views\Payment\" />
   </ItemGroup>
 
