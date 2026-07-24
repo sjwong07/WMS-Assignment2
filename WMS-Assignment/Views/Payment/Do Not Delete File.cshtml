@@ -1,0 +1,73 @@
+@{
+    ViewData["Title"] = "Register";
+}
+
+<h2>Create Account</h2>
+
+<form asp-controller="Home" asp-action="Register" method="post">
+
+    <div>
+        <label for="Name">Name</label><br />
+        <input type="text" id="Name" name="Name" required />
+    </div>
+
+    <br />
+
+    <div>
+        <label for="FirstName">First Name</label><br />
+        <input type="text" id="FirstName" name="FirstName" required />
+    </div>
+
+    <br />
+
+    <div>
+        <label for="LastName">Last Name</label><br />
+        <input type="text" id="LastName" name="LastName" required />
+    </div>
+
+    <br />
+
+    <div>
+        <label for="Username">Username</label><br />
+        <input type="text" id="Username" name="Username" required />
+    </div>
+
+    <br />
+
+    <div>
+        <label for="Email">Email</label><br />
+        <input type="email" id="Email" name="Email" required />
+    </div>
+
+    <br />
+
+    <div>
+        <label for="Password">Password</label><br />
+        <input type="password" id="Password" name="Password" required />
+    </div>
+
+    <br />
+
+    <div>
+        <label for="ConfirmPassword">Confirm Password</label><br />
+        <input type="password" id="ConfirmPassword" name="ConfirmPassword" required />
+    </div>
+
+    <br />
+
+    <button type="submit">Create Account</button>
+    <button type="reset">Clear</button>
+
+</form>
+
+<br />
+
+<p>
+    Already have an account?
+    <a asp-controller="Home" asp-action="Login">Login Here</a>
+</p>
+
+@if (ViewBag.Message != null)
+{
+    <p>@ViewBag.Message</p>
+}
