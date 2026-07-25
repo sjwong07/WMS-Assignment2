@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace WMS_Assignment.Controllers;
 
-public class HomeController(DB Db) : Controller
+public class HomeController(DB db) : Controller
 {
     public IActionResult Index()
     {
@@ -20,10 +20,7 @@ public class HomeController(DB Db) : Controller
         return View();
     }
 
-    public IActionResult Product()
-    {
-        return View();
-    }
+
 
     public IActionResult Receipt()
     {
@@ -40,9 +37,9 @@ public class HomeController(DB Db) : Controller
     [HttpPost]
     public IActionResult Login(string Username, string Password)
     {
-        var user = Db.Users.FirstOrDefault(x =>
-    x.Username == Username &&
-    x.Password == Password);
+        var user = db.Users.FirstOrDefault(u =>
+    u.Username == Username &&
+    u.Password == Password);
 
         if (user != null)
         {
@@ -87,11 +84,11 @@ public class HomeController(DB Db) : Controller
             RoleId = "RAC01"
         };
 
-        Db.Users.Add(user);
+        db.Users.Add(user);
 
         ViewBag.Message = "RoleId saved: " + user.RoleId;
 
-        Db.SaveChanges();
+        db.SaveChanges();
 
         ViewBag.Message = "Account created successfully!";
         return View("Views/Security/Register.cshtml");

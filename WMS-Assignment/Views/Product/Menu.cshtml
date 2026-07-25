@@ -1,21 +1,15 @@
-﻿@model List<MenuItem>
+﻿@model IEnumerable<MenuItem>
+
 
 @{
-    ViewData["Title"] = "Menu";
+    ViewBag.Title = "Menu";
 }
 
 <h2>Menu</h2>
 
-<form asp-controller="Home" asp-action="AddToOrder" method="post">
-    <label>Table:</label>
-    <select name="tableId">
-        @foreach (var t in (List<Table>)ViewBag.Tables)
-        {
-            <option value="@t.Id">@t.Id (@t.TableType, seats @t.Capacity)</option>
-        }
-    </select>
 
-    <table>
+
+    <table class="MenuItem">
         <thead>
             <tr>
                 <th></th>
@@ -39,5 +33,4 @@
         </tbody>
     </table>
 
-    <button type="submit">Add Selected Item to Order</button>
-</form>
+    <button type="submit">Add To Cart</button>
