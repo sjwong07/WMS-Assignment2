@@ -4,37 +4,47 @@
 
 <h2>Login</h2>
 
-<form asp-action="Login" method="post">
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Success"]
+    </div>
+}
 
-    <div>
-        <label for="Username">Username</label><br />
-        <input type="text" id="Username" name="Username" required />
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger">
+        @ViewBag.Error
+    </div>
+}
+
+<form method="post">
+
+    <div class="mb-3">
+        <label>Username</label>
+        <input name="username" class="form-control" required />
     </div>
 
-    <br />
-
-    <div>
-        <label for="Password">Password</label><br />
-        <input type="password" id="Password" name="Password" required />
+    <div class="mb-3">
+        <label>Password</label>
+        <input type="password"
+               name="password"
+               class="form-control"
+               required />
     </div>
 
-    <br />
-
-    <div>
-        <input type="submit" value="Login" />
-        <input type="reset" value="Clear" />
-    </div>
+    <button class="btn btn-primary">
+        Login
+    </button>
 
 </form>
 
-<br />
+<hr />
 
 <p>
     Don't have an account?
-    <a asp-controller="Home" asp-action="Create">Register Here</a>
+    <a asp-controller="Security"
+       asp-action="Register">
+        Register Here
+    </a>
 </p>
-
-@if (ViewBag.Message != null)
-{
-    <p>@ViewBag.Message</p>
-}

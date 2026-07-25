@@ -1,12 +1,11 @@
 global using WMS_Assignment.Models;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSession();
+builder.Services.AddHttpContextAccessor();   // Add this line
 builder.Services.AddControllersWithViews();
 builder.Services.AddAuthorization();
-
 
 builder.Services.AddSqlServer<DB>($@"
     Data Source=(LocalDB)\MSSQLLocalDB;
@@ -32,16 +31,17 @@ builder.Services.AddAuthentication(options =>
     options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
 });
 
-
-
 var app = builder.Build();
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
-app.UseSession();
+
+app.UseSession();          // Before Authentication
+
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapDefaultControllerRoute();
- 
 
 app.Run();

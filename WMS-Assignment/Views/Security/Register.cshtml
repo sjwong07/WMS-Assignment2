@@ -1,56 +1,46 @@
-@{
-    ViewData["Title"] = "Register";
-}
-
+﻿@model WMS_Assignment.Models.User
 <h2>Create Account</h2>
 
-<form method="post" asp-controller="Security" asp-action="Register">
-    <div class="mb-3">
-        <label for="Name" class="form-label">Full Name</label>
-        <input type="text" class="form-control" id="Name" name="Name" required />
-    </div>
+<!-- Show validation summary errors -->
+<div asp-validation-summary="All" class="text-danger"></div>
 
-    <div>
-        <label for="FirstName">First Name</label><br />
-        <input type="text" id="FirstName" name="FirstName" required />
-    </div>
-
-    <br />
-
-    <div>
-        <label for="LastName">Last Name</label><br />
-        <input type="text" id="LastName" name="LastName" required />
-    </div>
-
-    <br />
-
-    <div class="mb-3">
-        <label for="Email" class="form-label">Email</label>
-        <input type="email" class="form-control" id="Email" name="Email" required />
-    </div>
-
-    <div class="mb-3">
-        <label for="Username" class="form-label">Username</label>
-        <input type="text" class="form-control" id="Username" name="Username" required />
-    </div>
-
-    <div class="mb-3">
-        <label for="Password" class="form-label">Password</label>
-        <input type="password" class="form-control" id="Password" name="Password" required />
-    </div>
-
-    <div class="mb-3">
-        <label for="ConfirmPassword" class="form-label">Confirm Password</label>
-        <input type="password" class="form-control" id="ConfirmPassword" name="ConfirmPassword" required />
-    </div>
-
-    <button type="submit" class="btn btn-primary">Create Account</button>
-    <a asp-controller="Security" asp-action="Login" class="btn btn-secondary">Back to Login</a>
-</form>
-
-@if (ViewBag.Message != null)
+@if (ViewBag.Error != null)
 {
-    <div class="alert alert-info mt-3">
-        @ViewBag.Message
+    <div class="alert alert-danger">
+        @ViewBag.Error
     </div>
 }
+
+<form method="post">
+    <div class="mb-3">
+        <label>Username</label>
+        <input asp-for="Username" class="form-control" />
+        <span asp-validation-for="Username" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label>Email</label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label>Password</label>
+        <input asp-for="Password" type="password" class="form-control" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+
+        <small class="text-danger">
+            Password must contain:
+            <br />✓ At least 8 characters
+            <br />✓ 1 Uppercase
+            <br />✓ 1 Lowercase
+            <br />✓ 1 Number
+            <br />✓ 1 Special Character
+        </small>
+    </div>
+
+    <button type="submit" class="btn btn-success">Register</button>
+</form>
+
+<hr />
+<a asp-action="Login">Already have an account? Login</a>

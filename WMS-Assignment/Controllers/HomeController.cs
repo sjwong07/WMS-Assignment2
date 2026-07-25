@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.RegularExpressions;
 
 namespace WMS_Assignment.Controllers;
 
@@ -7,7 +9,7 @@ public class HomeController(DB db) : Controller
 {
     public IActionResult Index()
     {
-        return View();
+        return View("~/Views/Security/Login.cshtml");
     }
 
     public IActionResult About()
@@ -31,28 +33,35 @@ public class HomeController(DB db) : Controller
     [HttpGet]
     public IActionResult Login()
     {
-        return View("Views/Security/Login.cshtml");
+        return View("~/Views/Security/Login.cshtml");
     }
 
     [HttpPost]
-    public IActionResult Login(string Username, string Password)
+    public async Task<IActionResult> Login(string Username, string Password)
     {
         var user = db.Users.FirstOrDefault(u =>
-    u.Username == Username &&
-    u.Password == Password);
+            u.Username == Username &&
+            u.Password == Password);
 
         if (user != null)
         {
-            ViewBag.Message = "Login Successful!";
-        }
-        else
+            // Create user identity for authentication cookie
+            var claims = new List<System.Security.Claims.Claim>
         {
-            ViewBag.Message = "Invalid Username or Password.";
+            new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, user.Username),
+            new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.NameIdentifier, user.Id)
+        };
+
+            var claimsIdentity = new System.Security.Claims.ClaimsIdentity(claims, Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme);
+
+            await HttpContext.SignInAsync(Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme, new System.Security.Claims.ClaimsPrincipal(claimsIdentity));
+
+            return RedirectToAction("Index", "Home");
         }
 
-        return View();
+        ViewBag.Message = "Invalid Username or Password.";
+        return View("~/Views/Security/Register.cshtml"); // or your Login view path
     }
-
 
     [HttpGet]
     public IActionResult Register()
@@ -61,37 +70,51 @@ public class HomeController(DB db) : Controller
     }
 
     [HttpPost]
-    public IActionResult Register(string FirstName, string LastName,
-                              string Name, string Email, string Username,
-                              string Password, string ConfirmPassword)
+    public IActionResult Register(string Username, string Email, string Password)
     {
-        if (Password != ConfirmPassword)
+        // Check duplicate username
+        if (db.Users.Any(u => u.Username == Username))
         {
-            ViewBag.Message = "Passwords do not match.";
-            return View("Views/Security/Register.cshtml");
+            ViewBag.Message = "Username already exists.";
+            return View("~/Views/Security/Register.cshtml");
+        }
+
+        // Generate User ID (U01, U02, ...)
+        string newId = "U01";
+        var lastUser = db.Users
+                         .OrderByDescending(u => u.Id)
+                         .FirstOrDefault();
+
+        if (lastUser != null && lastUser.Id.Length > 1 && int.TryParse(lastUser.Id.Substring(1), out int number))
+        {
+            newId = "U" + (number + 1).ToString("00");
         }
 
         User user = new User
         {
-            Id = Guid.NewGuid().ToString(),
+            Id = newId,
             Username = Username,
-            Name = Name,
             Email = Email,
-            Password = Password,
-            FirstName = FirstName,
-            LastName = LastName,
+            Password = Password, // Note: Consider hashing this later for security
             CreatedDate = DateTime.Now,
-            RoleId = "RAC01"
+            RoleId = "RAC01",
+            FailedLogin = 0,
+            LockoutEnd = null
         };
 
-        db.Users.Add(user);
+        try
+        {
+            db.Users.Add(user);
+            db.SaveChanges();
 
-        ViewBag.Message = "RoleId saved: " + user.RoleId;
-
-        db.SaveChanges();
-
-        ViewBag.Message = "Account created successfully!";
-        return View("Views/Security/Register.cshtml");
+            TempData["Success"] = "Account created successfully! Please login.";
+            return RedirectToAction("Login");
+        }
+        catch (Exception ex)
+        {
+            ViewBag.Message = ex.InnerException?.Message ?? ex.Message;
+            return View("~/Views/Security/Register.cshtml");
+        }
     }
 
 
