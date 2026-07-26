@@ -1,1 +1,46 @@
-﻿
+﻿@model Order
+
+@{
+    ViewData["Title"] = "Cart";
+}
+
+<h2>Your Order</h2>
+
+@if (Model == null || !Model.OrderDetails.Any())
+{
+    <p>Your cart is empty. <a href="/Product/Menu">Go to Menu</a></p>
+}
+else
+{
+    <p>Table: @Model.Table?.Id</p>
+    <table>
+        <thead>
+            <tr><th>Item</th><th>Unit Price</th><th>Qty</th><th>Subtotal</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var od in Model.OrderDetails)
+            {
+                <tr>
+                    <td>@od.MenuItem?.Name</td>
+                    <td>RM @od.UnitPrice.ToString("0.00")</td>
+                    <td>
+                        <form asp-action="UpdateQuantity" method="post" style="display:inline">
+                            <input type="hidden" name="orderDetailId" value="@od.Id" />
+                            <input type="number" name="quantity" value="@od.Quantity" min="1" style="width:60px" />
+                            <button type="submit">Update</button>
+                        </form>
+                    </td>
+                    <td>RM @od.SubTotal.ToString("0.00")</td>
+                    <td>
+                        <form asp-action="RemoveItem" method="post" style="display:inline">
+                            <input type="hidden" name="orderDetailId" value="@od.Id" />
+                            <button type="submit">Remove</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <h3>Total: RM @Model.TotalAmount.ToString("0.00")</h3>
+    <a href="/Home/Checkout"><button>Proceed to Checkout</button></a>
+}
