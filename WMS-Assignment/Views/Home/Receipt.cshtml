@@ -1,1 +1,38 @@
-﻿<h1>Testing</h1>
+﻿@model Order
+
+@{
+    ViewData["Title"] = "E-Receipt";
+}
+
+<h2>E-Receipt</h2>
+
+@if (Model == null)
+{
+    <p>Order not found.</p>
+}
+else
+{
+    <p>Order ID: @Model.Id</p>
+    <p>Customer: @Model.User?.Name</p>
+    <p>Table: @Model.Table?.Id</p>
+    <p>Date: @Model.OrderDate.ToString("dd MMM yyyy, hh:mm tt")</p>
+    <table>
+        <thead>
+            <tr><th>Item</th><th>Qty</th><th>Unit Price</th><th>Subtotal</th></tr>
+        </thead>
+        <tbody>
+            @foreach (var od in Model.OrderDetails)
+            {
+                <tr>
+                    <td>@od.MenuItem?.Name</td>
+                    <td>@od.Quantity</td>
+                    <td>RM @od.UnitPrice.ToString("0.00")</td>
+                    <td>RM @od.SubTotal.ToString("0.00")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <h3>Total Paid: RM @Model.TotalAmount.ToString("0.00")</h3>
+    <p>Payment Method: @Model.PaymentMethod</p>
+    <p>Status: @Model.PaymentStatus</p>
+}
