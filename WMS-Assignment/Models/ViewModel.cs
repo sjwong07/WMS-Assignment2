@@ -144,3 +144,9 @@ public class OrderDetailVM
 
     public decimal SubTotal { get; set; }
 }
+
+public class MenuVM
+{
+    public List<FoodCategoryVM> FoodCategories { get; set; }
+    public List<MenuItemVM> MenuItems { get; set; }
+}

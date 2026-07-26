@@ -4,16 +4,27 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using WMS_Assignment.Models;
 
+
 namespace WMS_Assignment.Controllers;
 
 
 public class ProductController(DB db) : Controller
 {
-    public async Task<IActionResult> Menu()
+    public IActionResult Menu()
     {
-        var Category = await db.MenuItems.Include(m => m.Category).ToListAsync();
-       
+
         
-        return View(Category);
+        
+
+        return View();
+    }
+
+    public IActionResult FilteringMenu()
+
+    {
+        var foodcategories = db.FoodCategories;
+        var menuItems = db.MenuItems;
+
+        return View(foodcategories);
     }
 }

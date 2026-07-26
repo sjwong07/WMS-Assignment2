@@ -1,4 +1,4 @@
-﻿@model IEnumerable<MenuItem>
+﻿@model MenuVM
 
 <table class="MenuItem">
     <thead>
@@ -16,7 +16,7 @@
     </thead>
     <tbody>
 
-        @foreach (var item in Model)
+        @foreach (var item in Model.MenuItems)
         {
             <tr>
                 <td><input type="radio" name="menuItemId" value="@item.Id" /></td>
