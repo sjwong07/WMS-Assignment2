@@ -1,0 +1,33 @@
+﻿@using System.Text.Json
+@{
+    ViewData["Title"] = "Revenue Report";
+    var labels = ((IEnumerable<dynamic>)Model).Select(d => (string)d.Category).ToList();
+    var values = ((IEnumerable<dynamic>)Model).Select(d => (decimal)d.Total).ToList();
+}
+
+<h2>Revenue by Food Category</h2>
+
+<canvas id="revenueChart" style="max-width:500px"></canvas>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+    const labels = @Html.Raw(JsonSerializer.Serialize(labels));
+    const values = @Html.Raw(JsonSerializer.Serialize(values));
+
+    new Chart(document.getElementById('revenueChart'), {
+    type: 'pie',
+    data: {
+    labels: labels,
+    datasets: [{
+    label: 'Revenue (RM)',
+    data: values,
+    backgroundColor: ['#4e79a7', '#f28e2b', '#e15759', '#76b7b2', '#59a14f']
+    }]
+    },
+    options: {
+    plugins: {
+    legend: { position: 'right' }
+    }
+    }
+    });
+</script>
