@@ -60,22 +60,13 @@ public class FoodCategoryVM
 
 public class MenuItemVM
 {
-    
-    public string? Id { get; set; }
+    public string? Search {  get; set; }
+    public List<string> SelectCategories { get; set; }
+    public decimal? MinPrice {  get; set; }
+    public decimal? MaxPrice {  get; set; }
 
-    [MaxLength(50)]
-    public string Name { get; set; }
-
-
-    [MaxLength(100)]
-    public string Description { get; set; }
-
-
-    public decimal Price { get; set; }
-
-    [MaxLength(10)]
-    public string CategoryId { get; set; }
-    public FoodCategory Category { get; set; }
+    public IEnumerable<FoodCategory> FoodCategories { get; set; }
+    public IEnumerable<MenuItem> MenuItems {  get; set; }
 
 
 }
