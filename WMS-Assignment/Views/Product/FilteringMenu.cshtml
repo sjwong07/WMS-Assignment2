@@ -1,22 +1,6 @@
 ﻿
-<form data-ajax="true"
-      data-ajax-method="get"
-      data-ajax-update="#target">
 
-    <div>
-        <input type="text" name="search" placeholder="Search For Product" />
-    </div>
-
-    @foreach (var c in Model)
-    {
-        <label><input type="checkbox" name="category" value="@c.Name">@c.Name </label>
-    }
-
-
-
-
-</form>
 
 <div id="target">
-    <partial name="_Ajax1">
+    <partial name="_A">
 </div>
