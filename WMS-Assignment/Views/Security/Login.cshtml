@@ -11,29 +11,29 @@
     </div>
 }
 
-@if (ViewBag.Error != null)
+@if (ViewBag.Message != null)
 {
     <div class="alert alert-danger">
-        @ViewBag.Error
+        @ViewBag.Message
     </div>
 }
 
-<form method="post">
+<form asp-controller="Home" asp-action="Login" method="post">
 
     <div class="mb-3">
         <label>Username</label>
-        <input name="username" class="form-control" required />
+        <input name="Username" class="form-control" required />
     </div>
 
     <div class="mb-3">
         <label>Password</label>
         <input type="password"
-               name="password"
+               name="Password"
                class="form-control"
                required />
     </div>
 
-    <button class="btn btn-primary">
+    <button type="submit" class="btn btn-primary">
         Login
     </button>
 
@@ -43,7 +43,7 @@
 
 <p>
     Don't have an account?
-    <a asp-controller="Security"
+    <a asp-controller="Home"
        asp-action="Register">
         Register Here
     </a>
