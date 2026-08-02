@@ -111,7 +111,7 @@ public class HomeController(DB db) : Controller
     }
 
     [HttpPost]
-    public IActionResult Register(string Username, string Email, string Password)
+    public IActionResult Register(string Username, string Email, string Password, string FirstName, string LastName)
     {
         if (db.Users.Any(u => u.Username == Username))
         {
@@ -135,6 +135,9 @@ public class HomeController(DB db) : Controller
             Username = Username,
             Email = Email,
             Password = Password,
+            FirstName = FirstName,
+            LastName = LastName,
+            Name = FirstName + "" + LastName,
             CreatedDate = DateTime.Now,
             RoleId = "RC01",
             FailedLogin = 0,
