@@ -17,37 +17,22 @@ public class RoleVM
     public string Description { get; set; }
 
 
-}
-public class UserVM
-{
-    
-    public string? Id { get; set; }
 
+}
+
+public class LoginVM
+{
     [MaxLength(100)]
     public string Username { get; set; }
 
-    [MaxLength(100)]
-    public string Name { get; set; }
-
-    [MaxLength(100)]
-    public string Email { get; set; }
-
-    [MaxLength(100)]
+    [MaxLength(20)]
+    [DataType(DataType.Password)]
     public string Password { get; set; }
 
-    [MaxLength(100)]
-    public string FirstName { get; set; }
-
-    [MaxLength(100)]
-    public string LastName { get; set; }
-
-    public DateTime CreatedDate { get; set; }
-
-    [MaxLength(100)]
-    public string RoleId { get; set; }
-
-    public Role Role { get; set; }
+    public bool RememberMe {  get; set; }
 }
+
+
 public class FoodCategoryVM
 {
    
@@ -71,19 +56,6 @@ public class MenuItemVM
 
 }
 
-public class TableVM
-{
-   
-    public string? Id { get; set; }
-
-
-    [MaxLength(10)]
-    public int Capacity { get; set; }
-
-    [MaxLength(20)]
-    public string TableType { get; set; }
-
-}
 public class OrderVM
 {
    
@@ -136,8 +108,3 @@ public class OrderDetailVM
     public decimal SubTotal { get; set; }
 }
 
-public class MenuVM
-{
-    public List<FoodCategoryVM> FoodCategories { get; set; }
-    public List<MenuItemVM> MenuItems { get; set; }
-}

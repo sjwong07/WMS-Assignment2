@@ -7,7 +7,7 @@ namespace WMS_Assignment.Models;
 public class DB(DbContextOptions options) : DbContext(options)
 {
 
-    public DbSet<User> Users => Set<User>();
+    public DbSet<User> Users {  get; set; }
     public DbSet<Role> Roles { get; set; }
     public DbSet<Table> Tables { get; set; }
     public DbSet<FoodCategory> FoodCategories { get; set; }
@@ -163,52 +163,4 @@ public class OrderDetail
     public decimal UnitPrice { get; set; }
 
     public decimal SubTotal { get; set; }
-}
-
-public class AccountController : Controller
-{
-    private readonly DB _db;
-
-    public AccountController(DB db)
-    {
-        _db = db;
-    }
-
-    // GET: /Account/Register
-    [HttpGet]
-    public IActionResult Register()
-    {
-        return View();
-    }
-
-    // POST: /Account/Register
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Register(User model)
-    {
-        // 1. Check if model state is valid based on Data Annotations
-        if (ModelState.IsValid)
-        {
-            // 2. Generate a primary key since User.Id is a string
-            model.Id = Guid.NewGuid().ToString();
-
-            // 3. Set mandatory fields that aren't captured in the small form
-            model.CreatedDate = DateTime.Now;
-            model.FailedLogin = 0;
-
-            // Assign a default RoleId if required by your application (ensure this role exists in your Roles table)
-            // model.RoleId = "DEFAULT_ROLE_ID"; 
-
-            // 4. Add to database context and save
-            _db.Users.Add(model);
-            await _db.SaveChangesAsync();
-
-            // 5. Redirect to login after successful registration
-            return RedirectToAction("Login");
-        }
-
-        // If validation fails, return the form with errors
-        ViewBag.Error = "Please fix the errors below.";
-        return View(model);
-    }
 }

@@ -5,14 +5,9 @@ using System.Text.RegularExpressions;
 
 namespace WMS_Assignment.Controllers;
 
-public class SecurityController : Controller
+public class SecurityController(DB Db) : Controller
 {
-    private readonly DB Db;
-
-    public SecurityController(DB db)
-    {
-        Db = db;
-    }
+   
 
     //---------------- Register ----------------
 
@@ -118,10 +113,22 @@ public class SecurityController : Controller
         return RedirectToAction("Index", "Home");
     }
 
+    public  IActionResult forgotPassword (){
+
+        return View();
+    
+    
+    }
+
     public IActionResult Logout()
     {
         HttpContext.Session.Clear();
 
         return RedirectToAction("Login");
     }
+
+
+
+
+
 }

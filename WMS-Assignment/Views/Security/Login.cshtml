@@ -1,8 +1,6 @@
 @{
-    ViewData["Title"] = "Login";
+    ViewBag.Title = "Login";
 }
-
-<h2>Login</h2>
 
 @if (TempData["Success"] != null)
 {
@@ -36,6 +34,14 @@
     <button class="btn btn-primary">
         Login
     </button>
+
+     <p>
+
+         <a  asp-controller="Security"
+             asp-action="forgotPassword">
+             Forgot Password?
+         </a>
+     </p>
 
 </form>
 
