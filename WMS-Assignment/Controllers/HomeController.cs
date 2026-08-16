@@ -80,7 +80,7 @@ public class HomeController(DB db) : Controller
             return View("~/Views/Security/Login.cshtml");
         }
 
-        // Successful login â€” reset failed attempts
+        // Successful login — reset failed attempts
         user.FailedLogin = 0;
         user.LockoutEnd = null;
         await db.SaveChangesAsync();
