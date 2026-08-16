@@ -42,31 +42,66 @@ public class HomeController(DB db) : Controller
         return View("~/Views/Security/Login.cshtml");
     }
 
+
     [HttpPost]
     public async Task<IActionResult> Login(string Username, string Password)
     {
-        var user = db.Users.FirstOrDefault(u =>
-            u.Username == Username &&
-            u.Password == Password);
+        var user = db.Users.FirstOrDefault(u => u.Username == Username);
 
-        if (user != null)
+        if (user == null)
         {
-            var claims = new List<System.Security.Claims.Claim>
-            {
-                new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, user.Username),
-                new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.NameIdentifier, user.Id),
-                new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, user.RoleId)
-            };
-
-            var claimsIdentity = new System.Security.Claims.ClaimsIdentity(claims, "CookieAuth");
-
-            await HttpContext.SignInAsync("CookieAuth", new System.Security.Claims.ClaimsPrincipal(claimsIdentity));
-
-            return RedirectToAction("Index", "Home");
+            ViewBag.Message = "Invalid Username or Password.";
+            return View("~/Views/Security/Login.cshtml");
         }
 
-        ViewBag.Message = "Invalid Username or Password.";
-        return View("~/Views/Security/Register.cshtml");
+        // Check if account is currently locked out
+        if (user.LockoutEnd != null && user.LockoutEnd > DateTime.Now)
+        {
+            var minutesLeft = Math.Ceiling((user.LockoutEnd.Value - DateTime.Now).TotalMinutes);
+            ViewBag.Message = $"Account locked. Try again in {minutesLeft} minute(s).";
+            return View("~/Views/Security/Login.cshtml");
+        }
+
+        if (user.Password != Password)
+        {
+            user.FailedLogin += 1;
+
+            if (user.FailedLogin >= 3)
+            {
+                user.LockoutEnd = DateTime.Now.AddMinutes(15);
+                user.FailedLogin = 0;
+                await db.SaveChangesAsync();
+                ViewBag.Message = "Too many failed attempts. Account locked for 15 minutes.";
+                return View("~/Views/Security/Login.cshtml");
+            }
+
+            await db.SaveChangesAsync();
+            ViewBag.Message = $"Invalid Username or Password. {3 - user.FailedLogin} attempt(s) remaining.";
+            return View("~/Views/Security/Login.cshtml");
+        }
+
+        // Successful login — reset failed attempts
+        user.FailedLogin = 0;
+        user.LockoutEnd = null;
+        await db.SaveChangesAsync();
+
+        var claims = new List<System.Security.Claims.Claim>
+        {
+            new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, user.Username),
+            new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.NameIdentifier, user.Id),
+            new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, user.RoleId)
+        };
+
+        var claimsIdentity = new System.Security.Claims.ClaimsIdentity(claims, "CookieAuth");
+        await HttpContext.SignInAsync("CookieAuth", new System.Security.Claims.ClaimsPrincipal(claimsIdentity));
+
+        return RedirectToAction("Menu", "Product");
+    }
+
+    public async Task<IActionResult> Logout()
+    {
+        await HttpContext.SignOutAsync("CookieAuth");
+        return RedirectToAction("Login");
     }
 
     
@@ -76,7 +111,7 @@ public class HomeController(DB db) : Controller
     }
 
     [HttpPost]
-    public IActionResult Register(string Username, string Email, string Password)
+    public IActionResult Register(string Username, string Email, string Password, string FirstName, string LastName)
     {
         if (db.Users.Any(u => u.Username == Username))
         {
@@ -100,6 +135,9 @@ public class HomeController(DB db) : Controller
             Username = Username,
             Email = Email,
             Password = Password,
+            FirstName = FirstName,
+            LastName = LastName,
+            Name = FirstName + "" + LastName,
             CreatedDate = DateTime.Now,
             RoleId = "RC01",
             FailedLogin = 0,

@@ -1,21 +1,32 @@
 ﻿@model WMS_Assignment.Models.User
 <h2>Create Account</h2>
 
-<!-- Show validation summary errors -->
 <div asp-validation-summary="All" class="text-danger"></div>
 
-@if (ViewBag.Error != null)
+@if (ViewBag.Message != null)
 {
     <div class="alert alert-danger">
-        @ViewBag.Error
+        @ViewBag.Message
     </div>
 }
 
-<form method="post">
+<form asp-controller="Home" asp-action="Register" method="post">
     <div class="mb-3">
         <label>Username</label>
         <input asp-for="Username" class="form-control" />
         <span asp-validation-for="Username" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label>First Name</label>
+        <input asp-for="FirstName" class="form-control" />
+        <span asp-validation-for="FirstName" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label>Last Name</label>
+        <input asp-for="LastName" class="form-control" />
+        <span asp-validation-for="LastName" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
@@ -43,4 +54,4 @@
 </form>
 
 <hr />
-<a asp-action="Login">Already have an account? Login</a>
+<a asp-controller="Home" asp-action="Login">Already have an account? Login</a>

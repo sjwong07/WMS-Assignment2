@@ -52,12 +52,13 @@ public class User
     [MaxLength(200)]
     public string Hash {  get; set; }
 
+    [Required(ErrorMessage = "First name is required")]
     [MaxLength(100)]
     public string FirstName { get; set; }
 
+    [Required(ErrorMessage = "Last name is required")]
     [MaxLength(100)]
     public string LastName { get; set; }
-
     public DateTime CreatedDate { get; set; }
 
     [MaxLength(100)]
