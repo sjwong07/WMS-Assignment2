@@ -108,3 +108,9 @@ public class OrderDetailVM
     public decimal SubTotal { get; set; }
 }
 
+public class forgotPasswordVM
+{
+    [MaxLength(50)]
+    public string Email {  get; set; }
+
+}

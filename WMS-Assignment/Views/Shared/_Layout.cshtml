@@ -26,8 +26,8 @@
         <a href="/Home/Register"> Register</a>
         @if (User.Identity != null && User.Identity.IsAuthenticated)
         {
-            <span>Hi, @User.Identity.Name</span>
-            <a asp-controller="Home" asp-action="Logout">Logout</a>
+            <a href="/Security/Logout"> Logout</a>
+           // <a href="/Profile/UpdateProfile"> Update Profile</a>
         }
         else
         {
