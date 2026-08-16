@@ -14,16 +14,22 @@ public class Helper(IWebHostEnvironment en,
 
     public bool VerifyPassword(string hash,string password)
     {
-        return ph.VerifyHashedPassword(0, hash, password)
+        return ph.VerifyHashedPassword(0,hash,password)
             == PasswordVerificationResult.Success;
     }
 
-   /* public void SignOut()
+    public string RandomPassword()
     {
-        ct.HttpContext!.SignOutAsync();
+        string s = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        string password = "";
+
+        Random r = new();
+
+        for(int i = 0; i < s.Length; i++)
+        {
+            password += s[r.Next(s.Length)];
+        }
+        return password;
     }
-   */
-
-
 
 }

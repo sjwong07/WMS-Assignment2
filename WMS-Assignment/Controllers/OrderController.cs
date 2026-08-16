@@ -85,4 +85,6 @@ public class OrderController(DB db) : Controller
 
         return View("Piechart", data);
     }
+
+
 }

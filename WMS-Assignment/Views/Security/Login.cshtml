@@ -1,8 +1,6 @@
 @{
-    ViewData["Title"] = "Login";
+    ViewBag.Title = "Login";
 }
-
-<h2>Login</h2>
 
 @if (TempData["Success"] != null)
 {
@@ -20,6 +18,8 @@
 
 <form asp-controller="Home" asp-action="Login" method="post">
 
+
+
     <div class="mb-3">
         <label>Username</label>
         <input name="Username" class="form-control" required />
@@ -33,9 +33,11 @@
                required />
     </div>
 
-    <button type="submit" class="btn btn-primary">
+     <button type="submit" class="btn btn-primary">
         Login
     </button>
+
+    <a href="/Security/forgotPassword">Forgot Password?</a>
 
 </form>
 

@@ -5,16 +5,8 @@ using System.Text.RegularExpressions;
 
 namespace WMS_Assignment.Controllers;
 
-public class SecurityController : Controller
+public class SecurityController(DB db,Helper hp) : Controller
 {
-    private readonly DB Db;
-
-    public SecurityController(DB db)
-    {
-        Db = db;
-    }
-
-    //---------------- Register ----------------
 
     public IActionResult Register()
     {
@@ -24,13 +16,13 @@ public class SecurityController : Controller
     [HttpPost]
     public IActionResult Register(User model)
     {
-        if (Db.Users.Any(x => x.Username == model.Username))
+        if (db.Users.Any(x => x.Username == model.Username))
         {
             ViewBag.Error = "Username already exists.";
             return View(model);
         }
 
-        if (Db.Users.Any(x => x.Email == model.Email))
+        if (db.Users.Any(x => x.Email == model.Email))
         {
             ViewBag.Error = "Email already exists.";
             return View(model);
@@ -49,8 +41,8 @@ public class SecurityController : Controller
             return View(model);
         }
 
-        Db.Users.Add(model);
-        Db.SaveChanges();
+        db.Users.Add(model);
+        db.SaveChanges();
 
         TempData["Success"] = "Account created successfully.";
 
@@ -65,9 +57,11 @@ public class SecurityController : Controller
     }
 
     [HttpPost]
-    public IActionResult Login(string username, string password)
+    public IActionResult Login(LoginVM vm)
+
     {
-        var user = Db.Users.FirstOrDefault(x => x.Username == username);
+        
+        var user = db.Users.FirstOrDefault(x => x.Username == vm.Username);
 
         if (user == null)
         {
@@ -83,7 +77,7 @@ public class SecurityController : Controller
             return View();
         }
 
-        if (user.Password != password)
+        if (user.Password != vm.Password)
         {
             user.FailedLogin++;
 
@@ -101,7 +95,7 @@ public class SecurityController : Controller
                     $"Invalid password. Remaining attempts: {3 - user.FailedLogin}";
             }
 
-            Db.SaveChanges();
+            db.SaveChanges();
 
             return View();
         }
@@ -111,11 +105,38 @@ public class SecurityController : Controller
         user.FailedLogin = 0;
         user.LockoutEnd = null;
 
-        Db.SaveChanges();
+        db.SaveChanges();
 
         HttpContext.Session.SetString("User", user.Username);
 
         return RedirectToAction("Index", "Home");
+    }
+
+    public  IActionResult forgotPassword (){
+
+        return View();
+    }
+
+    [HttpPost]
+    public IActionResult forgotPassword(string Email)
+    {
+        var u = db.Users.Find(Email);
+
+        if (u == null)
+        {
+            ModelState.AddModelError("Email", "Email not found.");
+        }
+
+
+        if (ModelState.IsValid)
+        {
+            string password = hp.RandomPassword();
+            u!.Hash = hp.HashPassword(password);
+            db.SaveChanges();
+
+            TempData["Info"] = $"Password reset to <b>{password}</b>.";
+        }
+        return RedirectToAction("Login");
     }
 
     public IActionResult Logout()
@@ -124,4 +145,9 @@ public class SecurityController : Controller
 
         return RedirectToAction("Login");
     }
+
+
+
+
+
 }
