@@ -49,6 +49,8 @@ public class User
     [DataType(DataType.Password)]
     [MaxLength(100)]
     public string Password { get; set; }
+    [MaxLength(200)]
+    public string Hash {  get; set; }
 
     [MaxLength(100)]
     public string FirstName { get; set; }
@@ -61,12 +63,25 @@ public class User
     [MaxLength(100)]
     public string RoleId { get; set; }
 
-    public Role Role { get; set; }
+    public Role Role;
 
     public int FailedLogin { get; set; } = 0;
 
     public DateTime? LockoutEnd { get; set; }
 }
+
+public class Admin : User
+{
+
+}
+
+public class Member:  User
+{
+    [MaxLength(100)]
+    public string PhotoURL { get;set;}
+}
+
+
 public class FoodCategory
 {
     [Key, MaxLength(10)]

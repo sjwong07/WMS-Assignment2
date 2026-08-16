@@ -6,6 +6,7 @@ builder.Services.AddSession();
 builder.Services.AddHttpContextAccessor();   
 builder.Services.AddControllersWithViews();
 builder.Services.AddAuthorization();
+builder.Services.AddScoped<Helper>();
 
 builder.Services.AddSqlServer<DB>($@"
     Data Source=(LocalDB)\MSSQLLocalDB;

@@ -111,6 +111,7 @@ public class OrderDetailVM
 public class forgotPasswordVM
 {
     [MaxLength(50)]
+    [EmailAddress]
     public string Email {  get; set; }
 
 }
