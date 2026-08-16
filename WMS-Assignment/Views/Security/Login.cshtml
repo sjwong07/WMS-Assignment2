@@ -1,8 +1,6 @@
 @{
-    ViewData["Title"] = "Login";
+    ViewBag.Title = "Login";
 }
-
-<h2>Login</h2>
 
 @if (TempData["Success"] != null)
 {
@@ -36,6 +34,8 @@
     <button type="submit" class="btn btn-primary">
         Login
     </button>
+
+    <a href="/Security/forgotPassword">Forgot Password?</a>
 
 </form>
 

@@ -36,7 +36,7 @@ public class HomeController(DB db) : Controller
         return View(order);
     }
 
-    [HttpGet]
+    
     public IActionResult Login()
     {
         return View("~/Views/Security/Login.cshtml");
@@ -104,7 +104,7 @@ public class HomeController(DB db) : Controller
         return RedirectToAction("Login");
     }
 
-    [HttpGet]
+    
     public IActionResult Register()
     {
         return View("Views/Security/Register.cshtml");
