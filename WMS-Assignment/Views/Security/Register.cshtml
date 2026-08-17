@@ -1,4 +1,5 @@
-﻿@model WMS_Assignment.Models.User
+﻿@model RegisterVM
+
 <h2>Create Account</h2>
 
 <div asp-validation-summary="All" class="text-danger"></div>
@@ -10,7 +11,7 @@
     </div>
 }
 
-<form asp-controller="Home" asp-action="Register" method="post">
+<form asp-controller="Security" asp-action="Register"  class = "form" method = "post" enctype="multipart/form-data">
     <div class="mb-3">
         <label>Username</label>
         <input asp-for="Username" class="form-control" />
@@ -50,8 +51,14 @@
         </small>
     </div>
 
+     <div class="ProfilePhoto">
+        <label>ProfilePhoto</label>
+        <input asp-for="ProfilePhoto" type="file" class="file" autofocus="">
+        <span asp-validation-for="ProfilePhoto"></span>
+    </div>
+
     <button type="submit" class="btn btn-success">Register</button>
 </form>
 
 <hr />
-<a asp-controller="Home" asp-action="Login">Already have an account? Login</a>
+<a asp-controller="Security" asp-action="Login">Already have an account? Login</a>

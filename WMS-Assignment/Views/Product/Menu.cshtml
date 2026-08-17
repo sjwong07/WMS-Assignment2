@@ -8,9 +8,29 @@
       data-ajax-update="#target"
       data-ajax-loading="#loader">
 
-    @Html.TextBox("name", "",
+    @Html.TextBox("search", "",
                   new { id = "name" , type = "search", autofocus = "", data_trim = "",
                   placeholder = "Search For Product" })
+
+    @foreach (var p in Model.FoodCategories)
+    {
+        <label><input type="checkbox" name="category" value="@p.Name">@p.Name </label>
+    }
+
+
+    @Html.TextBox("minPrice", "", new
+    {
+       id = "minPrice", type = "search",autofocus = "",data_trim = "",placeholder = "Min Price"
+    })
+
+    <div></div>
+
+    @Html.TextBox("maxPrice", "", new
+    {
+       id= "maxPrice", type = "search",autofocus = "",data_trim = "",placeholder = "Max Price"
+    })
+
+
 
 </form>
 
@@ -23,7 +43,7 @@
         <script>
             let timer = null;
 
-            $('#name').on('input', e => {
+            $('#name,#minPrice,#maxPrice').on('input', e => {
                 clearTimeout(timer);
                 timer = setTimeout(() => $(e.target.form).submit(), 500);
             });

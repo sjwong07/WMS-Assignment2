@@ -3,7 +3,8 @@ global using WMS_Assignment.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSession();
-builder.Services.AddHttpContextAccessor();   
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddAuthentication().AddCookie();
 builder.Services.AddControllersWithViews();
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<Helper>();

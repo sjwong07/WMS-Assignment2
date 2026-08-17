@@ -16,22 +16,22 @@
            <h1><a href="/"> WagEat Cafe </a></h1>
        </header>
 
-    
         <nav>
         <a href="/"> Home</a>
         <a href="/Product/Menu"> Menu</a>
-        <a href="/Product/FilteringMenu"> filter</a>
+        <a href="/Product/AdminMenu">AdminMenu</a>
         <a href="/Home/Cart"> Cart</a>
-        <a href="/Home/Login"> Login</a>
-        <a href="/Home/Register"> Register</a>
+        <a href="/Security/Login"> Login</a>
+        <a href="/Security/Register"> Register</a>
+
         @if (User.Identity != null && User.Identity.IsAuthenticated)
         {
             <a href="/Security/Logout"> Logout</a>
-           // <a href="/Profile/UpdateProfile"> Update Profile</a>
+            <a href="/Profile/UpdateProfile"> Update Profile</a>
         }
         else
         {
-            <a asp-controller="Home" asp-action="Login">Login</a>
+            <a asp-controller="Security" asp-action="Login">Login</a>
         }
         <div></div>
        </nav>

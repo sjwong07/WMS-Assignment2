@@ -8,6 +8,8 @@ public class DB(DbContextOptions options) : DbContext(options)
 {
 
     public DbSet<User> Users {  get; set; }
+    public DbSet<Admin> Admins {  get; set; }
+    public DbSet<Member> Members {  get; set; }
     public DbSet<Role> Roles { get; set; }
     public DbSet<Table> Tables { get; set; }
     public DbSet<FoodCategory> FoodCategories { get; set; }
@@ -33,30 +35,29 @@ public class User
     [Key, MaxLength(100)]
     public string Id { get; set; }
 
-    [Required(ErrorMessage = "Username is required")]
+    
     [MaxLength(100)]
     public string Username { get; set; }
 
     [MaxLength(100)]
     public string Name { get; set; }
 
-    [Required(ErrorMessage = "Email is required")]
+    
     [EmailAddress]
     [MaxLength(100)]
     public string Email { get; set; }
 
-    [Required(ErrorMessage = "Password is required")]
+   
     [DataType(DataType.Password)]
     [MaxLength(100)]
     public string Password { get; set; }
     [MaxLength(200)]
-    public string Hash {  get; set; }
+    public string Hash { get; set; } = null;
 
-    [Required(ErrorMessage = "First name is required")]
+   
     [MaxLength(100)]
     public string FirstName { get; set; }
 
-    [Required(ErrorMessage = "Last name is required")]
     [MaxLength(100)]
     public string LastName { get; set; }
     public DateTime CreatedDate { get; set; }

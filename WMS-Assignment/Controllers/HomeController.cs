@@ -104,60 +104,6 @@ public class HomeController(DB db) : Controller
         return RedirectToAction("Login");
     }
 
-    
-    public IActionResult Register()
-    {
-        return View("Views/Security/Register.cshtml");
-    }
-
-    [HttpPost]
-    public IActionResult Register(string Username, string Email, string Password, string FirstName, string LastName)
-    {
-        if (db.Users.Any(u => u.Username == Username))
-        {
-            ViewBag.Message = "Username already exists.";
-            return View("~/Views/Security/Register.cshtml");
-        }
-
-        string newId = "U01";
-        var lastUser = db.Users
-                         .OrderByDescending(u => u.Id)
-                         .FirstOrDefault();
-
-        if (lastUser != null && lastUser.Id.Length > 1 && int.TryParse(lastUser.Id.Substring(1), out int number))
-        {
-            newId = "U" + (number + 1).ToString("00");
-        }
-
-        User user = new User
-        {
-            Id = newId,
-            Username = Username,
-            Email = Email,
-            Password = Password,
-            FirstName = FirstName,
-            LastName = LastName,
-            Name = FirstName + "" + LastName,
-            CreatedDate = DateTime.Now,
-            RoleId = "RC01",
-            FailedLogin = 0,
-            LockoutEnd = null
-        };
-
-        try
-        {
-            db.Users.Add(user);
-            db.SaveChanges();
-
-            TempData["Success"] = "Account created successfully! Please login.";
-            return RedirectToAction("Login");
-        }
-        catch (Exception ex)
-        {
-            ViewBag.Message = ex.InnerException?.Message ?? ex.Message;
-            return View("~/Views/Security/Register.cshtml");
-        }
-    }
 
     public async Task<IActionResult> Cart()
     {
