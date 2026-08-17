@@ -11,6 +11,7 @@
         <th>Description</th>
         <th>Price</th>
         <th>Qty</th>
+        <th>Category</th>
         <th>Detail</th>
         
     </tr>
@@ -23,7 +24,8 @@
             <td>@item.Description</td>
             <td>RM @item.Price</td>
             <td><input type="number" name="quantity" value="1" min="1" style="width:60px" /></td>
-            <td></td>
+            <td>@item.Category.Name</td>
+            <td><a href="/Product/Detail">Details</a></td>
             
         </tr>
     }

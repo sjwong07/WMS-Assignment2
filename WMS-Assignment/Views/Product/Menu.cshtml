@@ -12,22 +12,24 @@
                   new { id = "name" , type = "search", autofocus = "", data_trim = "",
                   placeholder = "Search For Product" })
 
+    <label><input id="All" type="checkbox" />All</label>
+
     @foreach (var p in Model.FoodCategories)
     {
-        <label><input type="checkbox" name="category" value="@p.Name">@p.Name </label>
+        <label><input type="checkbox" name="category" value="@p.Id">@p.Name </label>
     }
 
 
     @Html.TextBox("minPrice", "", new
     {
-       id = "minPrice", type = "search",autofocus = "",data_trim = "",placeholder = "Min Price"
+       id = "minPrice", type = "number",autofocus = "",data_trim = "",placeholder = "Min Price"
     })
 
     <div></div>
 
     @Html.TextBox("maxPrice", "", new
     {
-       id= "maxPrice", type = "search",autofocus = "",data_trim = "",placeholder = "Max Price"
+       id= "maxPrice", type = "number",autofocus = "",data_trim = "",placeholder = "Max Price"
     })
 
 
@@ -47,6 +49,22 @@
                 clearTimeout(timer);
                 timer = setTimeout(() => $(e.target.form).submit(), 500);
             });
+
+            $('input[name="category"]').on('change', e =>{
+                clearTimeout(timer);
+                timer = setTimeout(() => $(e.target.form).submit(), 1500);
+            });
+
+            $('#All').on('change',e => {
+                if(e.target.checked){
+                    $('input[name="category"]').prop('check',false);
+                    
+                }
+               
+
+            });
         </script>
+
+
     }
     

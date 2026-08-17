@@ -11,7 +11,7 @@ namespace WMS_Assignment.Controllers;
 public class ProductController(DB db,Helper hp) : Controller
 {
    
-    public IActionResult Menu(string? search,List<string>? category,decimal?minPrice,decimal? maxPrice,string? name) 
+    public IActionResult Menu(string? search,List<string>? category,decimal?minPrice,decimal? maxPrice) 
     {
         var categories = db.FoodCategories;
         var m = db.MenuItems.AsQueryable();
