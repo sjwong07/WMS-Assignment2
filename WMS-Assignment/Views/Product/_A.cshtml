@@ -2,50 +2,31 @@
 @model MenuItemVM
 
 
-    @Html.TextBox("name","",new{type = "search",autofocus="",data_trim=""
-    ,placeholder="Search For Product"})
-
-    <div></div>
-
-    @Html.TextBox("name", "", new
-    {
-        type = "search",autofocus = "",data_trim = "", placeholder = "Search For Product"
-    })
-
-
-    @foreach (var p in Model.FoodCategories)
-    {
-        <label><input type="checkbox" name="category" value="@p.Name">@p.Name </label>
-    }
-
-
 
 <table class="MenuItem">
 
     <tr>
-        <th></th>
+        <th>Id</th>
         <th>Item</th>
         <th>Description</th>
         <th>Price</th>
         <th>Qty</th>
-        <th>Create</th>
+        <th>Category</th>
         <th>Detail</th>
-        <th>Update</th>
-        <th>Delete</th>
+        
     </tr>
 
     @foreach (var item in Model.MenuItems)
     {
         <tr>
-            <td><input type="radio" name="menuItemId" value="@item.Id" /></td>
+            <td><input type="checkbox" name="menuItemId" value="@item.Id">@item.Id</td>
             <td>@item.Name</td>
             <td>@item.Description</td>
             <td>RM @item.Price</td>
             <td><input type="number" name="quantity" value="1" min="1" style="width:60px" /></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
+            <td>@item.Category.Name</td>
+            <td><button href="/Product/Detail">Details</button></td>
+            
         </tr>
     }
 

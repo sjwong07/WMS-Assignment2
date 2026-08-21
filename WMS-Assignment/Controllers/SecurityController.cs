@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using WMS_Assignment.Models;
 using System.Text.RegularExpressions;
 
+
 namespace WMS_Assignment.Controllers;
 
 public class SecurityController(DB db,Helper hp) : Controller
@@ -13,41 +14,49 @@ public class SecurityController(DB db,Helper hp) : Controller
         return View();
     }
 
+
+
+
     [HttpPost]
-    public IActionResult Register(User model)
+    public IActionResult Register(RegisterVM vm)
     {
-        if (db.Users.Any(x => x.Username == model.Username))
+        if (ModelState.IsValid)
         {
-            ViewBag.Error = "Username already exists.";
-            return View(model);
+            db.Members.Add(new()
+            {
+                Id = Guid.NewGuid().ToString("N"),
+                Username = vm.Username,
+                Name = vm.FirstName + "  " + vm.LastName,
+                FirstName = vm.FirstName,
+                LastName = vm.LastName,
+                Email = vm.Email,
+                Hash = hp.HashPassword(vm.Password),
+                PhotoURL = hp.SavePhoto(vm.ProfilePhoto, "photos"),
+
+            });
+            db.SaveChanges();
+
+            TempData["Info"] = "Register Successful,Please Login";
+            return RedirectToAction("Login");
         }
 
-        if (db.Users.Any(x => x.Email == model.Email))
+    
+        if (db.Users.Any(u => u.Username == vm.Username))
         {
-            ViewBag.Error = "Email already exists.";
-            return View(model);
+            ViewBag.Message = "Username already exists.";
+            return View("~/Views/Security/Register.cshtml");
         }
 
-        //Password validation
 
-        string pattern =
-        @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&^#()_+\-=\[\]{};':""\\|,.<>\/?]).{8,}$";
-
-        if (!Regex.IsMatch(model.Password, pattern))
-        {
-            ViewBag.Error =
-                "Password must contain at least 8 characters, 1 uppercase, 1 lowercase, 1 number and 1 special character.";
-
-            return View(model);
-        }
-
-        db.Users.Add(model);
-        db.SaveChanges();
-
-        TempData["Success"] = "Account created successfully.";
-
-        return RedirectToAction("Login");
+        return View(vm);
     }
+
+
+
+
+
+
+
 
     //---------------- Login ----------------
 
