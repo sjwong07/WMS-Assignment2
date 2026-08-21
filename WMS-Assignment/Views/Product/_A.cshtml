@@ -6,7 +6,7 @@
 <table class="MenuItem">
 
     <tr>
-        <th></th>
+        <th>Id</th>
         <th>Item</th>
         <th>Description</th>
         <th>Price</th>
@@ -19,13 +19,13 @@
     @foreach (var item in Model.MenuItems)
     {
         <tr>
-            <td><input type="radio" name="menuItemId" value="@item.Id" /></td>
+            <td><input type="checkbox" name="menuItemId" value="@item.Id">@item.Id</td>
             <td>@item.Name</td>
             <td>@item.Description</td>
             <td>RM @item.Price</td>
             <td><input type="number" name="quantity" value="1" min="1" style="width:60px" /></td>
             <td>@item.Category.Name</td>
-            <td><a href="/Product/Detail">Details</a></td>
+            <td><button href="/Product/Detail">Details</button></td>
             
         </tr>
     }

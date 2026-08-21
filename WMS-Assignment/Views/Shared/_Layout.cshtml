@@ -21,13 +21,13 @@
         <a href="/Product/Menu"> Menu</a>
         <a href="/Product/AdminMenu">AdminMenu</a>
         <a href="/Home/Cart"> Cart</a>
-        <a href="/Security/Login"> Login</a>
+        
         <a href="/Security/Register"> Register</a>
 
         @if (User.Identity != null && User.Identity.IsAuthenticated)
         {
             <a href="/Security/Logout"> Logout</a>
-            <a href="/Profile/UpdateProfile"> Update Profile</a>
+            <a href="/Member/Profile"> Profile and Information Update</a>
         }
         else
         {

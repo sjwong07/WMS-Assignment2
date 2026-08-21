@@ -46,10 +46,6 @@ public class ProductController(DB db,Helper hp) : Controller
             MenuItems = m.ToList(),
         };
 
-        
-
-
-
         if (Request.IsAjax())
         {
             return PartialView("_A", m);
@@ -66,6 +62,7 @@ public class ProductController(DB db,Helper hp) : Controller
         return View(m);
     }
 
+   
     public IActionResult Create()
     {
         return View();
