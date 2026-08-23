@@ -25,25 +25,52 @@
                 WagEat<span class="brand-dot"></span>
             </a>
 
-    
-        <nav>
-        <a href="/"> Home</a>
-        <a href="/Product/Menu"> Menu</a>
-        <a href="/Product/FilteringMenu"> filter</a>
-        <a href="/Home/Cart"> Cart</a>
-        <a href="/Home/Login"> Login</a>
-        <a href="/Home/Register"> Register</a>
-        @if (User.Identity != null && User.Identity.IsAuthenticated)
-        {
-            <span>Hi, @User.Identity.Name</span>
-            <a asp-controller="Home" asp-action="Logout">Logout</a>
-        }
-        else
-        {
-            <a asp-controller="Home" asp-action="Login">Login</a>
-        }
-        <div></div>
-       </nav>
+            <!-- Nav Links -->
+            <ul class="nav-links" id="navLinks">
+                <li><a href="/" class="active"><span class="nav-icon">🏠</span> Home</a></li>
+                <li><a href="/Product/Menu"><span class="nav-icon">📋</span> Menu</a></li>
+                <li><a href="/Product/FilteringMenu"><span class="nav-icon">🔍</span> Filter</a></li>
+                <li>
+                    <a href="/Home/Cart" class="cart-link">
+                        <span class="nav-icon">🛒</span> Cart
+                        <span class="cart-badge populated">3</span>
+                    </a>
+                </li>
+                @if (User.Identity != null && User.Identity.IsAuthenticated)
+                {
+                    <li>
+                        <div class="user-avatar" onclick="toggleDropdown()">
+                            <div class="avatar-img">JD</div>
+                            <span class="username">@User.Identity.Name</span>
+                        </div>
+                        <div class="dropdown-menu" id="userDropdown">
+                            <a href="/Account/Profile" class="dropdown-item">
+                                <span class="item-icon">👤</span> Profile
+                            </a>
+                            <a href="/Account/Orders" class="dropdown-item">
+                                <span class="item-icon">📦</span> My Orders
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="/Home/Logout" class="dropdown-item danger">
+                                <span class="item-icon">🚪</span> Logout
+                            </a>
+                        </div>
+                    </li>
+                }
+                else
+                {
+                    <li><a href="/Home/Login" class="nav-cta"><span class="nav-icon">🔑</span> Login</a></li>
+                }
+            </ul>
+
+            <!-- Mobile Toggle -->
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
 
     <!-- Main Content -->
     <main>
