@@ -22,11 +22,11 @@ public class Helper(IWebHostEnvironment en,
             == PasswordVerificationResult.Success;
     }
 
-    public void Login(string username, string password, bool rememberMe)
+    public void Login(string username, string password, bool rememberMe,string role)
     {
         List<Claim> claims = [
             new(ClaimTypes.Name,username),
-          //  new(ClaimTypes.Role,role),
+            new(ClaimTypes.Role,role),
             ];
 
         ClaimsIdentity identity = new(claims, "Cookies");
