@@ -1,50 +1,98 @@
-
-<!DOCTYPE html>
-<html en="en">
+﻿<!DOCTYPE html>
+<html lang="en">
 <head>
-    <meta charset=" = "utf-8">
-    <meta name=" = "viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewBag.Title</title>
-    <link rel="stylesheet" href ="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - WagEat Cafe</title>
+    <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/menu.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    @await RenderSectionAsync("Styles", required: false)
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
     <link rel="stylesheet" href="/css/menu.css">
     <link rel="stylesheet" href="/css/site.css">
-    <link rel="stylesheet" href="/css/menu.css" asp-append-version="true">
-    @RenderSection("head",false)
-   </head>
-   <body>
-       <header>
-           <h1><a href="/"> WagEat Cafe </a></h1>
-       </header>
+    @RenderSection("head", false)
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <!-- Brand -->
+            <a href="/" class="navbar-brand">
+                <span class="brand-icon">☕</span>
+                WagEat<span class="brand-dot"></span>
+            </a>
 
+    
         <nav>
         <a href="/"> Home</a>
         <a href="/Product/Menu"> Menu</a>
-        <a href="/Product/AdminMenu">AdminMenu</a>
+        <a href="/Product/FilteringMenu"> filter</a>
         <a href="/Home/Cart"> Cart</a>
-        
-        <a href="/Security/Register"> Register</a>
-
+        <a href="/Home/Login"> Login</a>
+        <a href="/Home/Register"> Register</a>
         @if (User.Identity != null && User.Identity.IsAuthenticated)
         {
-            <a href="/Security/Logout"> Logout</a>
-            <a href="/Member/Profile"> Profile and Information Update</a>
+            <span>Hi, @User.Identity.Name</span>
+            <a asp-controller="Home" asp-action="Logout">Logout</a>
         }
         else
         {
-            <a asp-controller="Security" asp-action="Login">Login</a>
+            <a asp-controller="Home" asp-action="Login">Login</a>
         }
         <div></div>
        </nav>
 
-       <main>
-           <h1> @ViewBag.Title</h1>  
-           @RenderBody()
-       </main>
+    <!-- Main Content -->
+    <main>
+        @RenderBody()
+    </main>
 
-       <footer>
-           Developed by<b> WSJ-OSH-NYX</b> &middot;
-           Copyrighted &copy;@DateTime.Today.Year
-       </footer>
+    <script>
+            // Mobile Nav Toggle
+            const navToggle = document.getElementById('navToggle');
+            const navLinks = document.getElementById('navLinks');
+
+            navToggle.addEventListener('click', () => {
+                navToggle.classList.toggle('active');
+                navLinks.classList.toggle('open');
+            });
+
+            // Close mobile nav on link click
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.addEventListener('click', () => {
+                    navToggle.classList.remove('active');
+                    navLinks.classList.remove('open');
+                });
+            });
+
+            // Dropdown toggle
+            function toggleDropdown() {
+                const dropdown = document.getElementById('userDropdown');
+                dropdown.classList.toggle('show');
+            }
+
+            // Close dropdown on outside click
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.user-avatar') && !e.target.closest('.dropdown-menu')) {
+                    const dropdown = document.getElementById('userDropdown');
+                    if (dropdown) dropdown.classList.remove('show');
+                }
+            });
+
+            // Navbar scroll effect        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 10) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+                    });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
 
     <script src="/js/jquery.min.js"></script>
     <script src="/js/jquery.unobtrusive-ajax.min.js"></script>
@@ -53,5 +101,11 @@
     <script src="/js/app.js" asp-append-version="true"></script>
     @RenderSection("foot", false)
 
-    </body>
+    @await RenderSectionAsync("Scripts", required: false)
+
+    <footer>
+        Developed by<b> WSJ-OSH-NYX</b> &middot;
+        Copyrighted &copy;@DateTime.Today.Year
+    </footer>
+</body>
 </html>

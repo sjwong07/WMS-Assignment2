@@ -1,6 +1,8 @@
-@{
-    ViewBag.Title = "Login";
+﻿@{
+    ViewData["Title"] = "Login";
 }
+
+<h2>Login</h2>
 
 @if (TempData["Success"] != null)
 {
@@ -9,41 +11,74 @@
     </div>
 }
 
-@if (ViewBag.Message != null)
-{
-    <div class="alert alert-danger">
-        @ViewBag.Message
-    </div>
-}
+            @if (ViewBag.Message != null)
+            {
+                <div class="alert alert-danger">
+                    @ViewBag.Message
+                </div>
+            }
 
-<form asp-controller="Home" asp-action="Login" method="post">
+            <div class="form-group">
+                <label for="username">
+                    <span class="label-icon">👤</span> Username
+                </label>
+                <div class="input-wrapper">
+                    <input type="text" id="username" name="Username"
+                           placeholder="Enter your username" required />
+                    <span class="input-icon">👤</span>
+                </div>
+                <div class="error-message" id="usernameError">
+                    Please enter your username
+                </div>
+            </div>
 
-    <div class="mb-3">
-        <label>Username</label>
-        <input name="Username" class="form-control" required />
-    </div>
+            <div class="form-group">
+                <label for="password">
+                    <span class="label-icon">🔒</span> Password
+                </label>
+                <div class="input-wrapper">
+                    <input type="password" id="password" name="Password"
+                           placeholder="Enter your password" required />
+                    <span class="input-icon">🔒</span>
+                </div>
+                <div class="error-message" id="passwordError">
+                    Please enter your password
+                </div>
+            </div>
 
-    <div class="mb-3">
-        <label>Password</label>
-        <input type="password"
-               name="Password"
-               class="form-control"
-               required />
-    </div>
+            <div class="form-options">
+                <label class="remember-me">
+                    <input type="checkbox" name="remember" checked />
+                    Remember me
+                </label>
+                <a href="#" class="forgot-link">Forgot password?</a>
+            </div>
 
-    <button type="submit" class="btn btn-primary">
-        Login
-    </button>
+            <button type="submit" class="btn-login" id="loginBtn">
+                <span class="shimmer"></span>
+                <span class="btn-content">
+                    <span class="btn-icon">🚀</span>
+                    <span class="btn-text">Sign In</span>
+                    <span class="spinner"></span>
+                </span>
+            </button>
+        </form>
 
-    <a href="/Security/forgotPassword">Forgot Password?</a>
+        <!-- Divider -->
+        <div class="divider">
+            <span>or continue with</span>
+        </div>
 
 </form>
 
-<hr />
+        input.addEventListener('blur', function() {
+            this.parentElement.querySelector('.input-icon').style.transform = 'translateY(-50%) scale(1)';
+        });
+    });
 
 <p>
     Don't have an account?
-    <a asp-controller="Security"
+    <a asp-controller="Home"
        asp-action="Register">
         Register Here
     </a>
