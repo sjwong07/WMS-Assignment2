@@ -50,14 +50,6 @@ public class SecurityController(DB db,Helper hp) : Controller
 
         return View(vm);
     }
-
-
-
-
-
-
-
-
     //---------------- Login ----------------
 
     public IActionResult Login()

@@ -45,12 +45,7 @@ public class Helper(IWebHostEnvironment en,
     {
         ct.HttpContext!.SignOutAsync();
     }
-    public string RandomPassword()
-    {
-        string s = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        string password = "";
 
-        Random r = new();
 
     public string RandomPassword()
     {
@@ -83,12 +78,7 @@ public class Helper(IWebHostEnvironment en,
 
         return "";
     }
-        for(int i = 0; i < s.Length; i++)
-        {
-            password += s[r.Next(s.Length)];
-        }
-        return password;
-    }
+    
 
     public string SavePhoto(IFormFile f,string folder)
     {
