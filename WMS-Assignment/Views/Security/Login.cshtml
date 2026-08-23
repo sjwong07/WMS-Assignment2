@@ -1,50 +1,199 @@
-@{
+﻿@{
     ViewBag.Title = "Login";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success">
-        @TempData["Success"]
-    </div>
-}
-
-@if (ViewBag.Message != null)
-{
-    <div class="alert alert-danger">
-        @ViewBag.Message
-    </div>
-}
-
-<form asp-controller="Home" asp-action="Login" method="post">
-
-    <div class="mb-3">
-        <label>Username</label>
-        <input name="Username" class="form-control" required />
+<div class="login-container">
+    <!-- Background Decorations -->
+    <div class="bg-decoration">
+        <div class="circle c1"></div>
+        <div class="circle c2"></div>
+        <div class="circle c3"></div>
+        <div class="food-emoji e1">🍽️</div>
+        <div class="food-emoji e2">☕</div>
+        <div class="food-emoji e3">🥘</div>
     </div>
 
-    <div class="mb-3">
-        <label>Password</label>
-        <input type="password"
-               name="Password"
-               class="form-control"
-               required />
+    <!-- Login Card -->
+    <div class="login-card">
+        <!-- Header -->
+        <div class="login-header">
+            <div class="avatar-wrapper">
+                <div class="ring"></div>
+                <div class="avatar-inner">🍲</div>
+            </div>
+            <div class="welcome-badge">✨ Welcome Back</div>
+            <h1>
+                Welcome <span class="highlight">Back!</span>
+            </h1>
+            <p>Sign in to continue ordering your favorite food</p>
+        </div>
+
+        <!-- Login Form -->
+        <form asp-action="Login" asp-controller="Home" method="post" id="loginForm">
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success">
+                    @TempData["Success"]
+                </div>
+            }
+
+            @if (ViewBag.Message != null)
+            {
+                <div class="alert alert-danger">
+                    @ViewBag.Message
+                </div>
+            }
+
+            <div class="form-group">
+                <label for="username">
+                    <span class="label-icon">👤</span> Username
+                </label>
+                <div class="input-wrapper">
+                    <input type="text" id="username" name="Username"
+                           placeholder="Enter your username" required />
+                    <span class="input-icon">👤</span>
+                </div>
+                <div class="error-message" id="usernameError">
+                    Please enter your username
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">
+                    <span class="label-icon">🔒</span> Password
+                </label>
+                <div class="input-wrapper">
+                    <input type="password" id="password" name="Password"
+                           placeholder="Enter your password" required />
+                    <span class="input-icon">🔒</span>
+                </div>
+                <div class="error-message" id="passwordError">
+                    Please enter your password
+                </div>
+            </div>
+
+            <div class="form-options">
+                <label class="remember-me">
+                    <input type="checkbox" name="remember" checked />
+                    Remember me
+                </label>
+                <a href="#" class="forgot-link">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="btn-login" id="loginBtn">
+                <span class="shimmer"></span>
+                <span class="btn-content">
+                    <span class="btn-icon">🚀</span>
+                    <span class="btn-text">Sign In</span>
+                    <span class="spinner"></span>
+                </span>
+            </button>
+        </form>
+
+        <!-- Divider -->
+        <div class="divider">
+            <span>or continue with</span>
+        </div>
+
+        <!-- Social Login -->
+        <div class="social-login">
+            <button class="btn-social google" onclick="socialLogin('google')">
+                <span class="social-icon">🔵</span>
+                <span class="social-label">Google</span>
+            </button>
+            <button class="btn-social facebook" onclick="socialLogin('facebook')">
+                <span class="social-icon">⚫</span>
+                <span class="social-label">Facebook</span>
+            </button>
+        </div>
+
+        <!-- Register Link -->
+        <div class="register-link">
+            <span class="register-text">
+                Don't have an account? <a href="/Home/Register">Register Here</a>
+            </span>
+        </div>
     </div>
+</div>
 
-    <button type="submit" class="btn btn-primary">
-        Login
-    </button>
+<!-- Footer -->
+<footer class="login-footer">
+    <div class="footer-content">
+        <span>Developed by <b>WSJ-OSH-NYX</b></span>
+        <span class="footer-divider">·</span>
+        <span>Copyrighted <span class="footer-heart">❤️</span> &copy;@DateTime.Today.Year</span>
+    </div>
+</footer>
 
-    <a href="/Security/forgotPassword">Forgot Password?</a>
+<script>
+    // Form validation with animation
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        const username = document.getElementById('username');
+        const password = document.getElementById('password');
+        const usernameError = document.getElementById('usernameError');
+        const passwordError = document.getElementById('passwordError');
+        const loginBtn = document.getElementById('loginBtn');
+        let isValid = true;
 
-</form>
+        // Reset errors
+        username.classList.remove('error');
+        password.classList.remove('error');
+        usernameError.classList.remove('show');
+        passwordError.classList.remove('show');
 
-<hr />
+        // Validate username
+        if (!username.value.trim()) {
+            username.classList.add('error');
+            usernameError.classList.add('show');
+            isValid = false;
+        }
 
-<p>
-    Don't have an account?
-    <a asp-controller="Security"
-       asp-action="Register">
-        Register Here
-    </a>
-</p>
+        // Validate password
+        if (!password.value.trim()) {
+            password.classList.add('error');
+            passwordError.classList.add('show');
+            isValid = false;
+        }
+
+        if (!isValid) {
+            e.preventDefault();
+            return;
+        }
+
+        // Show loading state
+        loginBtn.classList.add('loading');
+    });
+
+    // Social login function
+    function socialLogin(provider) {
+        const loginBtn = document.getElementById('loginBtn');
+        loginBtn.classList.add('loading');
+
+        // Simulate social login
+        setTimeout(() => {
+            loginBtn.classList.remove('loading');
+            window.location.href = '/Home/Index';
+        }, 1500);
+    }
+
+    // Input focus animation
+    document.querySelectorAll('.input-wrapper input').forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.querySelector('.input-icon').style.transform = 'translateY(-50%) scale(1.1)';
+        });
+
+        input.addEventListener('blur', function() {
+            this.parentElement.querySelector('.input-icon').style.transform = 'translateY(-50%) scale(1)';
+        });
+    });
+
+    // Remove error on input
+    document.querySelectorAll('.input-wrapper input').forEach(input => {
+        input.addEventListener('input', function() {
+            this.classList.remove('error');
+            const errorMsg = this.closest('.form-group').querySelector('.error-message');
+            if (errorMsg) errorMsg.classList.remove('show');
+        });
+    });
+</script>
