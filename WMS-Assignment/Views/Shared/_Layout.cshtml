@@ -8,8 +8,8 @@
     <link rel="stylesheet" href="~/css/menu.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-   
 
+   
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
     <link rel="stylesheet" href="/css/menu.css">
     <link rel="stylesheet" href="/css/site.css">
@@ -29,7 +29,7 @@
             <ul class="nav-links" id="navLinks">
                 <li><a href="/" class="active"><span class="nav-icon">🏠</span> Home</a></li>
                 <li><a href="/Product/Menu"><span class="nav-icon">📋</span> Menu</a></li>
-                
+
                 <li>
                     <a href="/Home/Cart" class="cart-link">
                         <span class="nav-icon">🛒</span> Cart
@@ -118,72 +118,17 @@
             } else {
                 navbar.classList.remove('scrolled');
             }
-                    });
+                                });
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)
 
-<script>
-    // Form validation with animation
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
-        const username = document.getElementById('username');
-        const password = document.getElementById('password');
-        const usernameError = document.getElementById('usernameError');
-        const passwordError = document.getElementById('passwordError');
-        const loginBtn = document.getElementById('loginBtn');
-        let isValid = true;
-
-        // Reset errors
-        username.classList.remove('error');
-        password.classList.remove('error');
-        usernameError.classList.remove('show');
-        passwordError.classList.remove('show');
-
-        // Validate username
-        if (!username.value.trim()) {
-            username.classList.add('error');
-            usernameError.classList.add('show');
-            isValid = false;
-        }
-
-        // Validate password
-        if (!password.value.trim()) {
-            password.classList.add('error');
-            passwordError.classList.add('show');
-            isValid = false;
-        }
-
-        if (!isValid) {
-            e.preventDefault();
-            return;
-        }
-
-        // Show loading state
-        loginBtn.classList.add('loading');
-    });
-
-    // Social login function
-    function socialLogin(provider) {
-        const loginBtn = document.getElementById('loginBtn');
-        loginBtn.classList.add('loading');
-
-        // Simulate social login
-        setTimeout(() => {
-            loginBtn.classList.remove('loading');
-            window.location.href = '/Home/Index';
-        }, 1500);
-    }
-
-    // Input focus animation
-    document.querySelectorAll('.input-wrapper input').forEach(input => {
-        input.addEventListener('focus', function() {
-            this.parentElement.querySelector('.input-icon').style.transform = 'translateY(-50%) scale(1.1)';
-        });
-
-        input.addEventListener('blur', function() {
-            this.parentElement.querySelector('.input-icon').style.transform = 'translateY(-50%) scale(1)';
-        });
-    });
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/jquery.unobtrusive-ajax.min.js"></script>
+    <script src="/js/jquery.validate.min.js"></script>
+    <script src="/js/jquery.validate.unobtrusive.min.js"></script>
+    <script src="/js/app.js" asp-append-version="true"></script>
+    @RenderSection("foot", false)
 
     @await RenderSectionAsync("Scripts", required: false)
 
