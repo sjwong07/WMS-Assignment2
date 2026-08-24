@@ -1,0 +1,113 @@
+﻿.admin-menu-container {
+    max-width: 1100px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+/* ── Header row with title + Create button ── */
+.admin-menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+    .admin-menu-header h2 {
+        font-size: 1.6rem;
+        color: #333;
+        margin: 0;
+    }
+
+/* ── Table ── */
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+    .admin-table thead {
+        background-color: #c0392b;
+        color: white;
+    }
+
+        .admin-table thead th {
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+    .admin-table tbody tr {
+        border-bottom: 1px solid #f0f0f0;
+        transition: background 0.15s;
+    }
+
+        .admin-table tbody tr:hover {
+            background-color: #fdf5f5;
+        }
+
+    .admin-table tbody td {
+        padding: 12px 16px;
+        vertical-align: middle;
+        font-size: 0.9rem;
+        color: #444;
+    }
+
+.desc-cell {
+    max-width: 380px;
+    color: #666 !important;
+}
+
+.price-cell {
+    font-weight: 600;
+    color: #c0392b !important;
+    white-space: nowrap;
+}
+
+/* ── Action cell — buttons side by side ── */
+.action-cell {
+    white-space: nowrap;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+/* ── Shared button style ── */
+.btn-action {
+    display: inline-block;
+    padding: 7px 14px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+
+    .btn-action:hover {
+        opacity: 0.85;
+    }
+
+/* Create — green */
+.btn-create {
+    background-color: #27ae60;
+    color: white;
+    padding: 10px 20px;
+    font-size: 0.95rem;
+}
+
+/* Update — blue */
+.btn-update {
+    background-color: #2980b9;
+    color: white;
+}
+
+/* Delete — red */
+.btn-delete {
+    background-color: #e74c3c;
+    color: white;
+}

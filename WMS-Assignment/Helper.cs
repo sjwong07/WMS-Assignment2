@@ -87,8 +87,10 @@ public class Helper(IWebHostEnvironment en,
 
     }
 
+    public string SavePhoto(IFormFile f, string folder)
+    {
         var file = Guid.NewGuid().ToString("n") + ".jpg";
-        var path = Path.Combine(folderPath, file);
+        var path = Path.Combine(en.WebRootPath, folder, file);
 
         var options = new ResizeOptions
         {

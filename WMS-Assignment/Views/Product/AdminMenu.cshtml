@@ -1,6 +1,16 @@
 ﻿@model IEnumerable<MenuItem>
 
-<table class="MenuItem">
+<div class="admin-menu-container">
+
+    <div class="admin-menu-header">
+        <h2>Menu Management</h2>
+        <a asp-action="Create" asp-controller="Product" class="btn-action btn-create">
+            + Create New Item
+        </a>
+    </div>
+
+
+    <table class="admin-table">
 
     <tr>
         <th></th>
@@ -8,10 +18,9 @@
         <th>Description</th>
         <th>Price</th>
         <th>Qty</th>
-        <th>Create</th>
-        
-        <th>Update</th>
         <th>Delete</th>
+        <th>Update</th>
+        
     </tr>
 
     @foreach (var item in Model)
@@ -22,12 +31,20 @@
             <td>@item.Description</td>
             <td>RM @item.Price</td>
             <td><input type="number" name="quantity" value="1" min="1" style="width:60px" /></td>
-            <td></td>
-            <td></td>
-            <td></td>
+
+               
+            <td><button type="submit" class="btn-action btn-delete" asp-route-id="@item.Id">🗑️ Delete</button>
+                 </td>
+            <td>
+                    <a asp-action="Update"
+                       asp-controller="Product"
+                       asp-route-id="@item.Id"
+                       class="btn-action btn-update">
+                        ✏️ Update
+                    </a>
+            </td>
+            
         </tr>
     }
 
 </table>
-
-<button type="submit">Add To Cart</button>
