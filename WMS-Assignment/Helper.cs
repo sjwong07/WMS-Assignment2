@@ -65,7 +65,7 @@ public class Helper(IWebHostEnvironment en,
     public string ValidatePhoto(IFormFile? f)
     {
         if (f == null || f.Length == 0)
-            return ""; // No photo uploaded, nothing to validate
+            return "";
 
         var reType = new Regex(@"^image\/(jpeg|png|webp)$", RegexOptions.IgnoreCase);
         var reName = new Regex(@"^.+\.(jpeg|jpg|png|webp)$", RegexOptions.IgnoreCase);
