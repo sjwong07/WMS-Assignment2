@@ -15,7 +15,7 @@ public class OrderController(DB db) : Controller
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var roleId = User.FindFirstValue(ClaimTypes.Role);
 
-        bool isStaffOrAdmin = roleId == "RS01" || roleId == "RA01";
+        bool isStaffOrAdmin = IsStaffOrAdmin(roleId);
 
         var query = db.Orders
             .Include(o => o.Table)
@@ -37,7 +37,7 @@ public class OrderController(DB db) : Controller
     public async Task<IActionResult> Maintenance()
     {
         var roleId = User.FindFirstValue(ClaimTypes.Role);
-        if (roleId != "RS01" && roleId != "RA01")
+        if (!IsStaffOrAdmin(roleId))
             return Forbid();
 
         var orders = await db.Orders
@@ -54,7 +54,7 @@ public class OrderController(DB db) : Controller
     public async Task<IActionResult> UpdateStatus(string orderId, string status)
     {
         var roleId = User.FindFirstValue(ClaimTypes.Role);
-        if (roleId != "RS01" && roleId != "RA01")
+        if (!IsStaffOrAdmin(roleId))
             return Forbid();
 
         var order = await db.Orders.FindAsync(orderId);
@@ -70,7 +70,7 @@ public class OrderController(DB db) : Controller
     public async Task<IActionResult> Report()
     {
         var roleId = User.FindFirstValue(ClaimTypes.Role);
-        if (roleId != "RS01" && roleId != "RA01")
+        if (!IsStaffOrAdmin(roleId))
             return Forbid();
 
         var data = await db.OrderDetails
@@ -84,6 +84,10 @@ public class OrderController(DB db) : Controller
             .ToListAsync();
 
         return View("Piechart", data);
+    }
+    private bool IsStaffOrAdmin(string roleId)
+    {
+        return roleId == "RS01" || roleId == "RA01" || roleId == "Admin";
     }
 
 
