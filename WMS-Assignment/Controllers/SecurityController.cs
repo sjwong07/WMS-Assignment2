@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WMS_Assignment.Models;
@@ -10,6 +11,7 @@ namespace WMS_Assignment.Controllers;
 public class SecurityController(DB db,Helper hp,
                             IConfiguration cf, IWebHostEnvironment en) : Controller
 {
+    //---------------- Register ----------------
 
     public IActionResult Register()
     {
@@ -19,33 +21,43 @@ public class SecurityController(DB db,Helper hp,
     [HttpPost]
     public IActionResult Register(RegisterVM vm)
     {
+        // Check duplicates
+        if (db.Users.Any(u => u.Username.ToLower() == vm.Username.Trim().ToLower()))
+        {
+            ModelState.AddModelError("Username", "Username is already taken.");
+        }
+        if (db.Users.Any(u => u.Email.ToLower() == vm.Email.Trim().ToLower()))
+        {
+            ModelState.AddModelError("Email", "Email address is already registered.");
+        }
+
         if (ModelState.IsValid)
         {
-            db.Members.Add(new()
+            var member = new Member
             {
-                Id = Guid.NewGuid().ToString("N"),
-                Username = vm.Username,
-                Name = vm.FirstName + "  " + vm.LastName,
+                Id = Guid.NewGuid().ToString(),
+                Username = vm.Username.Trim(),
+                Name = vm.Username.Trim(),
+                Email = vm.Email.Trim(),
                 FirstName = vm.FirstName,
                 LastName = vm.LastName,
-                Email = vm.Email,
                 Hash = hp.HashPassword(vm.Password),
-                PhotoURL = hp.SavePhoto(vm.ProfilePhoto, "photos"),
+                RoleId = "Member",
+                CreatedDate = DateTime.Now
+            };
 
-            });
+            // Save photo if uploaded
+            if (vm.ProfilePhoto != null && vm.ProfilePhoto.Length > 0)
+            {
+                member.PhotoURL = hp.SavePhoto(vm.ProfilePhoto, "photos");
+            }
+
+            db.Members.Add(member);
             db.SaveChanges();
 
-            TempData["Info"] = "Register Successful,Please Login";
-            return RedirectToAction("Login");
+            TempData["Success"] = "Account created successfully. Please log in.";
+            return RedirectToAction("Login", "Security");
         }
-
-    
-        if (db.Users.Any(u => u.Username == vm.Username))
-        {
-            ViewBag.Message = "Username already exists.";
-            return View("~/Views/Security/Register.cshtml");
-        }
-
 
         return View(vm);
     }
@@ -59,9 +71,7 @@ public class SecurityController(DB db,Helper hp,
 
     [HttpPost]
     public IActionResult Login(LoginVM vm)
-
     {
-        
         var user = db.Users.FirstOrDefault(x => x.Username == vm.Username);
 
         if (user == null)
@@ -70,42 +80,38 @@ public class SecurityController(DB db,Helper hp,
             return View();
         }
 
-        if (user.LockoutEnd != null &&
-            user.LockoutEnd > DateTime.Now)
+        if (user.LockoutEnd != null && user.LockoutEnd > DateTime.Now)
         {
-            ViewBag.Error =
-                $"Account locked. Try again after {user.LockoutEnd}";
+            ViewBag.Error = $"Account locked. Try again after {user.LockoutEnd}";
             return View();
         }
 
-        if (user.Password != vm.Password)
+        // Verify the entered password against the stored Hash
+        bool isPasswordValid = hp.VerifyPassword(user.Hash, vm.Password);
+
+        if (!isPasswordValid)
         {
             user.FailedLogin++;
 
             if (user.FailedLogin >= 3)
             {
-                user.LockoutEnd = DateTime.Now.AddMinutes(3);
+                user.LockoutEnd = DateTime.Now.AddMinutes(5);
                 user.FailedLogin = 0;
 
-                ViewBag.Error =
-                    "Too many failed attempts. Please wait 3 minutes.";
+                ViewBag.Error = "Too many failed attempts. Please wait 5 minutes.";
             }
             else
             {
-                ViewBag.Error =
-                    $"Invalid password. Remaining attempts: {3 - user.FailedLogin}";
+                ViewBag.Error = $"Invalid password. Remaining attempts: {3 - user.FailedLogin}";
             }
 
             db.SaveChanges();
-
             return View();
         }
 
-        //Success
-
+        // Success: Reset failed attempts & lockout
         user.FailedLogin = 0;
         user.LockoutEnd = null;
-
         db.SaveChanges();
 
         HttpContext.Session.SetString("User", user.Username);
@@ -113,8 +119,10 @@ public class SecurityController(DB db,Helper hp,
         return RedirectToAction("Index", "Home");
     }
 
-    public  IActionResult forgotPassword (){
+    //---------------- Forgot Password ----------------
 
+    public IActionResult ForgotPassword()
+    {
         return View();
     }
 
@@ -195,16 +203,17 @@ public class SecurityController(DB db,Helper hp,
 
         hp.SendEmail(mail);
     }
+    //---------------- Logout ----------------
 
-    public IActionResult Logout()
+    public async Task<IActionResult> Logout()
     {
+        // 1. Clear session
         HttpContext.Session.Clear();
 
+        // 2. Clear authentication cookie
+        await HttpContext.SignOutAsync("CookieAuth");
+
+        TempData["Success"] = "You have been logged out successfully.";
         return RedirectToAction("Login");
     }
-
-
-
-
-
 }

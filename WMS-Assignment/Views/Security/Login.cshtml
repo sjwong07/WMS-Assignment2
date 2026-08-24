@@ -33,14 +33,14 @@
         <form asp-action="Login" asp-controller="Home" method="post" id="loginForm">
             @if (TempData["Success"] != null)
             {
-                <div class="alert alert-success">
+                <div class="auth-success-box" style="background:#e8f5e9; color:#2e7d32; padding:10px 14px; border-radius:10px; margin-bottom:15px; font-size:0.875rem;">
                     @TempData["Success"]
                 </div>
             }
 
             @if (ViewBag.Message != null)
             {
-                <div class="alert alert-danger">
+                <div class="auth-error-box" style="background:#ffebee; color:#c62828; padding:10px 14px; border-radius:10px; margin-bottom:15px; font-size:0.875rem;">
                     @ViewBag.Message
                 </div>
             }
@@ -63,10 +63,17 @@
                 <label for="password">
                     <span class="label-icon">🔒</span> Password
                 </label>
-                <div class="input-wrapper">
+                <div class="input-wrapper" style="position: relative;">
                     <input type="password" id="password" name="Password"
-                           placeholder="Enter your password" required />
+                           placeholder="Enter your password" required style="padding-right: 44px;" />
                     <span class="input-icon">🔒</span>
+
+                    <!-- Show/Hide Password Button -->
+                    <button type="button" id="togglePasswordBtn" onclick="togglePasswordVisibility()"
+                            style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 1.1rem; padding: 0; color: #b09a88; z-index: 2;"
+                            aria-label="Toggle password visibility">
+                        👁️
+                    </button>
                 </div>
                 <div class="error-message" id="passwordError">
                     Please enter your password
@@ -84,29 +91,11 @@
             <button type="submit" class="btn-login" id="loginBtn">
                 <span class="shimmer"></span>
                 <span class="btn-content">
-                    <span class="btn-icon">🚀</span>
-                    <span class="btn-text">Sign In</span>
+                    <span class="btn-text">Login</span>
                     <span class="spinner"></span>
                 </span>
             </button>
         </form>
-
-        <!-- Divider -->
-        <div class="divider">
-            <span>or continue with</span>
-        </div>
-
-        <!-- Social Login -->
-        <div class="social-login">
-            <button class="btn-social google" onclick="socialLogin('google')">
-                <span class="social-icon">🔵</span>
-                <span class="social-label">Google</span>
-            </button>
-            <button class="btn-social facebook" onclick="socialLogin('facebook')">
-                <span class="social-icon">⚫</span>
-                <span class="social-label">Facebook</span>
-            </button>
-        </div>
 
         <!-- Register Link -->
         <div class="register-link">
@@ -117,16 +106,21 @@
     </div>
 </div>
 
-<!-- Footer -->
-<footer class="login-footer">
-    <div class="footer-content">
-        <span>Developed by <b>WSJ-OSH-NYX</b></span>
-        <span class="footer-divider">·</span>
-        <span>Copyrighted <span class="footer-heart">❤️</span> &copy;@DateTime.Today.Year</span>
-    </div>
-</footer>
-
 <script>
+    // Show / Hide Password Toggle
+    function togglePasswordVisibility() {
+        const passwordField = document.getElementById('password');
+        const toggleBtn = document.getElementById('togglePasswordBtn');
+
+        if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+            toggleBtn.textContent = '🙈';
+        } else {
+            passwordField.type = 'password';
+            toggleBtn.textContent = '👁️';
+        }
+    }
+
     // Form validation with animation
     document.getElementById('loginForm').addEventListener('submit', function(e) {
         const username = document.getElementById('username');
@@ -165,26 +159,16 @@
         loginBtn.classList.add('loading');
     });
 
-    // Social login function
-    function socialLogin(provider) {
-        const loginBtn = document.getElementById('loginBtn');
-        loginBtn.classList.add('loading');
-
-        // Simulate social login
-        setTimeout(() => {
-            loginBtn.classList.remove('loading');
-            window.location.href = '/Home/Index';
-        }, 1500);
-    }
-
     // Input focus animation
     document.querySelectorAll('.input-wrapper input').forEach(input => {
         input.addEventListener('focus', function() {
-            this.parentElement.querySelector('.input-icon').style.transform = 'translateY(-50%) scale(1.1)';
+            const icon = this.parentElement.querySelector('.input-icon');
+            if (icon) icon.style.transform = 'translateY(-50%) scale(1.1)';
         });
 
         input.addEventListener('blur', function() {
-            this.parentElement.querySelector('.input-icon').style.transform = 'translateY(-50%) scale(1)';
+            const icon = this.parentElement.querySelector('.input-icon');
+            if (icon) icon.style.transform = 'translateY(-50%) scale(1)';
         });
     });
 

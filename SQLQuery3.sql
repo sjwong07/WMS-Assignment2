@@ -1,5 +1,5 @@
-ALTER TABLE Users
-ADD FailedLogin INT NOT NULL DEFAULT 0;
+ALTER TABLE [dbo].[Users] 
+ADD CONSTRAINT UQ_Users_Username UNIQUE (Username);
 
-ALTER TABLE Users
-ADD LockoutEnd DATETIME NULL;
+ALTER TABLE [dbo].[Users] 
+ADD CONSTRAINT UQ_Users_Email UNIQUE (Email);

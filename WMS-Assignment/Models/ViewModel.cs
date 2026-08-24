@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace WMS_Assignment.Models;
 
@@ -33,39 +33,36 @@ public class LoginVM
 
 
 
+
+
+
 public class RegisterVM
 {
-    [Required(ErrorMessage = "Username Required")]
-    [MaxLength(50)]
-    [RegularExpression(@"^[a-zA-Z0-9]+$")]
-    public string Username { get; set; }
+    [Required, MaxLength(100)]
+    public string Username { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "First Name Required")]
-    [StringLength(15, MinimumLength = 3)]
-    public string FirstName { get; set; }
+    [Required, EmailAddress, MaxLength(100)]
+    public string Email { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Last Name Required")]
-    [StringLength(15, MinimumLength = 3)]
-    public string LastName { get; set; }
-
-    [Required(ErrorMessage = "Email Required")]
     [MaxLength(100)]
-    [EmailAddress]
-    public string Email { get; set; }
+    public string? FirstName { get; set; }
 
-    [Required(ErrorMessage = "Password Required")]
-    [MaxLength(50)]
-    [RegularExpression(@"^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,}$", ErrorMessage = "Password Must Contain At Lease 8 Character,1 Upper" +
-                       "1 Lowercase, 1 Digit and 1 Special Character")]
-    public string Password { get; set; }
+    [MaxLength(100)]
+    public string? LastName { get; set; }
 
-    [Required(ErrorMessage = "Profile Photo Required.")]
-    public IFormFile ProfilePhoto { get; set; }
+    [Required]
+    [DataType(DataType.Password)]
+    [StringLength(16, MinimumLength = 12, ErrorMessage = "Password must be between 12 and 16 characters.")]
+    public string Password { get; set; } = string.Empty;
 
+    [Required]
+    [DataType(DataType.Password)]
+    [Compare("Password", ErrorMessage = "Passwords do not match.")]
+    public string ConfirmPassword { get; set; } = string.Empty;
+
+    public IFormFile? ProfilePhoto { get; set; }
 }
-
-
-    public class MenuItemVM
+public class MenuItemVM
     {
         public string? Search { get; set; }
         public List<string> SelectCategories { get; set; }
