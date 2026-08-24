@@ -35,6 +35,11 @@
                         <span class="nav-icon">🛒</span> Cart
                         <span class="cart-badge populated">3</span>
                     </a>
+
+                    <a href="/Member/Profile" class="dropdown-item">
+                        <span class="item-icon">👤 Profile</span>
+                    </a>
+                    <a href="/Product/AdminMenu">Admin Menu</a>
                 </li>
                 @if (User.Identity != null && User.Identity.IsAuthenticated)
                 {
@@ -44,9 +49,7 @@
                             <span class="username">@User.Identity.Name</span>
                         </div>
                         <div class="dropdown-menu" id="userDropdown">
-                            <a href="/Member/Profile" class="dropdown-item">
-                                <span class="item-icon">👤 Profile</span>
-                            </a>
+                          
 
                             <a href="/Order/History" class="dropdown-item">
                                 <span class="item-icon">📦My Orders</span>

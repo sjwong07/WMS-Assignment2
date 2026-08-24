@@ -9,6 +9,21 @@ public class MemberController(DB db):Controller
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var user = db.Users.FirstOrDefault(u => u.Id == userId);
-        return View(user);
+
+       
+       
+
+        if (user == null)
+            return RedirectToAction("Login", "Home");
+
+        var vm = new ProfileVM
+        {
+            UserId = userId,
+            Username = user.Username,
+            Email = user.Email,
+            
+        };
+
+        return View(vm);
     }
 }
