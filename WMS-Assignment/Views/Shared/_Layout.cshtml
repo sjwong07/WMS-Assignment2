@@ -1,211 +1,195 @@
-﻿@using Microsoft.AspNetCore.Builder
-@using Microsoft.AspNetCore.Localization
-@using Microsoft.Extensions.Options
-@using WMS_Assignment.Models
+﻿@using Microsoft.AspNetCore.Http
+@{
+    var username = Context.Session.GetString("User")
+                ?? Context.Session.GetString("Username")
+                ?? (User.Identity != null && User.Identity.IsAuthenticated ? User.Identity.Name : null);
 
-@inject WMS_Assignment.Models.DB db
+    var userRole = Context.Session.GetString("Role") ?? "Member";
 
+    var rawPhoto = Context.Session.GetString("UserPhoto")
+                ?? Context.Session.GetString("Photo")
+                ?? Context.Session.GetString("PhotoURL");
+
+    string userPhotoUrl = "/images/default-avatar.png";
+
+    if (!string.IsNullOrEmpty(rawPhoto))
+    {
+        userPhotoUrl = rawPhoto.StartsWith("/") || rawPhoto.StartsWith("http")
+            ? rawPhoto
+            : $"/photos/{rawPhoto}";
+    }
+    else if (!string.IsNullOrEmpty(username))
+    {
+        userPhotoUrl = $"/photos/{username}.jpg";
+    }
+
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    bool isAuthPage = string.Equals(currentController, "Security", StringComparison.OrdinalIgnoreCase)
+                   && (string.Equals(currentAction, "Login", StringComparison.OrdinalIgnoreCase)
+                       || string.Equals(currentAction, "Register", StringComparison.OrdinalIgnoreCase)
+                       || string.Equals(currentAction, "ForgotPassword", StringComparison.OrdinalIgnoreCase));
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - WagEat Cafe</title>
+    <title>@ViewBag.Title - WagEat</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+    <!-- External Stylesheets -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/menu.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/forgotpassword.css" asp-append-version="true" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-   
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
-    <link rel="stylesheet" href="/css/menu.css">
-    <link rel="stylesheet" href="/css/site.css">
-    <link rel="stylesheet" href="/css/popup.css"
-    @RenderSection("head", false)
+    <!-- Hide Google Translate Default Top Bar -->
+    <style>
+        .goog-te-banner-frame.skiptranslate,
+        .goog-te-banner-frame,
+        #goog-gt-tt,
+        .goog-te-balloon-frame {
+            display: none !important;
+        }
+
+        body {
+            top: 0px !important;
+        }
+
+        .skiptranslate {
+            display: none !important;
+        }
+    </style>
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar" id="navbar">
-        <div class="container">
-            <!-- Brand -->
-            <a asp-controller="Home" asp-action="Index" class="navbar-brand">
-                <span class="brand-icon">☕</span>
-                WagEat<span class="brand-dot"></span>
-            </a>
 
-            <!-- Nav Links (Filter is removed) -->
-            <ul class="nav-links" id="navLinks">
-                <li><a asp-controller="Home" asp-action="Index"><span class="nav-icon">🏠</span> @Lang.T("Home")</a></li>
-                <li><a asp-controller="Product" asp-action="Menu"><span class="nav-icon">📋</span> @Lang.T("Menu")</a></li>
-                <li>
-                    <a asp-controller="Home" asp-action="Cart" class="cart-link">
-                        <span class="nav-icon">🛒</span> @Lang.T("Cart")
-                    </a>
-                </li>
+    <!-- Hidden Google Translate Element -->
+    <div id="google_translate_element" style="display:none;"></div>
 
-                @if (User.Identity != null && User.Identity.IsAuthenticated)
-                {
-                    var username = User.Identity.Name?.Trim() ?? "";
-                    var claimPhoto = User.FindFirst("PhotoURL")?.Value;
+    <!-- Header / Navbar -->
+    <header class="navbar-main">
+        <!-- Logo -->
+        <a href="/" class="brand-logo notranslate">
+            <span>☕</span> WagEat •
+        </a>
 
-                    var member = db.Members.FirstOrDefault(m => m.Username.ToLower() == username.ToLower());
-                    var photoUrl = !string.IsNullOrEmpty(claimPhoto) ? claimPhoto : member?.PhotoURL;
+        <!-- Navigation Links -->
+        <ul class="nav-center-links">
+            <li><a href="/">🏠 Home</a></li>
+            <li><a href="/Product/Menu">📋 Menu</a></li>
+            <li><a href="/Home/Cart">🛒 Cart</a></li>
+        </ul>
 
-                    var reqCulture = Context.Features.Get<IRequestCultureFeature>();
-                    var curCulture = reqCulture?.RequestCulture.Culture.Name ?? "en-US";
+        <!-- Right Side User Section -->
+        <div class="nav-right-actions">
+            @if (!string.IsNullOrEmpty(username))
+            {
+                <div class="nav-user-pill notranslate" id="userDropdownTrigger" onclick="toggleUserDropdown(event)">
+                    <img src="@userPhotoUrl"
+                         alt="@username"
+                         class="user-avatar-img"
+                         onerror="this.onerror=null; this.src='/uploads/@(username).jpg'; this.onerror=function(){this.src='/images/default-avatar.png';};" />
 
-                    <li class="user-dropdown-wrapper">
-                        <div class="user-avatar">
-                            @if (!string.IsNullOrEmpty(photoUrl))
-                            {
-                                <img src="@Url.Content("~/photos/" + photoUrl)"
-                                     alt="Avatar"
-                                     class="avatar-img-photo"
-                                     onclick="toggleDropdown(event)"
-                                     style="cursor: pointer;" />
-                            }
-                            else
-                            {
-                                <div class="avatar-img" onclick="toggleDropdown(event)" style="cursor: pointer;">
-                                    @(username.Length >= 2 ? username.Substring(0, 2).ToUpper() : "SJ")
-                                </div>
-                            }
+                    <span class="username-text">@username</span>
 
-                            <span class="username" onclick="toggleDropdown(event)" style="cursor: pointer;">@User.Identity.Name</span>
+                    <!-- Language Selector Dropdown -->
+                    <select id="langSelector" class="lang-select" onclick="event.stopPropagation()" onmousedown="event.stopPropagation()" onchange="changeLanguage(this.value, event)">
+                        <option value="en">EN</option>
+                        <option value="ms">BM</option>
+                        <option value="zh-CN">中文</option>
+                    </select>
 
-                            <!-- Language Select Box inside User Badge -->
-                            <form id="langInsidePillForm" asp-controller="Home" asp-action="SetLanguage"
-                                  asp-route-returnUrl="@(Context.Request.Path + Context.Request.QueryString)"
-                                  method="post" style="margin: 0; display: inline-flex; align-items: center;">
-                                <select name="culture" onchange="document.getElementById('langInsidePillForm').submit();" class="direct-lang-dropdown">
-                                    <option value="en-US" selected="@(curCulture == "en-US")">EN</option>
-                                    <option value="zh-CN" selected="@(curCulture == "zh-CN")">中文</option>
-                                    <option value="ms-MY" selected="@(curCulture == "ms-MY")">BM</option>
-                                </select>
-                            </form>
+                    <span class="caret-icon">▼</span>
 
-                            <span onclick="toggleDropdown(event)" style="font-size: 10px; color: #6b7280; cursor: pointer;">▼</span>
-                        </div>
-
-                        <div class="dropdown-menu" id="userDropdown">
-                            <a asp-controller="Member" asp-action="Profile" class="dropdown-item">
-                                <span class="item-icon">👤</span> @Lang.T("Profile")
-                            </a>
-                           
-                            <div class="dropdown-divider"></div>
-                            <a asp-controller="Security" asp-action="Logout" class="dropdown-item danger">
-                                <span class="item-icon">🚪</span> @Lang.T("Logout")
-                            </a>
-                          
-
-                            <a href="/Order/History" class="dropdown-item">
-                                <span class="item-icon">📦My Orders</span>
-                            </a>
-
-                            <div class="dropdown-divider"></div>
-                            <a href="/Security/Logout" class="dropdown-item danger">
-                                <span class="item-icon">🚪Logout</span>
-                            </a>
-                        </div>
-                    </li>
-                    
-                }
-                else
-                {
-                    <li>
-                        <a asp-controller="Security" asp-action="Login" class="nav-cta">
-                            <span class="nav-icon">🔑</span> @Lang.T("Login")
+                    <!-- Dropdown Content -->
+                    <div class="user-dropdown-menu" id="userMenu">
+                        <a href="/Member/Profile">
+                            <span>👤</span> Profile
                         </a>
-                    </li>
-                }
-            </ul>
-            <form asp-controller="Language" asp-action="SetLanguage" asp-route-returnUrl="@Context.Request.Path" method="get" style="display:inline">
-                <select name="culture" onchange="this.form.submit()">
-                    <option value="en">English</option>
-                    <option value="ms">Bahasa Malaysia</option>
-                    <option value="zh">中文</option>
-                </select>
-            </form>
-            <!-- Mobile Toggle -->
-            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
+                        @if (userRole == "Admin")
+                        {
+                            <a href="/Admin/Dashboard">
+                                <span>⚙️</span> Dashboard
+                            </a>
+                        }
+                        <div class="user-dropdown-divider"></div>
+                        <a href="/Security/Logout" class="logout-btn">
+                            <span>🚪</span> Logout
+                        </a>
+                    </div>
+                </div>
+            }
+            else if (!isAuthPage)
+            {
+                <a href="/Security/Login" class="btn btn-sm btn-primary" style="text-decoration:none;">Login</a>
+            }
         </div>
-    </nav>
+    </header>
 
-    <!-- Main Content -->
-    <main>
+    <!-- Main Content Container -->
+    <main role="main">
         @RenderBody()
     </main>
 
-    <footer>
-        Developed by <b>WSJ-OSH-NYX</b> &middot;
-        Copyrighted &copy; @DateTime.Today.Year
-    </footer>
-
-    <!-- Scripts -->
-    <script src="~/js/jquery.min.js"></script>
-    <script src="~/js/jquery.unobtrusive-ajax.min.js"></script>
-    <script src="~/js/jquery.validate.min.js"></script>
-    <script src="~/js/jquery.validate.unobtrusive.min.js"></script>
-    <script src="~/js/app.js" asp-append-version="true"></script>
-
-    <script>
-        // Mobile Nav Toggle
-        const navToggle = document.getElementById('navToggle');
-        const navLinks = document.getElementById('navLinks');
-
-        if (navToggle && navLinks) {
-            navToggle.addEventListener('click', () => {
-                navToggle.classList.toggle('active');
-                navLinks.classList.toggle('open');
-            });
-
-            document.querySelectorAll('.nav-links a').forEach(link => {
-                link.addEventListener('click', () => {
-                    navToggle.classList.remove('active');
-                    navLinks.classList.remove('open');
-                });
-            });
+    <!-- Google Translate Script -->
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'en',
+                includedLanguages: 'en,ms,zh-CN',
+                autoDisplay: false
+            }, 'google_translate_element');
         }
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
-        // Dropdown toggle
-        function toggleDropdown(e) {
-            e.stopPropagation();
-            const dropdown = document.getElementById('userDropdown');
+    <!-- Custom Handlers -->
+    <script>
+        function toggleUserDropdown(event) {
+            if (event.target.tagName.toLowerCase() === 'select' || event.target.tagName.toLowerCase() === 'option') {
+                return;
+            }
+            event.stopPropagation();
+            const dropdown = document.getElementById('userMenu');
             if (dropdown) {
                 dropdown.classList.toggle('show');
             }
         }
 
-        // Close dropdown on outside click
-        document.addEventListener('click', (e) => {
-            const dropdown = document.getElementById('userDropdown');
-            if (dropdown && !e.target.closest('.user-dropdown-wrapper')) {
-                dropdown.classList.remove('show');
+        function changeLanguage(langCode, event) {
+            if (event) event.stopPropagation();
+
+            const cookieValue = '/en/' + langCode;
+            document.cookie = 'googtrans=' + cookieValue + '; path=/;';
+            document.cookie = 'googtrans=' + cookieValue + '; path=/; domain=' + window.location.hostname;
+            localStorage.setItem('selectedLanguage', langCode);
+
+            const selectElement = document.querySelector('.goog-te-combo');
+            if (selectElement) {
+                selectElement.value = langCode;
+                selectElement.dispatchEvent(new Event('change'));
+            } else {
+                window.location.reload();
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('selectedLanguage') || 'en';
+            const selector = document.getElementById('langSelector');
+            if (selector) {
+                selector.value = savedLang;
             }
         });
 
-        // Navbar scroll effect
-        window.addEventListener('scroll', () => {
-            const navbar = document.getElementById('navbar');
-            if (navbar) {
-                if (window.scrollY > 10) {
-                    navbar.classList.add('scrolled');
-                } else {
-                    navbar.classList.remove('scrolled');
-                }
+        document.addEventListener('click', function (e) {
+            const dropdown = document.getElementById('userMenu');
+            const trigger = document.getElementById('userDropdownTrigger');
+            if (dropdown && trigger && !trigger.contains(e.target)) {
+                dropdown.classList.remove('show');
             }
         });
     </script>
 
-    @RenderSection("foot", false)
     @await RenderSectionAsync("Scripts", required: false)
+    @await RenderSectionAsync("foot", required: false)
 </body>
 </html>

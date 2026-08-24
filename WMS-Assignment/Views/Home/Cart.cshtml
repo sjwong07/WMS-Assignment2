@@ -1,46 +1,144 @@
 ﻿@model Order
 
 @{
-    ViewData["Title"] = "Cart";
+    ViewData["Title"] = "Your Order & Cart";
+    var tableId = Model?.Table?.Id ?? Model?.TableId ?? "T01";
+    var hasItems = Model != null && Model.OrderDetails != null && Model.OrderDetails.Any();
+    var totalAmount = Model?.TotalAmount ?? 0;
 }
 
-<h2>Your Order</h2>
+<div class="cart-page-container">
+    <div class="cart-header-title">
+        <h2>🛍️ Your Order</h2>
+        <span class="table-badge">📍 Table: <strong>@tableId</strong></span>
+    </div>
 
-@if (Model == null || !Model.OrderDetails.Any())
-{
-    <p>Your cart is empty. <a href="/Product/Menu">Go to Menu</a></p>
-}
-else
-{
-    <p>Table: @Model.Table?.Id</p>
-    <table>
-        <thead>
-            <tr><th>Item</th><th>Unit Price</th><th>Qty</th><th>Subtotal</th><th></th></tr>
-        </thead>
-        <tbody>
-            @foreach (var od in Model.OrderDetails)
-            {
-                <tr>
-                    <td>@od.MenuItem?.Name</td>
-                    <td>RM @od.UnitPrice.ToString("0.00")</td>
-                    <td>
-                        <form asp-action="UpdateQuantity" method="post" style="display:inline">
-                            <input type="hidden" name="orderDetailId" value="@od.Id" />
-                            <input type="number" name="quantity" value="@od.Quantity" min="1" style="width:60px" />
-                            <button type="submit">Update</button>
-                        </form>
-                    </td>
-                    <td>RM @od.SubTotal.ToString("0.00")</td>
-                    <td>
-                        <form asp-action="RemoveItem" method="post" style="display:inline">
-                            <input type="hidden" name="orderDetailId" value="@od.Id" />
-                            <button type="submit">Remove</button>
-                        </form>
-                    </td>
-                </tr>
+    @if (hasItems)
+    {
+        <div class="cart-grid-layout">
+            <!-- Left Side: Order Items List -->
+            <div class="cart-items-card">
+                <div class="cart-table-wrapper">
+                    <table class="cart-custom-table">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Subtotal</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var od in Model!.OrderDetails!)
+                            {
+                                var menuItem = od.MenuItem;
+                                var photoName = $"{menuItem?.Id}.jpg";
+
+                                <tr>
+                                    <td>
+                                        <div class="cart-item-meta">
+                                            <img src="/photos/@photoName" 
+                                                 alt="@menuItem?.Name" 
+                                                 class="cart-item-img"
+                                                 onerror="this.onerror=null; this.src='/uploads/@photoName'; this.onerror=function(){this.src='/images/default-food.jpg';};" />
+                                            <div>
+                                                <div class="cart-item-name">@(menuItem?.Name ?? "Food Item")</div>
+                                                <small class="cart-item-cat">@(menuItem?.Category?.Name ?? "Drink / Dessert")</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="unit-price">RM @od.UnitPrice.ToString("0.00")</td>
+                                    <td>
+                                        <form asp-action="UpdateQuantity" method="post" class="cart-qty-form">
+                                            <input type="hidden" name="orderDetailId" value="@od.Id" />
+                                            <div class="qty-counter">
+                                                <button type="button" class="qty-btn" onclick="adjustCartQty(this, -1)">-</button>
+                                                <input type="number" name="quantity" class="qty-input" value="@od.Quantity" min="1" max="99" onchange="this.form.submit()" />
+                                                <button type="button" class="qty-btn" onclick="adjustCartQty(this, 1)">+</button>
+                                            </div>
+                                        </form>
+                                    </td>
+                                    <td class="subtotal-price">RM @od.SubTotal.ToString("0.00")</td>
+                                    <td>
+                                        <form asp-action="RemoveItem" method="post">
+                                            <input type="hidden" name="orderDetailId" value="@od.Id" />
+                                            <button type="submit" class="btn-remove-item" title="Remove item">
+                                                🗑️
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="cart-footer-links">
+                    <a href="/Product/Menu" class="btn-continue-shopping">
+                        ← Add More Food
+                    </a>
+                </div>
+            </div>
+
+            <!-- Right Side: Order Summary Card -->
+            <div class="cart-summary-card">
+                <h3 class="summary-heading">Order Summary</h3>
+
+                <div class="summary-line">
+                    <span>Items Count:</span>
+                    <strong>@(Model.OrderDetails?.Sum(d => d.Quantity) ?? 0) item(s)</strong>
+                </div>
+
+                <div class="summary-line">
+                    <span>Table Number:</span>
+                    <strong>@tableId</strong>
+                </div>
+
+                <div class="summary-line">
+                    <span>Service & Taxes:</span>
+                    <strong class="tax-free-text">RM 0.00 (Included)</strong>
+                </div>
+
+                <div class="summary-divider"></div>
+
+                <div class="summary-total-line">
+                    <span>Total:</span>
+                    <span class="total-amount">RM @totalAmount.ToString("0.00")</span>
+                </div>
+
+                <a href="/Home/Checkout" class="checkout-link">
+                    <button type="button" class="btn-checkout-proceed">
+                        Proceed to Checkout ➔
+                    </button>
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="empty-cart-box">
+            <div class="empty-cart-icon">🛒</div>
+            <h3>Your cart is empty!</h3>
+            <p>You haven't added any delicious food or drinks yet.</p>
+            <a href="/Product/Menu" class="add-to-cart-btn btn-browse-menu">
+                Browse Menu
+            </a>
+        </div>
+    }
+</div>
+
+@section foot {
+    <script>
+        function adjustCartQty(button, delta) {
+            const form = button.closest('form');
+            const input = form.querySelector('.qty-input');
+            let currentVal = parseInt(input.value) || 1;
+            let newVal = currentVal + delta;
+            if (newVal >= 1) {
+                input.value = newVal;
+                form.submit();
             }
-        </tbody>
-    </table>
-    <h3>Total: RM @Model.TotalAmount.ToString("0.00")</h3>
-    <a href="/Home/Checkout"><button>Proceed to Checkout</button></a>
+        }
+    </script>
 }
