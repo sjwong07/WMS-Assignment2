@@ -1,4 +1,9 @@
-﻿@inject WMS_Assignment.Models.DB db
+﻿@using Microsoft.AspNetCore.Builder
+@using Microsoft.AspNetCore.Localization
+@using Microsoft.Extensions.Options
+@using WMS_Assignment.Models
+
+@inject WMS_Assignment.Models.DB db
 
 <!DOCTYPE html>
 <html lang="en">
@@ -13,7 +18,6 @@
     <link rel="stylesheet" href="~/css/menu.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/forgotpassword.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/AdminMenu.css" asp-append-version="true" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
    
@@ -21,7 +25,6 @@
     <link rel="stylesheet" href="/css/menu.css">
     <link rel="stylesheet" href="/css/site.css">
     <link rel="stylesheet" href="/css/popup.css"
-    <link rel="stylesheet" href="~/css/AdminMenu.css" />
     @RenderSection("head", false)
 </head>
 <body>
@@ -34,20 +37,14 @@
                 WagEat<span class="brand-dot"></span>
             </a>
 
-            <!-- Nav Links -->
+            <!-- Nav Links (Filter is removed) -->
             <ul class="nav-links" id="navLinks">
-                <li><a href="/" class="active"><span class="nav-icon">🏠</span> Home</a></li>
-                <li><a href="/Product/Menu"><span class="nav-icon">📋</span> Menu</a></li>
-
+                <li><a asp-controller="Home" asp-action="Index"><span class="nav-icon">🏠</span> @Lang.T("Home")</a></li>
+                <li><a asp-controller="Product" asp-action="Menu"><span class="nav-icon">📋</span> @Lang.T("Menu")</a></li>
                 <li>
                     <a asp-controller="Home" asp-action="Cart" class="cart-link">
-                        <span class="nav-icon">🛒</span> Cart
+                        <span class="nav-icon">🛒</span> @Lang.T("Cart")
                     </a>
-
-                    <a href="/Member/Profile" class="dropdown-item">
-                        <span class="item-icon">👤 Profile</span>
-                    </a>
-                    <a href="/Product/AdminMenu">Admin Menu</a>
                 </li>
 
                 @if (User.Identity != null && User.Identity.IsAuthenticated)
@@ -55,32 +52,28 @@
                     var username = User.Identity.Name?.Trim() ?? "";
                     var claimPhoto = User.FindFirst("PhotoURL")?.Value;
 
-                    // Case-insensitive lookup from Members table
                     var member = db.Members.FirstOrDefault(m => m.Username.ToLower() == username.ToLower());
                     var photoUrl = !string.IsNullOrEmpty(claimPhoto) ? claimPhoto : member?.PhotoURL;
 
+                    var reqCulture = Context.Features.Get<IRequestCultureFeature>();
+                    var curCulture = reqCulture?.RequestCulture.Culture.Name ?? "en-US";
+
                     <li class="user-dropdown-wrapper">
-                        <div class="user-avatar" onclick="toggleDropdown(event)">
+                        <div class="user-avatar">
                             @if (!string.IsNullOrEmpty(photoUrl))
                             {
                                 <img src="@Url.Content("~/photos/" + photoUrl)"
                                      alt="Avatar"
-                                     class="avatar-img-photo" />
+                                     class="avatar-img-photo"
+                                     onclick="toggleDropdown(event)"
+                                     style="cursor: pointer;" />
                             }
                             else
                             {
-                                <div class="avatar-img">
+                                <div class="avatar-img" onclick="toggleDropdown(event)" style="cursor: pointer;">
                                     @(username.Length >= 2 ? username.Substring(0, 2).ToUpper() : "SJ")
                                 </div>
                             }
-                            <span class="username">@User.Identity.Name</span>
-                            <span style="font-size: 10px; color: #6b7280;">▼</span>
-                        </div>
-
-                        <div class="dropdown-menu" id="userDropdown">
-                          
-
-                            <a href="/Order/History" class="dropdown-item">
 
                             <span class="username" onclick="toggleDropdown(event)" style="cursor: pointer;">@User.Identity.Name</span>
 
@@ -90,6 +83,15 @@
                                   method="post" style="margin: 0; display: inline-flex; align-items: center;">
                                 <select name="culture" onchange="document.getElementById('langInsidePillForm').submit();" class="direct-lang-dropdown">
                                     <option value="en-US" selected="@(curCulture == "en-US")">EN</option>
+                                    <option value="zh-CN" selected="@(curCulture == "zh-CN")">中文</option>
+                                    <option value="ms-MY" selected="@(curCulture == "ms-MY")">BM</option>
+                                </select>
+                            </form>
+
+                            <span onclick="toggleDropdown(event)" style="font-size: 10px; color: #6b7280; cursor: pointer;">▼</span>
+                        </div>
+
+                        <div class="dropdown-menu" id="userDropdown">
                             <a asp-controller="Member" asp-action="Profile" class="dropdown-item">
                                 <span class="item-icon">👤</span> @Lang.T("Profile")
                             </a>
@@ -97,10 +99,10 @@
                             <div class="dropdown-divider"></div>
                             <a asp-controller="Security" asp-action="Logout" class="dropdown-item danger">
                                 <span class="item-icon">🚪</span> @Lang.T("Logout")
-                                </a>
-                                
-                                <a href="/Order/History" class="dropdown-item">
+                            </a>
+                          
 
+                            <a href="/Order/History" class="dropdown-item">
                                 <span class="item-icon">📦My Orders</span>
                             </a>
 
@@ -110,17 +112,24 @@
                             </a>
                         </div>
                     </li>
+                    
                 }
                 else
                 {
                     <li>
                         <a asp-controller="Security" asp-action="Login" class="nav-cta">
-                            <span class="nav-icon">🔑</span> Login
+                            <span class="nav-icon">🔑</span> @Lang.T("Login")
                         </a>
                     </li>
                 }
             </ul>
-
+            <form asp-controller="Language" asp-action="SetLanguage" asp-route-returnUrl="@Context.Request.Path" method="get" style="display:inline">
+                <select name="culture" onchange="this.form.submit()">
+                    <option value="en">English</option>
+                    <option value="ms">Bahasa Malaysia</option>
+                    <option value="zh">中文</option>
+                </select>
+            </form>
             <!-- Mobile Toggle -->
             <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
                 <span></span>
@@ -148,52 +157,52 @@
     <script src="~/js/app.js" asp-append-version="true"></script>
 
     <script>
-            // Mobile Nav Toggle
-            const navToggle = document.getElementById('navToggle');
-            const navLinks = document.getElementById('navLinks');
+        // Mobile Nav Toggle
+        const navToggle = document.getElementById('navToggle');
+        const navLinks = document.getElementById('navLinks');
 
-            if (navToggle && navLinks) {
-                navToggle.addEventListener('click', () => {
-                    navToggle.classList.toggle('active');
-                    navLinks.classList.toggle('open');
-                });
-
-                document.querySelectorAll('.nav-links a').forEach(link => {
-                    link.addEventListener('click', () => {
-                        navToggle.classList.remove('active');
-                        navLinks.classList.remove('open');
-                    });
-                });
-            }
-
-            // Dropdown toggle
-            function toggleDropdown(e) {
-                e.stopPropagation();
-                const dropdown = document.getElementById('userDropdown');
-                if (dropdown) {
-                    dropdown.classList.toggle('show');
-                }
-            }
-
-            // Close dropdown on outside click
-            document.addEventListener('click', (e) => {
-                const dropdown = document.getElementById('userDropdown');
-                if (dropdown && !e.target.closest('.user-dropdown-wrapper')) {
-                    dropdown.classList.remove('show');
-                }
+        if (navToggle && navLinks) {
+            navToggle.addEventListener('click', () => {
+                navToggle.classList.toggle('active');
+                navLinks.classList.toggle('open');
             });
 
-            // Navbar scroll effect
-            window.addEventListener('scroll', () => {
-                const navbar = document.getElementById('navbar');
-                if (navbar) {
-                    if (window.scrollY > 10) {
-                        navbar.classList.add('scrolled');
-                    } else {
-                        navbar.classList.remove('scrolled');
-                    }
-                }
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.addEventListener('click', () => {
+                    navToggle.classList.remove('active');
+                    navLinks.classList.remove('open');
+                });
             });
+        }
+
+        // Dropdown toggle
+        function toggleDropdown(e) {
+            e.stopPropagation();
+            const dropdown = document.getElementById('userDropdown');
+            if (dropdown) {
+                dropdown.classList.toggle('show');
+            }
+        }
+
+        // Close dropdown on outside click
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('userDropdown');
+            if (dropdown && !e.target.closest('.user-dropdown-wrapper')) {
+                dropdown.classList.remove('show');
+            }
+        });
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (navbar) {
+                if (window.scrollY > 10) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            }
+        });
     </script>
 
     @RenderSection("foot", false)
