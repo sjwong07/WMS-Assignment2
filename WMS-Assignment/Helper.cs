@@ -22,11 +22,11 @@ public class Helper(IWebHostEnvironment en,
 
     public bool VerifyPassword(string hash, string password)
     {
-        return ph.VerifyHashedPassword(0,hash,password)
+        return ph.VerifyHashedPassword(0, hash, password)
             == PasswordVerificationResult.Success;
     }
 
-    public void Login(string username, string password, bool rememberMe,string role)
+    public void Login(string username, string password, bool rememberMe, string role)
     {
         List<Claim> claims = [
             new(ClaimTypes.Name,username),
@@ -49,7 +49,7 @@ public class Helper(IWebHostEnvironment en,
     {
         ct.HttpContext!.SignOutAsync();
     }
-    
+
 
     public string RandomPassword()
     {
@@ -81,7 +81,7 @@ public class Helper(IWebHostEnvironment en,
         }
 
         return "";
-   
+
     }
 
     public string SavePhoto(IFormFile f,string folder)
