@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -12,13 +13,7 @@ public class HomeController(DB db, Helper hp) : Controller
 {
     public async Task<IActionResult> Index()
     {
-        // If user is not logged in, show login page
-        if (User.Identity == null || !User.Identity.IsAuthenticated)
-        {
-            return RedirectToAction("Login", "Security");
-        }
-
-        // If logged in, fetch top items to display on the Home page
+        // Fetch featured items
         var featuredItems = await db.MenuItems
             .Include(m => m.Category)
             .Take(4)
@@ -40,7 +35,7 @@ public class HomeController(DB db, Helper hp) : Controller
     public async Task<IActionResult> Receipt(string id)
     {
         var order = await db.Orders
-            .Include(o => o.OrderDetails).ThenInclude(od => od.MenuItem)
+            .Include(o => o.OrderDetails!).ThenInclude(od => od.MenuItem)
             .Include(o => o.Table)
             .Include(o => o.User)
             .FirstOrDefaultAsync(o => o.Id == id);
@@ -118,16 +113,17 @@ public class HomeController(DB db, Helper hp) : Controller
     public async Task<IActionResult> Logout()
     {
         await HttpContext.SignOutAsync("CookieAuth");
-        return RedirectToAction("Login");
+        HttpContext.Session.Clear();
+        return RedirectToAction("Login", "Security");
     }
 
     public async Task<IActionResult> Cart()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = GetCurrentUserId();
         if (userId == null) return RedirectToAction("Login");
 
         var order = await db.Orders
-            .Include(o => o.OrderDetails).ThenInclude(od => od.MenuItem)
+            .Include(o => o.OrderDetails!).ThenInclude(od => od.MenuItem)
             .Include(o => o.Table)
             .Where(o => o.UserId == userId && o.Status == "Pending")
             .OrderByDescending(o => o.OrderDate)
@@ -139,7 +135,7 @@ public class HomeController(DB db, Helper hp) : Controller
     [HttpPost]
     public async Task<IActionResult> AddToOrder(string tableId, string menuItemId, int quantity)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = GetCurrentUserId();
         if (userId == null) return RedirectToAction("Login");
 
         if (string.IsNullOrEmpty(menuItemId) || quantity < 1)
@@ -203,7 +199,7 @@ public class HomeController(DB db, Helper hp) : Controller
             detail.Quantity = quantity;
             detail.SubTotal = detail.Quantity * detail.UnitPrice;
             await db.SaveChangesAsync();
-            await RecalculateTotal(detail.OrderId);
+            await RecalculateTotal(detail.OrderId!);
         }
         return RedirectToAction("Cart");
     }
@@ -214,17 +210,20 @@ public class HomeController(DB db, Helper hp) : Controller
         var detail = await db.OrderDetails.FindAsync(orderDetailId);
         if (detail != null)
         {
-            string orderId = detail.OrderId;
+            string? orderId = detail.OrderId;
             db.OrderDetails.Remove(detail);
             await db.SaveChangesAsync();
-            await RecalculateTotal(orderId);
+            if (!string.IsNullOrEmpty(orderId))
+            {
+                await RecalculateTotal(orderId);
+            }
         }
         return RedirectToAction("Cart");
     }
 
     public async Task<IActionResult> Checkout()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = GetCurrentUserId();
         if (userId == null) return RedirectToAction("Login");
 
         var order = await db.Orders
@@ -261,6 +260,7 @@ public class HomeController(DB db, Helper hp) : Controller
             await db.SaveChangesAsync();
         }
     }
+
 
     public IActionResult SetLanguage(string culture, string returnUrl)
     {

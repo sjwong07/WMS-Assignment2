@@ -17,7 +17,6 @@ public class Helper(IWebHostEnvironment en,
     public string HashPassword(string password)
     {
         return ph.HashPassword(0, password);
-
     }
 
     public bool VerifyPassword(string hash, string password)
@@ -30,24 +29,23 @@ public class Helper(IWebHostEnvironment en,
     {
         List<Claim> claims = [
             new(ClaimTypes.Name,username),
-            new(ClaimTypes.Role,role),
+           // new(ClaimTypes.Role,role),
             ];
 
-        ClaimsIdentity identity = new(claims, "Cookies");
+        ClaimsIdentity identity = new(claims, "CookieAuth");
         ClaimsPrincipal principal = new(identity);
-
 
         AuthenticationProperties properties = new()
         {
             IsPersistent = rememberMe,
         };
 
-        ct.HttpContext!.SignInAsync(principal, properties);
+        ct.HttpContext!.SignInAsync("CookieAuth", principal, properties);
     }
 
     public void LogOut()
     {
-        ct.HttpContext!.SignOutAsync();
+        ct.HttpContext!.SignOutAsync("CookieAuth");
     }
 
 
@@ -55,13 +53,11 @@ public class Helper(IWebHostEnvironment en,
     {
         string s = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         string password = "";
-
         Random r = new();
 
-        for (int i = 0; i <= 10; i++)
+        for (int i = 0; i < 10; i++)
         {
             password += s[r.Next(s.Length)];
-
         }
         return password;
     }
@@ -69,23 +65,24 @@ public class Helper(IWebHostEnvironment en,
     public string ValidatePhoto(IFormFile? f)
     {
         if (f == null || f.Length == 0)
-            return ""; // no photo uploaded, nothing to validate
+            return "";
 
         var reType = new Regex(@"^image\/(jpeg|png|webp)$", RegexOptions.IgnoreCase);
         var reName = new Regex(@"^.+\.(jpeg|jpg|png|webp)$", RegexOptions.IgnoreCase);
 
         if (!reType.IsMatch(f.ContentType) || !reName.IsMatch(f.FileName))
         {
-            return "Only JPG,WEBP and PNG photo is allowed";
+            return "Only JPG, WEBP and PNG photo is allowed";
         }
         else if (f.Length > 1 * 1024 * 1024)
         {
-            return "Photo size cannot more than 1MB";
+            return "Photo size cannot be more than 1MB";
         }
 
         return "";
-
     }
+
+
 
     public string SavePhoto(IFormFile f, string folder)
     {
