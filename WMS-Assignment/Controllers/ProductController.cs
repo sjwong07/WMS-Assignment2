@@ -74,5 +74,15 @@ public class ProductController(DB db,Helper hp) : Controller
     {
         return View();
     }
+
+    public IActionResult Update()
+    {
+        return View();
+    }
+
+    public IActionResult Delete()
+    {
+        return View();
+    }
     
 }
