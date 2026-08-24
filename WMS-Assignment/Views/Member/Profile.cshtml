@@ -1,17 +1,35 @@
-﻿@model WMS_Assignment.Models.User
+﻿@model WMS_Assignment.Models.ProfileVM
 
 <div>
     <h2>User Profile</h2>
-    
-    <div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    <form asp-action="Profile" asp-controller="Member" method="post">
+
         <div>
-            <label>Current Username</label>
-            <span> <input type="text" name="Username" value="@Model.Username" /></span>
+            <label>UserId</label>
+            
+            <span>@Model.UserId</span>
         </div>
 
+        <div>
+            <label>Username</label>
+            <input type="text" asp-for="Username" />
+            <span asp-validation-for="Username"></span>
+        </div>
 
+        <div>
+            <label>Email</label>
+            <input type="email" asp-for="Email" />
+            <span asp-validation-for="Email"></span>
+        </div>
 
-    </div>
+       
 
- 
+        <button type="submit">Save Changes</button>
+    </form>
 </div>
