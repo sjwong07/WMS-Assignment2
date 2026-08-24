@@ -1,4 +1,9 @@
-﻿@inject WMS_Assignment.Models.DB db
+﻿@using Microsoft.AspNetCore.Builder
+@using Microsoft.AspNetCore.Localization
+@using Microsoft.Extensions.Options
+@using WMS_Assignment.Models
+
+@inject WMS_Assignment.Models.DB db
 
 <!DOCTYPE html>
 <html lang="en">
@@ -12,12 +17,108 @@
     <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/menu.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     @await RenderSectionAsync("Styles", required: false)
 
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
-    <link rel="stylesheet" href="/css/menu.css">
-    <link rel="stylesheet" href="/css/site.css">
+    <style>
+        .user-dropdown-wrapper {
+            position: relative;
+        }
+
+        .user-avatar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: #fdf6f0;
+            border: 1px solid #fed7aa;
+        }
+
+        .avatar-img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #d97736;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .avatar-img-photo {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid #d98c5f;
+            display: block;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: calc(100% + 8px);
+            background-color: #ffffff;
+            min-width: 170px;
+            border-radius: 10px;
+            border: 1px solid #f3f4f6;
+            padding: 6px 0;
+            z-index: 1000;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            color: #374151;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.15s ease;
+        }
+
+        .dropdown-item:hover {
+            background-color: #fff7ed;
+            color: #d98c5f;
+        }
+
+        .dropdown-item.danger {
+            color: #dc2626;
+        }
+
+        .dropdown-item.danger:hover {
+            background-color: #fef2f2;
+            color: #b91c1c;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background-color: #f3f4f6;
+            margin: 4px 0;
+        }
+
+        .direct-lang-dropdown {
+            border: 1px solid #fed7aa;
+            background: #ffffff;
+            color: #d97736;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 2px 4px;
+            cursor: pointer;
+            outline: none;
+        }
+    </style>
+
     @RenderSection("head", false)
 </head>
 <body>
@@ -30,14 +131,13 @@
                 WagEat<span class="brand-dot"></span>
             </a>
 
-            <!-- Nav Links -->
+            <!-- Nav Links (Filter is removed) -->
             <ul class="nav-links" id="navLinks">
-                <li><a href="/" class="active"><span class="nav-icon">🏠</span> Home</a></li>
-                <li><a href="/Product/Menu"><span class="nav-icon">📋</span> Menu</a></li>
-                <li><a href="/Product/FilteringMenu"><span class="nav-icon">🔍</span> Filter</a></li>
+                <li><a asp-controller="Home" asp-action="Index"><span class="nav-icon">🏠</span> @Lang.T("Home")</a></li>
+                <li><a asp-controller="Product" asp-action="Menu"><span class="nav-icon">📋</span> @Lang.T("Menu")</a></li>
                 <li>
                     <a asp-controller="Home" asp-action="Cart" class="cart-link">
-                        <span class="nav-icon">🛒</span> Cart
+                        <span class="nav-icon">🛒</span> @Lang.T("Cart")
                     </a>
                 </li>
 
@@ -46,38 +146,53 @@
                     var username = User.Identity.Name?.Trim() ?? "";
                     var claimPhoto = User.FindFirst("PhotoURL")?.Value;
 
-                    // Case-insensitive lookup from Members table
                     var member = db.Members.FirstOrDefault(m => m.Username.ToLower() == username.ToLower());
                     var photoUrl = !string.IsNullOrEmpty(claimPhoto) ? claimPhoto : member?.PhotoURL;
 
+                    var reqCulture = Context.Features.Get<IRequestCultureFeature>();
+                    var curCulture = reqCulture?.RequestCulture.Culture.Name ?? "en-US";
+
                     <li class="user-dropdown-wrapper">
-                        <div class="user-avatar" onclick="toggleDropdown(event)">
+                        <div class="user-avatar">
                             @if (!string.IsNullOrEmpty(photoUrl))
                             {
                                 <img src="@Url.Content("~/photos/" + photoUrl)"
                                      alt="Avatar"
-                                     class="avatar-img-photo" />
+                                     class="avatar-img-photo"
+                                     onclick="toggleDropdown(event)"
+                                     style="cursor: pointer;" />
                             }
                             else
                             {
-                                <div class="avatar-img">
+                                <div class="avatar-img" onclick="toggleDropdown(event)" style="cursor: pointer;">
                                     @(username.Length >= 2 ? username.Substring(0, 2).ToUpper() : "SJ")
                                 </div>
                             }
-                            <span class="username">@User.Identity.Name</span>
-                            <span style="font-size: 10px; color: #6b7280;">▼</span>
+
+                            <span class="username" onclick="toggleDropdown(event)" style="cursor: pointer;">@User.Identity.Name</span>
+
+                            <!-- Language Select Box inside User Badge -->
+                            <form id="langInsidePillForm" asp-controller="Home" asp-action="SetLanguage"
+                                  asp-route-returnUrl="@(Context.Request.Path + Context.Request.QueryString)"
+                                  method="post" style="margin: 0; display: inline-flex; align-items: center;">
+                                <select name="culture" onchange="document.getElementById('langInsidePillForm').submit();" class="direct-lang-dropdown">
+                                    <option value="en-US" selected="@(curCulture == "en-US")">EN</option>
+                                    <option value="zh-CN" selected="@(curCulture == "zh-CN")">中文</option>
+                                    <option value="ms-MY" selected="@(curCulture == "ms-MY")">BM</option>
+                                </select>
+                            </form>
+
+                            <span onclick="toggleDropdown(event)" style="font-size: 10px; color: #6b7280; cursor: pointer;">▼</span>
                         </div>
 
                         <div class="dropdown-menu" id="userDropdown">
-                            <a href="/Account/Profile" class="dropdown-item">
-                                <span class="item-icon">👤</span> Profile
+                            <a asp-controller="Member" asp-action="Profile" class="dropdown-item">
+                                <span class="item-icon">👤</span> @Lang.T("Profile")
                             </a>
-                            <a href="/Account/Orders" class="dropdown-item">
-                                <span class="item-icon">📦</span> My Orders
-                            </a>
+                           
                             <div class="dropdown-divider"></div>
-                            <a href="/Home/Logout" class="dropdown-item danger">
-                                <span class="item-icon">🚪</span> Logout
+                            <a asp-controller="Security" asp-action="Logout" class="dropdown-item danger">
+                                <span class="item-icon">🚪</span> @Lang.T("Logout")
                             </a>
                         </div>
                     </li>
@@ -86,7 +201,7 @@
                 {
                     <li>
                         <a asp-controller="Security" asp-action="Login" class="nav-cta">
-                            <span class="nav-icon">🔑</span> Login
+                            <span class="nav-icon">🔑</span> @Lang.T("Login")
                         </a>
                     </li>
                 }
@@ -119,52 +234,52 @@
     <script src="~/js/app.js" asp-append-version="true"></script>
 
     <script>
-            // Mobile Nav Toggle
-            const navToggle = document.getElementById('navToggle');
-            const navLinks = document.getElementById('navLinks');
+        // Mobile Nav Toggle
+        const navToggle = document.getElementById('navToggle');
+        const navLinks = document.getElementById('navLinks');
 
-            if (navToggle && navLinks) {
-                navToggle.addEventListener('click', () => {
-                    navToggle.classList.toggle('active');
-                    navLinks.classList.toggle('open');
-                });
-
-                document.querySelectorAll('.nav-links a').forEach(link => {
-                    link.addEventListener('click', () => {
-                        navToggle.classList.remove('active');
-                        navLinks.classList.remove('open');
-                    });
-                });
-            }
-
-            // Dropdown toggle
-            function toggleDropdown(e) {
-                e.stopPropagation();
-                const dropdown = document.getElementById('userDropdown');
-                if (dropdown) {
-                    dropdown.classList.toggle('show');
-                }
-            }
-
-            // Close dropdown on outside click
-            document.addEventListener('click', (e) => {
-                const dropdown = document.getElementById('userDropdown');
-                if (dropdown && !e.target.closest('.user-dropdown-wrapper')) {
-                    dropdown.classList.remove('show');
-                }
+        if (navToggle && navLinks) {
+            navToggle.addEventListener('click', () => {
+                navToggle.classList.toggle('active');
+                navLinks.classList.toggle('open');
             });
 
-            // Navbar scroll effect
-            window.addEventListener('scroll', () => {
-                const navbar = document.getElementById('navbar');
-                if (navbar) {
-                    if (window.scrollY > 10) {
-                        navbar.classList.add('scrolled');
-                    } else {
-                        navbar.classList.remove('scrolled');
-                    }
-                }
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.addEventListener('click', () => {
+                    navToggle.classList.remove('active');
+                    navLinks.classList.remove('open');
+                });
             });
+        }
+
+        // Dropdown toggle
+        function toggleDropdown(e) {
+            e.stopPropagation();
+            const dropdown = document.getElementById('userDropdown');
+            if (dropdown) {
+                dropdown.classList.toggle('show');
+            }
+        }
+
+        // Close dropdown on outside click
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('userDropdown');
+            if (dropdown && !e.target.closest('.user-dropdown-wrapper')) {
+                dropdown.classList.remove('show');
+            }
+        });
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (navbar) {
+                if (window.scrollY > 10) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            }
+        });
     </script>
 
     @RenderSection("foot", false)
