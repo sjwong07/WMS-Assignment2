@@ -43,6 +43,73 @@ public class HomeController(DB db, Helper hp) : Controller
         return View(order);
     }
 
+    public IActionResult Login()
+    {
+        return View("~/Views/Security/Login.cshtml");
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Login(string Username, string Password)
+    {
+        var user = await db.Users.FirstOrDefaultAsync(u => u.Username == Username);
+
+        if (user == null)
+        {
+            ViewBag.Message = "Invalid Username or Password.";
+            return View("~/Views/Security/Login.cshtml");
+        }
+
+        // Check if account is currently locked out
+        if (user.LockoutEnd != null && user.LockoutEnd > DateTime.Now)
+        {
+            var minutesLeft = Math.Ceiling((user.LockoutEnd.Value - DateTime.Now).TotalMinutes);
+            ViewBag.Message = $"Account locked. Try again in {minutesLeft} minute(s).";
+            return View("~/Views/Security/Login.cshtml");
+        }
+
+        // Verify using the password hash
+        bool isPasswordCorrect = !string.IsNullOrEmpty(user.Hash) && hp.VerifyPassword(user.Hash, Password);
+
+        if (!isPasswordCorrect)
+        {
+            user.FailedLogin += 1;
+
+            if (user.FailedLogin >= 3)
+            {
+                user.LockoutEnd = DateTime.Now.AddMinutes(5);
+                user.FailedLogin = 0;
+                await db.SaveChangesAsync();
+                ViewBag.Message = "Too many failed attempts. Account locked for 5 minutes.";
+                return View("~/Views/Security/Login.cshtml");
+            }
+
+            await db.SaveChangesAsync();
+            ViewBag.Message = $"Invalid Username or Password. {3 - user.FailedLogin} attempt(s) remaining.";
+            return View("~/Views/Security/Login.cshtml");
+        }
+
+        // Successful login — reset failed attempts
+        user.FailedLogin = 0;
+        user.LockoutEnd = null;
+        await db.SaveChangesAsync();
+
+        // Retrieve Member details to get PhotoURL
+        var member = await db.Members.FirstOrDefaultAsync(m => m.Username == user.Username);
+
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.Name, user.Username ?? ""),
+            new Claim(ClaimTypes.NameIdentifier, user.Id ?? ""),
+            new Claim(ClaimTypes.Role, user.RoleId ?? "Member"),
+            new Claim("PhotoURL", member?.PhotoURL ?? "") // Stores photo filename in claims
+        };
+
+        var claimsIdentity = new ClaimsIdentity(claims, "CookieAuth");
+        await HttpContext.SignInAsync("CookieAuth", new ClaimsPrincipal(claimsIdentity));
+
+        return RedirectToAction("Menu", "Product");
+    }
+
     public async Task<IActionResult> Logout()
     {
         await HttpContext.SignOutAsync("CookieAuth");
@@ -52,7 +119,7 @@ public class HomeController(DB db, Helper hp) : Controller
 
     public async Task<IActionResult> Cart()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = GetCurrentUserId();
         if (userId == null) return RedirectToAction("Login");
 
         var order = await db.Orders
@@ -68,7 +135,7 @@ public class HomeController(DB db, Helper hp) : Controller
     [HttpPost]
     public async Task<IActionResult> AddToOrder(string tableId, string menuItemId, int quantity)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = GetCurrentUserId();
         if (userId == null) return RedirectToAction("Login");
 
         if (string.IsNullOrEmpty(menuItemId) || quantity < 1)
@@ -156,7 +223,7 @@ public class HomeController(DB db, Helper hp) : Controller
 
     public async Task<IActionResult> Checkout()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = GetCurrentUserId();
         if (userId == null) return RedirectToAction("Login");
 
         var order = await db.Orders
@@ -194,6 +261,7 @@ public class HomeController(DB db, Helper hp) : Controller
         }
     }
 
+
     public IActionResult SetLanguage(string culture, string returnUrl)
     {
         Response.Cookies.Append(
@@ -203,5 +271,18 @@ public class HomeController(DB db, Helper hp) : Controller
         );
 
         return LocalRedirect(returnUrl ?? "~/");
+    }
+    private string GetCurrentUserId()
+    {
+        // Try real cookie/claims login first
+        var claimUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (claimUserId != null) return claimUserId;
+
+        // Fall back to session-based login
+        var username = HttpContext.Session.GetString("User");
+        if (username == null) return null;
+
+        var user = db.Users.FirstOrDefault(u => u.Username == username);
+        return user?.Id;
     }
 }

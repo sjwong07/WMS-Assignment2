@@ -17,108 +17,14 @@
     <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/menu.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    @await RenderSectionAsync("Styles", required: false)
+    <link rel="stylesheet" href="~/css/forgotpassword.css" asp-append-version="true" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <style>
-        .user-dropdown-wrapper {
-            position: relative;
-        }
-
-        .user-avatar {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 4px 10px;
-            border-radius: 20px;
-            background: #fdf6f0;
-            border: 1px solid #fed7aa;
-        }
-
-        .avatar-img {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background-color: #d97736;
-            color: #ffffff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            font-weight: 700;
-        }
-
-        .avatar-img-photo {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 1px solid #d98c5f;
-            display: block;
-        }
-
-        .dropdown-menu {
-            display: none;
-            position: absolute;
-            right: 0;
-            top: calc(100% + 8px);
-            background-color: #ffffff;
-            min-width: 170px;
-            border-radius: 10px;
-            border: 1px solid #f3f4f6;
-            padding: 6px 0;
-            z-index: 1000;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
-
-        .dropdown-menu.show {
-            display: block;
-        }
-
-        .dropdown-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            color: #374151;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.15s ease;
-        }
-
-        .dropdown-item:hover {
-            background-color: #fff7ed;
-            color: #d98c5f;
-        }
-
-        .dropdown-item.danger {
-            color: #dc2626;
-        }
-
-        .dropdown-item.danger:hover {
-            background-color: #fef2f2;
-            color: #b91c1c;
-        }
-
-        .dropdown-divider {
-            height: 1px;
-            background-color: #f3f4f6;
-            margin: 4px 0;
-        }
-
-        .direct-lang-dropdown {
-            border: 1px solid #fed7aa;
-            background: #ffffff;
-            color: #d97736;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: bold;
-            padding: 2px 4px;
-            cursor: pointer;
-            outline: none;
-        }
-    </style>
-
+   
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+    <link rel="stylesheet" href="/css/menu.css">
+    <link rel="stylesheet" href="/css/site.css">
+    <link rel="stylesheet" href="/css/popup.css"
     @RenderSection("head", false)
 </head>
 <body>
@@ -194,6 +100,16 @@
                             <a asp-controller="Security" asp-action="Logout" class="dropdown-item danger">
                                 <span class="item-icon">🚪</span> @Lang.T("Logout")
                             </a>
+                          
+
+                            <a href="/Order/History" class="dropdown-item">
+                                <span class="item-icon">📦My Orders</span>
+                            </a>
+
+                            <div class="dropdown-divider"></div>
+                            <a href="/Security/Logout" class="dropdown-item danger">
+                                <span class="item-icon">🚪Logout</span>
+                            </a>
                         </div>
                     </li>
                 }
@@ -206,7 +122,13 @@
                     </li>
                 }
             </ul>
-
+            <form asp-controller="Language" asp-action="SetLanguage" asp-route-returnUrl="@Context.Request.Path" method="get" style="display:inline">
+                <select name="culture" onchange="this.form.submit()">
+                    <option value="en">English</option>
+                    <option value="ms">Bahasa Malaysia</option>
+                    <option value="zh">中文</option>
+                </select>
+            </form>
             <!-- Mobile Toggle -->
             <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
                 <span></span>
