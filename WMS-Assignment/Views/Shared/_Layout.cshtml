@@ -13,8 +13,8 @@
     <link rel="stylesheet" href="~/css/menu.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    @await RenderSectionAsync("Styles", required: false)
 
+   
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
     <link rel="stylesheet" href="/css/menu.css">
     <link rel="stylesheet" href="/css/site.css">
@@ -34,7 +34,7 @@
             <ul class="nav-links" id="navLinks">
                 <li><a href="/" class="active"><span class="nav-icon">🏠</span> Home</a></li>
                 <li><a href="/Product/Menu"><span class="nav-icon">📋</span> Menu</a></li>
-                <li><a href="/Product/FilteringMenu"><span class="nav-icon">🔍</span> Filter</a></li>
+
                 <li>
                     <a asp-controller="Home" asp-action="Cart" class="cart-link">
                         <span class="nav-icon">🛒</span> Cart
@@ -69,15 +69,17 @@
                         </div>
 
                         <div class="dropdown-menu" id="userDropdown">
-                            <a href="/Account/Profile" class="dropdown-item">
-                                <span class="item-icon">👤</span> Profile
+                            <a href="/Member/Profile" class="dropdown-item">
+                                <span class="item-icon">👤 Profile</span>
                             </a>
-                            <a href="/Account/Orders" class="dropdown-item">
-                                <span class="item-icon">📦</span> My Orders
+
+                            <a href="/Order/History" class="dropdown-item">
+                                <span class="item-icon">📦My Orders</span>
                             </a>
+
                             <div class="dropdown-divider"></div>
-                            <a href="/Home/Logout" class="dropdown-item danger">
-                                <span class="item-icon">🚪</span> Logout
+                            <a href="/Security/Logout" class="dropdown-item danger">
+                                <span class="item-icon">🚪Logout</span>
                             </a>
                         </div>
                     </li>

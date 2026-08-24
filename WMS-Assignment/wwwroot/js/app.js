@@ -9,3 +9,5 @@ $(document).on('click', '[data-get]', e => {
 $('[data-trim]').on('change', e => {
     e.target.value = e.target.value.trim();
 });
+
+

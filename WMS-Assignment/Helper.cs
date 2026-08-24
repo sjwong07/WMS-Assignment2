@@ -22,11 +22,11 @@ public class Helper(IWebHostEnvironment en,
             == PasswordVerificationResult.Success;
     }
 
-    public void Login(string username, string password, bool rememberMe)
+    public void Login(string username, string password, bool rememberMe,string role)
     {
         List<Claim> claims = [
             new(ClaimTypes.Name,username),
-          //  new(ClaimTypes.Role,role),
+            new(ClaimTypes.Role,role),
             ];
 
         ClaimsIdentity identity = new(claims, "Cookies");
@@ -45,12 +45,7 @@ public class Helper(IWebHostEnvironment en,
     {
         ct.HttpContext!.SignOutAsync();
     }
-    public string RandomPassword()
-    {
-        string s = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        string password = "";
-
-        Random r = new();
+    
 
     public string RandomPassword()
     {
@@ -85,12 +80,7 @@ public class Helper(IWebHostEnvironment en,
         }
 
         return "";
-    }
-        for(int i = 0; i < s.Length; i++)
-        {
-            password += s[r.Next(s.Length)];
-        }
-        return password;
+   
     }
 
         var file = Guid.NewGuid().ToString("n") + ".jpg";
