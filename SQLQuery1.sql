@@ -1,5 +1,5 @@
-ALTER TABLE Users
-ADD FailedLogin INT NOT NULL DEFAULT 0;
-
-ALTER TABLE Users
-ADD LockoutEnd DATETIME NULL;
+﻿
+IF EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Users') AND name = 'Password')
+BEGIN
+    ALTER TABLE [Users] ALTER COLUMN [Password] NVARCHAR(100) NULL;
+END
