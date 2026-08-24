@@ -1,64 +1,174 @@
 ﻿@model RegisterVM
 
-<h2>Create Account</h2>
+<link rel="stylesheet" href="~/css/auth.css" />
 
-<div asp-validation-summary="All" class="text-danger"></div>
+<div class="auth-page">
+    <div class="auth-card">
 
-@if (ViewBag.Message != null)
-{
-    <div class="alert alert-danger">
-        @ViewBag.Message
+        <form asp-controller="Security" asp-action="Register" class="auth-form" method="post" enctype="multipart/form-data">
+
+            <!-- Photo Upload Header -->
+            <div class="auth-icon-wrap">
+                <label for="ProfilePhoto" class="auth-icon-badge">
+                    <img id="photoPreview" class="auth-icon-img" style="display:none;" />
+                    <span id="photoPlaceholder" class="auth-icon-placeholder">👤</span>
+                    <span class="auth-icon-camera">📷</span>
+                </label>
+                <input asp-for="ProfilePhoto" type="file" class="auth-photo-input" id="ProfilePhoto" accept="image/*" onchange="previewPhoto(event)" />
+            </div>
+
+            <div class="auth-pill">✨ JOIN US</div>
+
+            <h1 class="auth-heading">Create <span>Account!</span></h1>
+            <p class="auth-subtext">Sign up to start ordering your favorite food</p>
+
+            <div class="auth-form-box">
+                <div class="auth-field">
+                    <label>👤 Username</label>
+                    <div class="auth-input-wrap">
+                        <span class="auth-input-icon">👤</span>
+                        <input asp-for="Username" class="auth-input" placeholder="Enter your username" required />
+                    </div>
+                    <span asp-validation-for="Username" class="text-danger"></span>
+                </div>
+
+                <div class="auth-field">
+                    <label>📧 Email</label>
+                    <div class="auth-input-wrap">
+                        <span class="auth-input-icon">📧</span>
+                        <input asp-for="Email" class="auth-input" placeholder="Enter your email" required />
+                    </div>
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+
+                <div class="auth-row">
+                    <div class="auth-field">
+                        <label>🙋 First Name</label>
+                        <div class="auth-input-wrap">
+                            <span class="auth-input-icon">🙋</span>
+                            <input asp-for="FirstName" class="auth-input" placeholder="First name" />
+                        </div>
+                        <span asp-validation-for="FirstName" class="text-danger"></span>
+                    </div>
+
+                    <div class="auth-field">
+                        <label>🙋 Last Name</label>
+                        <div class="auth-input-wrap">
+                            <span class="auth-input-icon">🙋</span>
+                            <input asp-for="LastName" class="auth-input" placeholder="Last name" />
+                        </div>
+                        <span asp-validation-for="LastName" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- Password Field with Show/Hide Toggle and 12-16 Characters Limit -->
+                <div class="auth-field">
+                    <label>🔒 Password</label>
+                    <div class="auth-input-wrap" style="position: relative;">
+                        <span class="auth-input-icon">🔒</span>
+                        <input asp-for="Password"
+                               type="password"
+                               class="auth-input"
+                               id="passwordInput"
+                               placeholder="Enter 12-16 characters"
+                               minlength="12"
+                               maxlength="16"
+                               oninput="checkPasswordRules()"
+                               style="padding-right: 44px;"
+                               required />
+                        <button type="button" onclick="togglePasswordVisibility('passwordInput', 'togglePasswordBtn')" id="togglePasswordBtn"
+                                style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 1.1rem; padding: 0; color: #b09a88; z-index: 2;">
+                            👁️
+                        </button>
+                    </div>
+                    <span asp-validation-for="Password" class="text-danger"></span>
+
+                    <ul class="auth-password-rules" id="passwordRules">
+                        <li data-rule="length"><span class="rule-dot"></span> 12 - 16 characters</li>
+                        <li data-rule="upper"><span class="rule-dot"></span> Uppercase</li>
+                        <li data-rule="lower"><span class="rule-dot"></span> Lowercase</li>
+                        <li data-rule="number"><span class="rule-dot"></span> Number</li>
+                        <li data-rule="special"><span class="rule-dot"></span> Special char</li>
+                    </ul>
+                </div>
+
+                <!-- Confirm Password Field with Show/Hide Toggle -->
+                <div class="auth-field">
+                    <label>🔁 Confirm Password</label>
+                    <div class="auth-input-wrap" style="position: relative;">
+                        <span class="auth-input-icon">🔁</span>
+                        <input asp-for="ConfirmPassword"
+                               type="password"
+                               class="auth-input"
+                               id="confirmPasswordInput"
+                               placeholder="Re-enter your password"
+                               minlength="12"
+                               maxlength="16"
+                               style="padding-right: 44px;"
+                               required />
+                        <button type="button" onclick="togglePasswordVisibility('confirmPasswordInput', 'toggleConfirmPasswordBtn')" id="toggleConfirmPasswordBtn"
+                                style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 1.1rem; padding: 0; color: #b09a88; z-index: 2;">
+                            👁️
+                        </button>
+                    </div>
+                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                </div>
+
+                <button type="submit" class="auth-submit">Create Account</button>
+
+                <p class="auth-footer-link">
+                    Already have an account? <a asp-controller="Security" asp-action="Login">Login</a>
+                </p>
+
+                @if (ViewBag.Message != null)
+                {
+                    <div class="auth-error-box">@ViewBag.Message</div>
+                }
+                <div asp-validation-summary="All" class="auth-error-box"></div>
+            </div>
+        </form>
+
     </div>
-}
+</div>
 
-<form asp-controller="Security" asp-action="Register"  class = "form" method = "post" enctype="multipart/form-data">
-    <div class="mb-3">
-        <label>Username</label>
-        <input asp-for="Username" class="form-control" />
-        <span asp-validation-for="Username" class="text-danger"></span>
-    </div>
+<script>
+    function previewPhoto(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const img = document.getElementById('photoPreview');
+            img.src = URL.createObjectURL(file);
+            img.style.display = 'block';
+            document.getElementById('photoPlaceholder').style.display = 'none';
+        }
+    }
 
-    <div class="mb-3">
-        <label>First Name</label>
-        <input asp-for="FirstName" class="form-control" />
-        <span asp-validation-for="FirstName" class="text-danger"></span>
-    </div>
+    function checkPasswordRules() {
+        const val = document.getElementById('passwordInput').value;
+        const rules = {
+            length: val.length >= 12 && val.length <= 16,
+            upper: /[A-Z]/.test(val),
+            lower: /[a-z]/.test(val),
+            number: /[0-9]/.test(val),
+            special: /[^A-Za-z0-9]/.test(val)
+        };
+        Object.keys(rules).forEach(key => {
+            const el = document.querySelector(`li[data-rule="${key}"]`);
+            if (el) {
+                el.classList.toggle('rule-met', rules[key]);
+            }
+        });
+    }
 
-    <div class="mb-3">
-        <label>Last Name</label>
-        <input asp-for="LastName" class="form-control" />
-        <span asp-validation-for="LastName" class="text-danger"></span>
-    </div>
+    function togglePasswordVisibility(inputId, btnId) {
+        const input = document.getElementById(inputId);
+        const btn = document.getElementById(btnId);
 
-    <div class="mb-3">
-        <label>Email</label>
-        <input asp-for="Email" class="form-control" />
-        <span asp-validation-for="Email" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label>Password</label>
-        <input asp-for="Password" type="password" class="form-control" />
-        <span asp-validation-for="Password" class="text-danger"></span>
-
-        <small class="text-danger">
-            Password must contain:
-            <br />✓ At least 8 characters
-            <br />✓ 1 Uppercase
-            <br />✓ 1 Lowercase
-            <br />✓ 1 Number
-            <br />✓ 1 Special Character
-        </small>
-    </div>
-
-     <div class="ProfilePhoto">
-        <label>ProfilePhoto</label>
-        <input asp-for="ProfilePhoto" type="file" class="file" autofocus="">
-        <span asp-validation-for="ProfilePhoto"></span>
-    </div>
-
-    <button type="submit" class="btn btn-success">Register</button>
-</form>
-
-<hr />
-<a asp-controller="Security" asp-action="Login">Already have an account? Login</a>
+        if (input.type === 'password') {
+            input.type = 'text';
+            btn.textContent = '🙈';
+        } else {
+            input.type = 'password';
+            btn.textContent = '👁️';
+        }
+    }
+</script>

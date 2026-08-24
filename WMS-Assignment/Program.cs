@@ -4,7 +4,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSession();
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddAuthentication().AddCookie();
 builder.Services.AddControllersWithViews();
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<Helper>();
@@ -15,7 +14,6 @@ builder.Services.AddSqlServer<DB>($@"
 ");
 
 // Configure Authentication with Cookie
-
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = "CookieAuth";
@@ -34,16 +32,28 @@ builder.Services.AddAuthentication(options =>
     options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
 });
 
-
-
 var app = builder.Build();
+
+// Seed Roles Automatically on App Startup
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<DB>();
+
+    if (!db.Roles.Any())
+    {
+        db.Roles.AddRange(
+            new Role { Id = "Member", Description = "Member" },
+            new Role { Id = "Admin", Description = "Admin" }
+        );
+        db.SaveChanges();
+    }
+}
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-app.UseSession();         
-
+app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 
