@@ -66,16 +66,19 @@ public class Helper(IWebHostEnvironment en,
         return password;
     }
 
-    public string ValidatePhoto(IFormFile f)
+    public string ValidatePhoto(IFormFile? f)
     {
+        if (f == null || f.Length == 0)
+            return ""; // no photo uploaded, nothing to validate
+
         var reType = new Regex(@"^image\/(jpeg|png|webp)$", RegexOptions.IgnoreCase);
         var reName = new Regex(@"^.+\.(jpeg|jpg|png|webp)$", RegexOptions.IgnoreCase);
 
-        if(!reType.IsMatch(f.ContentType) || !reName.IsMatch(f.FileName))
+        if (!reType.IsMatch(f.ContentType) || !reName.IsMatch(f.FileName))
         {
             return "Only JPG,WEBP and PNG photo is allowed";
         }
-        else if(f.Length > 1 * 1024 * 1024)
+        else if (f.Length > 1 * 1024 * 1024)
         {
             return "Photo size cannot more than 1MB";
         }
@@ -84,10 +87,8 @@ public class Helper(IWebHostEnvironment en,
 
     }
 
-    public string SavePhoto(IFormFile f,string folder)
-    {
         var file = Guid.NewGuid().ToString("n") + ".jpg";
-        var path = Path.Combine(en.WebRootPath, folder, file);
+        var path = Path.Combine(folderPath, file);
 
         var options = new ResizeOptions
         {
@@ -98,7 +99,7 @@ public class Helper(IWebHostEnvironment en,
         using var stream = f.OpenReadStream();
         using var img = Image.Load(stream);
         img.Mutate(x => x.Resize(options));
-        img.Save(path);
+        img.SaveAsJpeg(path);
 
         return file;
     }
