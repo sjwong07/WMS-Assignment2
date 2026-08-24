@@ -1,85 +1,83 @@
-﻿<div class="menu-page-container">
-    <!-- Search & Category Filters -->
-    <div class="menu-controls">
-        <div class="search-box">
-            <span class="search-icon">🔍</span>
-            <input type="text" placeholder="Search drinks, dishes, desserts..." />
-        </div>
+@model IEnumerable<WMS_Assignment.Models.MenuItem>
 
-        <div class="filter-chips">
-            <button class="chip active">All</button>
-            <button class="chip">Main Dish</button>
-            <button class="chip">Side Dish</button>
-            <button class="chip">Drink / Dessert</button>
-        </div>
+@{
+    ViewData["Title"] = "Home";
+}
+
+<div class="menu-page-container">
+    <div class="filter-chips">
+        <button class="chip active">All</button>
+        <button class="chip">Main Dish</button>
+        <button class="chip">Side Dish</button>
+        <button class="chip">Drink / Dessert</button>
     </div>
 
     <!-- Food Cards Grid -->
     <div class="food-grid">
-        <!-- Card Item (Repeat in your @foreach loop) -->
-        <div class="food-card">
-            <div class="food-img-wrapper">
-                <!-- Replace src with your image path: ~/images/americano.jpg -->
-                <img src="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500&auto=format&fit=crop&q=60" alt="Americano" class="food-img" />
-                <span class="category-badge">Drink</span>
-            </div>
-
-            <div class="food-info">
-                <div class="food-header">
-                    <h3 class="food-title">Americano</h3>
-                    <span class="food-price">RM 9.90</span>
-                </div>
-                <p class="food-desc">Rich espresso diluted with hot water for a smooth, bold finish.</p>
-
-                <div class="card-actions">
-                    <!-- Action buttons (Admin / Staff) -->
-                    <div class="admin-links">
-                        <a href="#" class="link-btn">Detail</a>
-                        <a href="#" class="link-btn">Edit</a>
+        @if (Model != null && Model.Any())
+        {
+            @foreach (var item in Model)
+            {
+                <div class="food-card">
+                    <div class="food-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500&auto=format&fit=crop&q=60"
+                             alt="@item.Name"
+                             class="food-img" />
+                        <span class="category-badge">@(item.Category?.Name ?? "Menu Item")</span>
                     </div>
 
-                    <!-- Quantity & Add to Cart -->
-                    <div class="order-controls">
-                        <div class="qty-counter">
-                            <button type="button" class="qty-btn">-</button>
-                            <input type="number" value="1" min="1" class="qty-input" />
-                            <button type="button" class="qty-btn">+</button>
+                    <div class="food-info">
+                        <div class="food-header">
+                            <h3 class="food-title">@item.Name</h3>
+                            <span class="food-price">RM @item.Price.ToString("0.00")</span>
                         </div>
-                        <button class="add-to-cart-btn">Add</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+                        <p class="food-desc">@item.Description</p>
 
-        <!-- Sample Card 2 -->
-        <div class="food-card">
-            <div class="food-img-wrapper">
-                <img src="https://images.unsplash.com/photo-1570968915860-54d5c301fa9f?w=500&auto=format&fit=crop&q=60" alt="Caffè Latte" class="food-img" />
-                <span class="category-badge">Drink</span>
-            </div>
+                        <div class="card-actions">
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <div class="admin-links">
+                                    <a asp-controller="Product" asp-action="Detail" asp-route-id="@item.Id" class="link-btn">Detail</a>
+                                    <a asp-controller="Product" asp-action="Edit" asp-route-id="@item.Id" class="link-btn">Edit</a>
+                                </div>
+                            }
 
-            <div class="food-info">
-                <div class="food-header">
-                    <h3 class="food-title">Caffè Latte</h3>
-                    <span class="food-price">RM 9.90</span>
-                </div>
-                <p class="food-desc">Espresso with a generous amount of silky steamed milk.</p>
+                            <!-- Quantity & Add to Cart Form -->
+                            <form asp-controller="Home" asp-action="AddToOrder" method="post" class="order-controls">
+                                <input type="hidden" name="menuItemId" value="@item.Id" />
+                                <input type="hidden" name="tableId" value="T01" /> <!-- Replace with dynamic table session/parameter if applicable -->
 
-                <div class="card-actions">
-                    <div class="admin-links">
-                        <a href="#" class="link-btn">Detail</a>
-                        <a href="#" class="link-btn">Edit</a>
-                    </div>
-                    <div class="order-controls">
-                        <div class="qty-counter">
-                            <button type="button" class="qty-btn">-</button>
-                            <input type="number" value="1" min="1" class="qty-input" />
-                            <button type="button" class="qty-btn">+</button>
+                                <div class="qty-counter">
+                                    <button type="button" class="qty-btn" onclick="decrementQty(this)">-</button>
+                                    <input type="number" name="quantity" value="1" min="1" class="qty-input" />
+                                    <button type="button" class="qty-btn" onclick="incrementQty(this)">+</button>
+                                </div>
+                                <button type="submit" class="add-to-cart-btn">Add</button>
+                            </form>
                         </div>
-                        <button class="add-to-cart-btn">Add</button>
                     </div>
                 </div>
+            }
+        }
+        else
+        {
+            <div class="text-center py-5 w-100">
+                <p class="text-muted">No featured items available right now.</p>
             </div>
-        </div>
+        }
     </div>
 </div>
+
+<script>
+    function incrementQty(btn) {
+        const input = btn.parentElement.querySelector('.qty-input');
+        input.value = parseInt(input.value || 1) + 1;
+    }
+
+    function decrementQty(btn) {
+        const input = btn.parentElement.querySelector('.qty-input');
+        if (parseInt(input.value) > 1) {
+            input.value = parseInt(input.value) - 1;
+        }
+    }
+</script>

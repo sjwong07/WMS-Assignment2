@@ -8,11 +8,23 @@ using WMS_Assignment.Models;
 
 namespace WMS_Assignment.Controllers;
 
-public class HomeController(DB db) : Controller
+public class HomeController(DB db, Helper hp) : Controller
 {
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        return View("~/Views/Security/Login.cshtml");
+        // If user is not logged in, show login page
+        if (User.Identity == null || !User.Identity.IsAuthenticated)
+        {
+            return RedirectToAction("Login", "Security");
+        }
+
+        // If logged in, fetch top items to display on the Home page
+        var featuredItems = await db.MenuItems
+            .Include(m => m.Category)
+            .Take(4)
+            .ToListAsync();
+
+        return View(featuredItems);
     }
 
     public IActionResult About()
@@ -36,17 +48,15 @@ public class HomeController(DB db) : Controller
         return View(order);
     }
 
-    
     public IActionResult Login()
     {
         return View("~/Views/Security/Login.cshtml");
     }
 
-
     [HttpPost]
     public async Task<IActionResult> Login(string Username, string Password)
     {
-        var user = db.Users.FirstOrDefault(u => u.Username == Username);
+        var user = await db.Users.FirstOrDefaultAsync(u => u.Username == Username);
 
         if (user == null)
         {
@@ -62,16 +72,19 @@ public class HomeController(DB db) : Controller
             return View("~/Views/Security/Login.cshtml");
         }
 
-        if (user.Password != Password)
+        // Verify using the password hash
+        bool isPasswordCorrect = !string.IsNullOrEmpty(user.Hash) && hp.VerifyPassword(user.Hash, Password);
+
+        if (!isPasswordCorrect)
         {
             user.FailedLogin += 1;
 
             if (user.FailedLogin >= 3)
             {
-                user.LockoutEnd = DateTime.Now.AddMinutes(15);
+                user.LockoutEnd = DateTime.Now.AddMinutes(5);
                 user.FailedLogin = 0;
                 await db.SaveChangesAsync();
-                ViewBag.Message = "Too many failed attempts. Account locked for 15 minutes.";
+                ViewBag.Message = "Too many failed attempts. Account locked for 5 minutes.";
                 return View("~/Views/Security/Login.cshtml");
             }
 
@@ -85,15 +98,19 @@ public class HomeController(DB db) : Controller
         user.LockoutEnd = null;
         await db.SaveChangesAsync();
 
-        var claims = new List<System.Security.Claims.Claim>
+        // Retrieve Member details to get PhotoURL
+        var member = await db.Members.FirstOrDefaultAsync(m => m.Username == user.Username);
+
+        var claims = new List<Claim>
         {
-            new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, user.Username),
-            new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.NameIdentifier, user.Id),
-            new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, user.RoleId)
+            new Claim(ClaimTypes.Name, user.Username ?? ""),
+            new Claim(ClaimTypes.NameIdentifier, user.Id ?? ""),
+            new Claim(ClaimTypes.Role, user.RoleId ?? "Member"),
+            new Claim("PhotoURL", member?.PhotoURL ?? "") // Stores photo filename in claims
         };
 
-        var claimsIdentity = new System.Security.Claims.ClaimsIdentity(claims, "CookieAuth");
-        await HttpContext.SignInAsync("CookieAuth", new System.Security.Claims.ClaimsPrincipal(claimsIdentity));
+        var claimsIdentity = new ClaimsIdentity(claims, "CookieAuth");
+        await HttpContext.SignInAsync("CookieAuth", new ClaimsPrincipal(claimsIdentity));
 
         return RedirectToAction("Menu", "Product");
     }
@@ -104,10 +121,9 @@ public class HomeController(DB db) : Controller
         return RedirectToAction("Login");
     }
 
-
     public async Task<IActionResult> Cart()
     {
-        var userId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId == null) return RedirectToAction("Login");
 
         var order = await db.Orders
@@ -123,7 +139,7 @@ public class HomeController(DB db) : Controller
     [HttpPost]
     public async Task<IActionResult> AddToOrder(string tableId, string menuItemId, int quantity)
     {
-        var userId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId == null) return RedirectToAction("Login");
 
         if (string.IsNullOrEmpty(menuItemId) || quantity < 1)
@@ -153,7 +169,7 @@ public class HomeController(DB db) : Controller
             db.Orders.Add(order);
         }
 
-        var existingDetail = order.OrderDetails.FirstOrDefault(od => od.MenuItemId == menuItemId);
+        var existingDetail = order.OrderDetails?.FirstOrDefault(od => od.MenuItemId == menuItemId);
         if (existingDetail != null)
         {
             existingDetail.Quantity += quantity;
@@ -208,7 +224,7 @@ public class HomeController(DB db) : Controller
 
     public async Task<IActionResult> Checkout()
     {
-        var userId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId == null) return RedirectToAction("Login");
 
         var order = await db.Orders
@@ -216,7 +232,7 @@ public class HomeController(DB db) : Controller
             .Where(o => o.UserId == userId && o.Status == "Pending")
             .FirstOrDefaultAsync();
 
-        if (order == null || !order.OrderDetails.Any())
+        if (order == null || order.OrderDetails == null || !order.OrderDetails.Any())
             return RedirectToAction("Cart");
 
         return View(order);
@@ -239,7 +255,7 @@ public class HomeController(DB db) : Controller
     private async Task RecalculateTotal(string orderId)
     {
         var order = await db.Orders.Include(o => o.OrderDetails).FirstOrDefaultAsync(o => o.Id == orderId);
-        if (order != null)
+        if (order != null && order.OrderDetails != null)
         {
             order.TotalAmount = order.OrderDetails.Sum(od => od.SubTotal);
             await db.SaveChangesAsync();
