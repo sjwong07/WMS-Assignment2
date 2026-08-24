@@ -2,10 +2,14 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WMS_Assignment.Models;
+using System.Text.RegularExpressions;
+using System.Net.Mail;
+
 
 namespace WMS_Assignment.Controllers;
 
-public class SecurityController(DB db, Helper hp) : Controller
+public class SecurityController(DB db,Helper hp,
+                            IConfiguration cf, IWebHostEnvironment en) : Controller
 {
     //---------------- Register ----------------
 
@@ -127,26 +131,81 @@ public class SecurityController(DB db, Helper hp) : Controller
     }
 
     [HttpPost]
-    public IActionResult ForgotPassword(string Email)
+    public IActionResult forgotPassword(forgotPasswordVM vm)
     {
         var u = db.Members.FirstOrDefault(x => x.Email.ToLower() == Email.Trim().ToLower());
 
         if (u == null)
         {
             ModelState.AddModelError("Email", "Email not found.");
+            return View(vm);
         }
 
-        if (ModelState.IsValid && u != null)
+        if (!ModelState.IsValid)
         {
-            string password = hp.RandomPassword();
-            u.Hash = hp.HashPassword(password);
-            db.SaveChanges();
+            return View(vm);
+        }
 
-            TempData["Info"] = $"Password reset to <b>{password}</b>.";
+        string password = hp.RandomPassword();
+
+        u.Hash = hp.HashPassword(password);
+
+        db.SaveChanges();
+
+        try
+        {
+            SendResetPasswordEmail(u, password);
+
+            TempData["Info"] =
+                "Password reset successful. Please check your email.";
+
             return RedirectToAction("Login");
         }
+        catch (SmtpException ex)
+        {
+            Console.WriteLine("RESET EMAIL ERROR: " + ex.Message);
 
-        return View();
+            ModelState.AddModelError(
+                "",
+                "Password was reset, but the email could not be sent."
+            );
+
+            return View(vm);
+        }
+    }
+
+    private void SendResetPasswordEmail(User u, string password)
+    {
+        Console.WriteLine("START SENDING EMAIL");
+        var mail = new MailMessage();
+
+        mail.To.Add(new MailAddress(u.Email, u.Name));
+        mail.Subject = "Reset Password";
+        mail.IsBodyHtml = true;
+
+        var url = Url.Action(
+            "Login",
+            "Security",
+            null,
+            "https"
+        );
+
+        mail.Body = $@"
+        <p>Dear {u.Name},</p>
+
+        <p>Your password has been reset to:</p>
+
+        <h1 style='color:red'>{password}</h1>
+
+        <p>
+            Please <a href='{url}'>login</a>
+            with your new password.
+        </p>
+
+        <p>From, Super Admin</p>
+    ";
+
+        hp.SendEmail(mail);
     }
 
     //---------------- Logout ----------------
