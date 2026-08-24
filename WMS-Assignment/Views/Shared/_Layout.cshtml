@@ -77,10 +77,24 @@
                             <span style="font-size: 10px; color: #6b7280;">▼</span>
                         </div>
 
-                        <div class="dropdown-menu" id="userDropdown">
-                          
+                            <span class="username" onclick="toggleDropdown(event)" style="cursor: pointer;">@User.Identity.Name</span>
 
-                            <a href="/Order/History" class="dropdown-item">
+                            <!-- Language Select Box inside User Badge -->
+                            <form id="langInsidePillForm" asp-controller="Home" asp-action="SetLanguage"
+                                  asp-route-returnUrl="@(Context.Request.Path + Context.Request.QueryString)"
+                                  method="post" style="margin: 0; display: inline-flex; align-items: center;">
+                                <select name="culture" onchange="document.getElementById('langInsidePillForm').submit();" class="direct-lang-dropdown">
+                                    <option value="en-US" selected="@(curCulture == "en-US")">EN</option>
+                            <a asp-controller="Member" asp-action="Profile" class="dropdown-item">
+                                <span class="item-icon">👤</span> @Lang.T("Profile")
+                            </a>
+                           
+                            <div class="dropdown-divider"></div>
+                            <a asp-controller="Security" asp-action="Logout" class="dropdown-item danger">
+                                <span class="item-icon">🚪</span> @Lang.T("Logout")
+                                </a>
+                                
+                                <a href="/Order/History" class="dropdown-item">
                                 <span class="item-icon">📦My Orders</span>
                             </a>
 

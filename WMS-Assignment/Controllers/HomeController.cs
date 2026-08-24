@@ -93,7 +93,7 @@ public class HomeController(DB db, Helper hp) : Controller
             return View("~/Views/Security/Login.cshtml");
         }
 
-        // Successful login — reset failed attempts
+        // Successful login â€” reset failed attempts
         user.FailedLogin = 0;
         user.LockoutEnd = null;
         await db.SaveChangesAsync();
@@ -260,5 +260,29 @@ public class HomeController(DB db, Helper hp) : Controller
             order.TotalAmount = order.OrderDetails.Sum(od => od.SubTotal);
             await db.SaveChangesAsync();
         }
+    }
+
+    public IActionResult SetLanguage(string culture, string returnUrl)
+    {
+        Response.Cookies.Append(
+            CookieRequestCultureProvider.DefaultCookieName,
+            CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
+            new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1) }
+        );
+
+        return LocalRedirect(returnUrl ?? "~/");
+    }
+    private string GetCurrentUserId()
+    {
+        // Try real cookie/claims login first
+        var claimUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (claimUserId != null) return claimUserId;
+
+        // Fall back to session-based login
+        var username = HttpContext.Session.GetString("User");
+        if (username == null) return null;
+
+        var user = db.Users.FirstOrDefault(u => u.Username == username);
+        return user?.Id;
     }
 }

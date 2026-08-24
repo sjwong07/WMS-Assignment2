@@ -26,7 +26,7 @@ public class Helper(IWebHostEnvironment en,
             == PasswordVerificationResult.Success;
     }
 
-    public void Login(string username, string password, bool rememberMe, string role)
+    public void Login(string username, string password, bool rememberMe)
     {
         List<Claim> claims = [
             new(ClaimTypes.Name,username),
@@ -104,6 +104,17 @@ public class Helper(IWebHostEnvironment en,
         img.SaveAsJpeg(path);
 
         return file;
+    }
+
+    public void DeletePhoto(string fileName, string folder)
+    {
+        if (string.IsNullOrEmpty(fileName)) return;
+
+        var path = Path.Combine(en.WebRootPath, folder, fileName);
+        if (File.Exists(path))
+        {
+            File.Delete(path);
+        }
     }
 
     public void SendEmail(MailMessage mail)
