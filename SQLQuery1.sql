@@ -1,4 +1,5 @@
-IF EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Users') AND name = 'Password')
+-- 1. Ensure Admin Role exists
+IF NOT EXISTS (SELECT 1 FROM [Roles] WHERE [Id] = 'Admin')
 BEGIN
     ALTER TABLE [Users] ALTER COLUMN [Password] NVARCHAR(100) NULL;
 END

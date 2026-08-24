@@ -26,11 +26,13 @@
             <h1>
                 Welcome <span class="highlight">Back!</span>
             </h1>
-            <p>Sign in to continue ordering your favorite food</p>
+            <p>Login to continue ordering your favorite food</p>
         </div>
 
-        <!-- Login Form (Fixed: Points to SecurityController) -->
-        <form asp-action="Login" asp-controller="Security" method="post" id="loginForm">
+        <!-- Login Form -->
+        <form action="/Security/Login" method="post" id="loginForm">
+            @Html.AntiForgeryToken()
+
             @if (TempData["Success"] != null)
             {
                 <div class="auth-success-box" style="background:#e8f5e9; color:#2e7d32; padding:10px 14px; border-radius:10px; margin-bottom:15px; font-size:0.875rem;">
@@ -51,7 +53,7 @@
                 </label>
                 <div class="input-wrapper">
                     <input type="text" id="username" name="Username"
-                           placeholder="Enter your username" required />
+                           placeholder="Enter your username" required autocomplete="username" />
                     <span class="input-icon">👤</span>
                 </div>
                 <div class="error-message" id="usernameError">
@@ -65,7 +67,7 @@
                 </label>
                 <div class="input-wrapper" style="position: relative;">
                     <input type="password" id="password" name="Password"
-                           placeholder="Enter your password" required style="padding-right: 44px;" />
+                           placeholder="Enter your password" required style="padding-right: 44px;" autocomplete="current-password" />
                     <span class="input-icon">🔒</span>
 
                     <!-- Show/Hide Password Button -->
@@ -97,7 +99,7 @@
             </button>
         </form>
 
-        <!-- Register Link (Fixed: Points to Security/Register) -->
+        <!-- Register Link -->
         <div class="register-link">
             <span class="register-text">
                 Don't have an account? <a asp-controller="Security" asp-action="Register">Register Here</a>
@@ -107,7 +109,6 @@
 </div>
 
 <script>
-    // Show / Hide Password Toggle
     function togglePasswordVisibility() {
         const passwordField = document.getElementById('password');
         const toggleBtn = document.getElementById('togglePasswordBtn');
@@ -121,7 +122,6 @@
         }
     }
 
-    // Form validation with animation
     document.getElementById('loginForm').addEventListener('submit', function(e) {
         const username = document.getElementById('username');
         const password = document.getElementById('password');
@@ -130,20 +130,17 @@
         const loginBtn = document.getElementById('loginBtn');
         let isValid = true;
 
-        // Reset errors
         username.classList.remove('error');
         password.classList.remove('error');
         usernameError.classList.remove('show');
         passwordError.classList.remove('show');
 
-        // Validate username
         if (!username.value.trim()) {
             username.classList.add('error');
             usernameError.classList.add('show');
             isValid = false;
         }
 
-        // Validate password
         if (!password.value.trim()) {
             password.classList.add('error');
             passwordError.classList.add('show');
@@ -155,11 +152,9 @@
             return;
         }
 
-        // Show loading state
         loginBtn.classList.add('loading');
     });
 
-    // Input focus animation
     document.querySelectorAll('.input-wrapper input').forEach(input => {
         input.addEventListener('focus', function() {
             const icon = this.parentElement.querySelector('.input-icon');
@@ -172,7 +167,6 @@
         });
     });
 
-    // Remove error on input
     document.querySelectorAll('.input-wrapper input').forEach(input => {
         input.addEventListener('input', function() {
             this.classList.remove('error');

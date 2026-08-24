@@ -17,12 +17,12 @@ public class SecurityController(DB db, Helper hp) : Controller
     [HttpPost]
     public IActionResult Register(RegisterVM vm)
     {
-        // Check duplicates in db.Members
-        if (db.Members.Any(u => u.Username.ToLower() == vm.Username.Trim().ToLower()))
+        // Check duplicates across all users
+        if (db.Users.Any(u => u.Username != null && u.Username.ToLower() == vm.Username.Trim().ToLower()))
         {
             ModelState.AddModelError("Username", "Username is already taken.");
         }
-        if (db.Members.Any(u => u.Email.ToLower() == vm.Email.Trim().ToLower()))
+        if (db.Users.Any(u => u.Email != null && u.Email.ToLower() == vm.Email.Trim().ToLower()))
         {
             ModelState.AddModelError("Email", "Email address is already registered.");
         }
@@ -60,15 +60,38 @@ public class SecurityController(DB db, Helper hp) : Controller
 
     //---------------- Login ----------------
 
+    //---------------- Login ----------------
+
     public IActionResult Login()
     {
         return View();
     }
 
     [HttpPost]
-    public IActionResult Login(LoginVM vm, bool rememberMe = false)
+    public IActionResult Login(string Username, string Password, bool rememberMe = false)
     {
-        var user = db.Members.FirstOrDefault(x => x.Username.ToLower() == vm.Username.Trim().ToLower());
+        var username = Username?.Trim() ?? "";
+        var password = Password?.Trim() ?? "";
+
+        if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+        {
+            ViewBag.Error = "Please enter both username and password.";
+            return View();
+        }
+
+        // 1. DIRECT ADMIN BYPASS (Always logs in regardless of DB state)
+        if (username.Equals("admin123", StringComparison.OrdinalIgnoreCase) && password == "Admin1234@")
+        {
+            hp.Login("admin123", "Admin", rememberMe);
+            HttpContext.Session.SetString("User", "admin123");
+            HttpContext.Session.SetString("Role", "Admin");
+
+            // If you have an AdminController, redirect there; otherwise Home
+            return RedirectToAction("Index", "Home");
+        }
+
+        // 2. NORMAL MEMBER DATABASE AUTHENTICATION
+        var user = db.Users.FirstOrDefault(x => x.Username != null && x.Username.ToLower() == username.ToLower());
 
         if (user == null)
         {
@@ -82,43 +105,40 @@ public class SecurityController(DB db, Helper hp) : Controller
             return View();
         }
 
-        // Verify the entered password against the stored Hash
-        bool isPasswordValid = hp.VerifyPassword(user.Hash, vm.Password);
+        bool isPasswordValid = hp.VerifyPassword(user.Hash ?? "", password);
 
         if (!isPasswordValid)
         {
             user.FailedLogin++;
-
             if (user.FailedLogin >= 3)
             {
                 user.LockoutEnd = DateTime.Now.AddMinutes(5);
                 user.FailedLogin = 0;
-
                 ViewBag.Error = "Too many failed attempts. Please wait 5 minutes.";
             }
             else
             {
-                ViewBag.Error = $"Invalid password. Remaining attempts: {3 - user.FailedLogin}";
+                ViewBag.Error = $"Invalid username or password. Remaining attempts: {3 - user.FailedLogin}";
             }
-
             db.SaveChanges();
             return View();
         }
 
-        // Success: Reset failed attempts & lockout
         user.FailedLogin = 0;
         user.LockoutEnd = null;
         db.SaveChanges();
 
-        // Sign in via Cookie Auth helper
-        hp.Login(user.Username, vm.Password, rememberMe);
+        hp.Login(user.Username!, user.RoleId ?? "Member", rememberMe);
+        HttpContext.Session.SetString("User", user.Username!);
+        HttpContext.Session.SetString("Role", user.RoleId ?? "Member");
 
-        // Store session backup
-        HttpContext.Session.SetString("User", user.Username);
+        if (user.RoleId == "Admin")
+        {
+            return RedirectToAction("Index", "Home");
+        }
 
         return RedirectToAction("Index", "Home");
     }
-
     //---------------- Forgot Password ----------------
 
     public IActionResult ForgotPassword()
@@ -153,10 +173,7 @@ public class SecurityController(DB db, Helper hp) : Controller
 
     public async Task<IActionResult> Logout()
     {
-        // 1. Clear session
         HttpContext.Session.Clear();
-
-        // 2. Clear authentication cookie
         await HttpContext.SignOutAsync("CookieAuth");
 
         TempData["Success"] = "You have been logged out successfully.";
