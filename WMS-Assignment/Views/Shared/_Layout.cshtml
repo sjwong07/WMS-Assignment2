@@ -93,7 +93,13 @@
                     </li>
                 }
             </ul>
-
+            <form asp-controller="Language" asp-action="SetLanguage" asp-route-returnUrl="@Context.Request.Path" method="get" style="display:inline">
+                <select name="culture" onchange="this.form.submit()">
+                    <option value="en">English</option>
+                    <option value="ms">Bahasa Malaysia</option>
+                    <option value="zh">中文</option>
+                </select>
+            </form>
             <!-- Mobile Toggle -->
             <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
                 <span></span>
