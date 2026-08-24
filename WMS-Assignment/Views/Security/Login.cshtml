@@ -1,6 +1,6 @@
-﻿
 ﻿@{
     ViewBag.Title = "Login";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <div class="login-container">
@@ -87,7 +87,7 @@
                     <input type="checkbox" name="rememberMe" value="true" checked />
                     Remember me
                 </label>
-                <a href="/Security/forgotPassword" class="forgot-link">Forgot password?</a>
+                <a asp-controller="Security" asp-action="ForgotPassword" class="forgot-link">Forgot password?</a>
             </div>
 
             <button type="submit" class="btn-login" id="loginBtn">
@@ -102,7 +102,7 @@
         <!-- Register Link -->
         <div class="register-link">
             <span class="register-text">
-                Don't have an account? <a href="/Security/Register">Register Here</a>
+                Don't have an account? <a asp-controller="Security" asp-action="Register">Register Here</a>
             </span>
         </div>
     </div>
@@ -175,4 +175,3 @@
         });
     });
 </script>
-

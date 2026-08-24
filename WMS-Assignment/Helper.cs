@@ -4,13 +4,8 @@ using System.Security.Claims;
 using System.Text.RegularExpressions;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
-using System.Net.Mail;
-using System.Net;
 
-public class Helper(IWebHostEnvironment en,
-                    IHttpContextAccessor ct,
-                    IConfiguration cf
-                    )
+public class Helper(IWebHostEnvironment en, IHttpContextAccessor ct)
 {
     private readonly PasswordHasher<object> ph = new();
 
@@ -21,16 +16,14 @@ public class Helper(IWebHostEnvironment en,
 
     public bool VerifyPassword(string hash, string password)
     {
-        return ph.VerifyHashedPassword(0, hash, password)
-            == PasswordVerificationResult.Success;
+        return ph.VerifyHashedPassword(0, hash, password) == PasswordVerificationResult.Success;
     }
 
     public void Login(string username, string password, bool rememberMe)
     {
         List<Claim> claims = [
-            new(ClaimTypes.Name,username),
-           // new(ClaimTypes.Role,role),
-            ];
+            new(ClaimTypes.Name, username)
+        ];
 
         ClaimsIdentity identity = new(claims, "CookieAuth");
         ClaimsPrincipal principal = new(identity);
@@ -47,7 +40,6 @@ public class Helper(IWebHostEnvironment en,
     {
         ct.HttpContext!.SignOutAsync("CookieAuth");
     }
-
 
     public string RandomPassword()
     {
@@ -82,12 +74,16 @@ public class Helper(IWebHostEnvironment en,
         return "";
     }
 
-
-
     public string SavePhoto(IFormFile f, string folder)
     {
+        var folderPath = Path.Combine(en.WebRootPath, folder);
+        if (!Directory.Exists(folderPath))
+        {
+            Directory.CreateDirectory(folderPath);
+        }
+
         var file = Guid.NewGuid().ToString("n") + ".jpg";
-        var path = Path.Combine(en.WebRootPath, folder, file);
+        var path = Path.Combine(folderPath, file);
 
         var options = new ResizeOptions
         {
@@ -113,44 +109,4 @@ public class Helper(IWebHostEnvironment en,
             File.Delete(path);
         }
     }
-
-    public void SendEmail(MailMessage mail)
-    {
-        string user = cf["Smtp:User"] ?? "";
-        string pass = cf["Smtp:Pass"] ?? "";
-        string name = cf["Smtp:Name"] ?? "";
-        string host = cf["Smtp:Host"] ?? "";
-        int port = cf.GetValue<int>("Smtp:Port");
-
-        mail.From = new MailAddress(user, name);
-
-        using var smtp = new SmtpClient
-        {
-            Host = host,
-            Port = port,
-            EnableSsl = true,
-            Credentials = new NetworkCredential(user, pass),
-        };
-
-        try
-        {
-            smtp.Send(mail);
-
-            Console.WriteLine("EMAIL SENT SUCCESSFULLY");
-        }
-        catch (SmtpException ex)
-        {
-            Console.WriteLine("SMTP ERROR:");
-            Console.WriteLine(ex.Message);
-
-            if (ex.InnerException != null)
-            {
-                Console.WriteLine("INNER ERROR:");
-                Console.WriteLine(ex.InnerException.Message);
-            }
-
-            throw;
-        }
-    }
-
 }
