@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -93,7 +94,7 @@ public class HomeController(DB db, Helper hp) : Controller
             return View("~/Views/Security/Login.cshtml");
         }
 
-        // Successful login — reset failed attempts
+        // Successful login â€” reset failed attempts
         user.FailedLogin = 0;
         user.LockoutEnd = null;
         await db.SaveChangesAsync();
@@ -261,6 +262,17 @@ public class HomeController(DB db, Helper hp) : Controller
             await db.SaveChangesAsync();
         }
     }
+
+ 
+    public IActionResult SetLanguage(string culture, string returnUrl)
+    {
+        Response.Cookies.Append(
+            CookieRequestCultureProvider.DefaultCookieName,
+            CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
+            new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1) }
+        );
+
+        return LocalRedirect(returnUrl ?? "~/");
     private string GetCurrentUserId()
     {
         // Try real cookie/claims login first

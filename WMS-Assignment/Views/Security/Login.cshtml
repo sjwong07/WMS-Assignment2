@@ -29,8 +29,8 @@
             <p>Sign in to continue ordering your favorite food</p>
         </div>
 
-        <!-- Login Form -->
-        <form asp-action="Login" asp-controller="Home" method="post" id="loginForm">
+        <!-- Login Form (Fixed: Points to SecurityController) -->
+        <form asp-action="Login" asp-controller="Security" method="post" id="loginForm">
             @if (TempData["Success"] != null)
             {
                 <div class="auth-success-box" style="background:#e8f5e9; color:#2e7d32; padding:10px 14px; border-radius:10px; margin-bottom:15px; font-size:0.875rem;">
@@ -38,10 +38,10 @@
                 </div>
             }
 
-            @if (ViewBag.Message != null)
+            @if (ViewBag.Error != null)
             {
                 <div class="auth-error-box" style="background:#ffebee; color:#c62828; padding:10px 14px; border-radius:10px; margin-bottom:15px; font-size:0.875rem;">
-                    @ViewBag.Message
+                    @ViewBag.Error
                 </div>
             }
 
@@ -82,7 +82,7 @@
 
             <div class="form-options">
                 <label class="remember-me">
-                    <input type="checkbox" name="remember" checked />
+                    <input type="checkbox" name="rememberMe" value="true" checked />
                     Remember me
                 </label>
                 <a href="/Security/forgotPassword" class="forgot-link">Forgot password?</a>
@@ -97,7 +97,7 @@
             </button>
         </form>
 
-        <!-- Register Link -->
+        <!-- Register Link (Fixed: Points to Security/Register) -->
         <div class="register-link">
             <span class="register-text">
                 Don't have an account? <a href="/Security/Register">Register Here</a>

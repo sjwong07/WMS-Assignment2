@@ -21,12 +21,12 @@ public class SecurityController(DB db,Helper hp,
     [HttpPost]
     public IActionResult Register(RegisterVM vm)
     {
-        // Check duplicates
-        if (db.Users.Any(u => u.Username.ToLower() == vm.Username.Trim().ToLower()))
+        // Check duplicates in db.Members
+        if (db.Members.Any(u => u.Username.ToLower() == vm.Username.Trim().ToLower()))
         {
             ModelState.AddModelError("Username", "Username is already taken.");
         }
-        if (db.Users.Any(u => u.Email.ToLower() == vm.Email.Trim().ToLower()))
+        if (db.Members.Any(u => u.Email.ToLower() == vm.Email.Trim().ToLower()))
         {
             ModelState.AddModelError("Email", "Email address is already registered.");
         }
@@ -37,7 +37,7 @@ public class SecurityController(DB db,Helper hp,
             {
                 Id = Guid.NewGuid().ToString(),
                 Username = vm.Username.Trim(),
-                Name = vm.Username.Trim(),
+                Name = $"{vm.FirstName} {vm.LastName}".Trim(),
                 Email = vm.Email.Trim(),
                 FirstName = vm.FirstName,
                 LastName = vm.LastName,
@@ -70,9 +70,9 @@ public class SecurityController(DB db,Helper hp,
     }
 
     [HttpPost]
-    public IActionResult Login(LoginVM vm)
+    public IActionResult Login(LoginVM vm, bool rememberMe = false)
     {
-        var user = db.Users.FirstOrDefault(x => x.Username == vm.Username);
+        var user = db.Members.FirstOrDefault(x => x.Username.ToLower() == vm.Username.Trim().ToLower());
 
         if (user == null)
         {
@@ -114,6 +114,10 @@ public class SecurityController(DB db,Helper hp,
         user.LockoutEnd = null;
         db.SaveChanges();
 
+        // Sign in via Cookie Auth helper
+        hp.Login(user.Username, vm.Password, rememberMe);
+
+        // Store session backup
         HttpContext.Session.SetString("User", user.Username);
 
         return RedirectToAction("Index", "Home");
@@ -129,7 +133,7 @@ public class SecurityController(DB db,Helper hp,
     [HttpPost]
     public IActionResult forgotPassword(forgotPasswordVM vm)
     {
-        var u = db.Users.FirstOrDefault(u => u.Email == vm.Email);
+        var u = db.Members.FirstOrDefault(x => x.Email.ToLower() == Email.Trim().ToLower());
 
         if (u == null)
         {
@@ -203,6 +207,7 @@ public class SecurityController(DB db,Helper hp,
 
         hp.SendEmail(mail);
     }
+
     //---------------- Logout ----------------
 
     public async Task<IActionResult> Logout()
@@ -214,6 +219,6 @@ public class SecurityController(DB db,Helper hp,
         await HttpContext.SignOutAsync("CookieAuth");
 
         TempData["Success"] = "You have been logged out successfully.";
-        return RedirectToAction("Login");
+        return RedirectToAction("Login", "Security");
     }
 }

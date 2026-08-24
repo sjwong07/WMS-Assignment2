@@ -1,9 +1,22 @@
 global using WMS_Assignment.Models;
+using System.Globalization;
+using Microsoft.AspNetCore.Localization;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// 1. Add Localization Services pointing to "Resources"
+builder.Services.AddLocalization(options =>
+{
+    options.ResourcesPath = "Resources";
+});
+
 builder.Services.AddSession();
 builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddControllersWithViews()
+    .AddViewLocalization()
+    .AddDataAnnotationsLocalization();
+
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<Helper>();
 
@@ -43,7 +56,7 @@ builder.Services.AddAuthentication(options =>
 {
     options.LoginPath = "/Security/Login";
     options.LogoutPath = "/Security/Logout";
-    options.AccessDeniedPath = "/Account/AccessDenied";
+    options.AccessDeniedPath = "/Security/AccessDenied";
     options.ExpireTimeSpan = TimeSpan.FromHours(8);
     options.SlidingExpiration = true;
     options.Cookie.Name = "WMSRestaurantAuth";
@@ -67,6 +80,27 @@ using (var scope = app.Services.CreateScope())
         db.SaveChanges();
     }
 }
+
+// 2. Configure Supported Languages (Cultures)
+var supportedCultures = new[]
+{
+    new CultureInfo("en-US"),
+    new CultureInfo("zh-CN"),
+    new CultureInfo("ms-MY")
+};
+
+var locOptions = new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new RequestCulture("en-US"),
+    SupportedCultures = supportedCultures,
+    SupportedUICultures = supportedCultures
+};
+
+// Ensure Cookie provider is first in line
+locOptions.RequestCultureProviders.Clear();
+locOptions.RequestCultureProviders.Add(new CookieRequestCultureProvider());
+
+app.UseRequestLocalization(locOptions);
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
