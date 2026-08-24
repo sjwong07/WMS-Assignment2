@@ -45,11 +45,6 @@
                     <a asp-controller="Home" asp-action="Cart" class="cart-link">
                         <span class="nav-icon">🛒</span> @Lang.T("Cart")
                     </a>
-
-                    <a href="/Member/Profile" class="dropdown-item">
-                        <span class="item-icon">👤 Profile</span>
-                    </a>
-                    <a href="/Product/AdminMenu">Admin Menu</a>
                 </li>
 
                 @if (User.Identity != null && User.Identity.IsAuthenticated)
@@ -104,6 +99,7 @@
                             <div class="dropdown-divider"></div>
                             <a asp-controller="Security" asp-action="Logout" class="dropdown-item danger">
                                 <span class="item-icon">🚪</span> @Lang.T("Logout")
+                            </a>
                           
 
                             <a href="/Order/History" class="dropdown-item">

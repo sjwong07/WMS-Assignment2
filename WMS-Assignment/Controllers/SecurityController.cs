@@ -133,7 +133,7 @@ public class SecurityController(DB db,Helper hp,
     [HttpPost]
     public IActionResult forgotPassword(forgotPasswordVM vm)
     {
-        var u = db.Members.FirstOrDefault(x => x.Email.ToLower() == Email.Trim().ToLower());
+        var u = db.Members.FirstOrDefault(x => x.Email == vm.Email);
 
         if (u == null)
         {

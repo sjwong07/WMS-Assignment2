@@ -25,11 +25,11 @@ public class Helper(IWebHostEnvironment en,
             == PasswordVerificationResult.Success;
     }
 
-    public void Login(string username, string password, bool rememberMe, string role)
+    public void Login(string username, string password, bool rememberMe)
     {
         List<Claim> claims = [
             new(ClaimTypes.Name,username),
-            new(ClaimTypes.Role,role),
+           // new(ClaimTypes.Role,role),
             ];
 
         ClaimsIdentity identity = new(claims, "CookieAuth");
@@ -113,7 +113,7 @@ public class Helper(IWebHostEnvironment en,
             File.Delete(path);
         }
     }
-}
+
     public void SendEmail(MailMessage mail)
     {
         string user = cf["Smtp:User"] ?? "";

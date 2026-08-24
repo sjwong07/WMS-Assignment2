@@ -263,7 +263,7 @@ public class HomeController(DB db, Helper hp) : Controller
         }
     }
 
- 
+
     public IActionResult SetLanguage(string culture, string returnUrl)
     {
         Response.Cookies.Append(
@@ -273,6 +273,7 @@ public class HomeController(DB db, Helper hp) : Controller
         );
 
         return LocalRedirect(returnUrl ?? "~/");
+    }
     private string GetCurrentUserId()
     {
         // Try real cookie/claims login first
