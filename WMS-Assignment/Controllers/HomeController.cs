@@ -123,7 +123,7 @@ public class HomeController(DB db, Helper hp) : Controller
 
     public async Task<IActionResult> Cart()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = GetCurrentUserId();
         if (userId == null) return RedirectToAction("Login");
 
         var order = await db.Orders
@@ -139,7 +139,7 @@ public class HomeController(DB db, Helper hp) : Controller
     [HttpPost]
     public async Task<IActionResult> AddToOrder(string tableId, string menuItemId, int quantity)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = GetCurrentUserId();
         if (userId == null) return RedirectToAction("Login");
 
         if (string.IsNullOrEmpty(menuItemId) || quantity < 1)
@@ -224,7 +224,7 @@ public class HomeController(DB db, Helper hp) : Controller
 
     public async Task<IActionResult> Checkout()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = GetCurrentUserId();
         if (userId == null) return RedirectToAction("Login");
 
         var order = await db.Orders
@@ -260,5 +260,18 @@ public class HomeController(DB db, Helper hp) : Controller
             order.TotalAmount = order.OrderDetails.Sum(od => od.SubTotal);
             await db.SaveChangesAsync();
         }
+    }
+    private string GetCurrentUserId()
+    {
+        // Try real cookie/claims login first
+        var claimUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (claimUserId != null) return claimUserId;
+
+        // Fall back to session-based login
+        var username = HttpContext.Session.GetString("User");
+        if (username == null) return null;
+
+        var user = db.Users.FirstOrDefault(u => u.Username == username);
+        return user?.Id;
     }
 }

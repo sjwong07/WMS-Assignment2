@@ -1,20 +1,34 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 using WMS_Assignment.Models;
 
 namespace WMS_Assignment.Controllers;
 
-[Authorize]
 public class OrderController(DB db) : Controller
 {
+    private string GetCurrentUserId()
+    {
+        var username = HttpContext.Session.GetString("User");
+        if (username == null) return null;
+        var user = db.Users.FirstOrDefault(u => u.Username == username);
+        return user?.Id;
+    }
+
+    private string GetCurrentRoleId()
+    {
+        var username = HttpContext.Session.GetString("User");
+        if (username == null) return null;
+        var user = db.Users.FirstOrDefault(u => u.Username == username);
+        return user?.RoleId;
+    }
+
     // GET: /Order/History
     public async Task<IActionResult> History()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var roleId = User.FindFirstValue(ClaimTypes.Role);
+        var userId = GetCurrentUserId();
+        if (userId == null) return RedirectToAction("Login", "Security");
 
+        var roleId = GetCurrentRoleId();
         bool isStaffOrAdmin = IsStaffOrAdmin(roleId);
 
         var query = db.Orders
@@ -33,10 +47,12 @@ public class OrderController(DB db) : Controller
 
         return View(orders);
     }
-    // GET: /Order/Maintenance — staff/admin view of all orders
+
+    // GET: /Order/Maintenance
     public async Task<IActionResult> Maintenance()
     {
-        var roleId = User.FindFirstValue(ClaimTypes.Role);
+        var roleId = GetCurrentRoleId();
+        if (roleId == null) return RedirectToAction("Login", "Security");
         if (!IsStaffOrAdmin(roleId))
             return Forbid();
 
@@ -49,11 +65,12 @@ public class OrderController(DB db) : Controller
         return View(orders);
     }
 
-    // POST: /Order/UpdateStatus — staff/admin changes an order's status
+    // POST: /Order/UpdateStatus
     [HttpPost]
     public async Task<IActionResult> UpdateStatus(string orderId, string status)
     {
-        var roleId = User.FindFirstValue(ClaimTypes.Role);
+        var roleId = GetCurrentRoleId();
+        if (roleId == null) return RedirectToAction("Login", "Security");
         if (!IsStaffOrAdmin(roleId))
             return Forbid();
 
@@ -66,10 +83,12 @@ public class OrderController(DB db) : Controller
 
         return RedirectToAction("Maintenance");
     }
-    // GET: /Order/Report — pie chart of revenue by food category
+
+    // GET: /Order/Report
     public async Task<IActionResult> Report()
     {
-        var roleId = User.FindFirstValue(ClaimTypes.Role);
+        var roleId = GetCurrentRoleId();
+        if (roleId == null) return RedirectToAction("Login", "Security");
         if (!IsStaffOrAdmin(roleId))
             return Forbid();
 
@@ -85,10 +104,9 @@ public class OrderController(DB db) : Controller
 
         return View("Piechart", data);
     }
+
     private bool IsStaffOrAdmin(string roleId)
     {
         return roleId == "RS01" || roleId == "RA01" || roleId == "Admin";
     }
-
-
 }

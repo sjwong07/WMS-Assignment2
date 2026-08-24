@@ -4,7 +4,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSession();
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddControllersWithViews();
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<Helper>();
 
@@ -12,6 +11,26 @@ builder.Services.AddSqlServer<DB>($@"
     Data Source=(LocalDB)\MSSQLLocalDB;
     AttachDbFilename={builder.Environment.ContentRootPath}\Restaurant.mdf;
 ");
+
+builder.Services.AddControllersWithViews()
+    .AddViewLocalization()
+    .AddDataAnnotationsLocalization();
+
+builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+
+builder.Services.Configure<Microsoft.AspNetCore.Builder.RequestLocalizationOptions>(options =>
+{
+    var supportedCultures = new[]
+    {
+        new System.Globalization.CultureInfo("en"),
+        new System.Globalization.CultureInfo("ms"),
+        new System.Globalization.CultureInfo("zh")
+    };
+
+    options.DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture("en");
+    options.SupportedCultures = supportedCultures;
+    options.SupportedUICultures = supportedCultures;
+});
 
 // Configure Authentication with Cookie
 builder.Services.AddAuthentication(options =>
@@ -52,6 +71,7 @@ using (var scope = app.Services.CreateScope())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseRequestLocalization();
 
 app.UseSession();
 app.UseAuthentication();
