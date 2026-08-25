@@ -65,9 +65,7 @@ public class User
     [MaxLength(100)]
     public string? Email { get; set; }
 
-    [DataType(DataType.Password)]
-    [MaxLength(100)]
-    public string? Password { get; set; }
+    
 
     [MaxLength(200)]
     public string? Hash { get; set; }

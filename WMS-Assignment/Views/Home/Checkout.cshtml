@@ -2,28 +2,78 @@
 
 @{
     ViewData["Title"] = "Checkout";
+    var subtotal = Model.OrderDetails.Sum(od => od.SubTotal);
 }
 
-<h2>Checkout</h2>
-<p>Total to Pay: RM @Model.TotalAmount.ToString("0.00")</p>
+<div class="checkout-page">
+    <div class="checkout-layout">
 
-<form asp-action="Checkout" method="post">
-    <input type="hidden" name="orderId" value="@Model.Id" />
+        <!-- Left Panel: Order Breakdown -->
+        <div class="checkout-panel">
+            <div class="checkout-store">
+                <span class="checkout-store-logo">☕</span>
+                <span class="checkout-store-name">WagEat Cafe</span>
+            </div>
+            <div class="checkout-order-id">Order #@Model.Id</div>
 
-    <label>
-        <input type="radio" name="paymentMethod" value="Cash" checked="checked" /> Cash
-    </label>
-    <br />
+            <table class="checkout-items-table">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Qty</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var od in Model.OrderDetails)
+                    {
+                        <tr>
+                            <td>@od.MenuItem?.Name</td>
+                            <td>@od.Quantity</td>
+                            <td>RM @od.SubTotal.ToString("0.00")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
 
-    <label>
-        <input type="radio" name="paymentMethod" value="Card" /> Card
-    </label>
-    <br />
+            <div class="checkout-summary-row">
+                <span>Subtotal</span>
+                <span>RM @subtotal.ToString("0.00")</span>
+            </div>
+            <div class="checkout-summary-row grand-total">
+                <span>Total</span>
+                <span>RM @Model.TotalAmount.ToString("0.00")</span>
+            </div>
+        </div>
 
-    <label>
-        <input type="radio" name="paymentMethod" value="E-Wallet" /> E-Wallet
-    </label>
-    <br />
+        <!-- Right Panel: Payment Selection -->
+        <div class="checkout-panel">
+            <div class="checkout-panel-title">Select Payment Method</div>
 
-    <button type="submit">Confirm Payment</button>
-</form>
+            <form asp-action="Checkout" method="post">
+                <input type="hidden" name="orderId" value="@Model.Id" />
+
+                <div class="payment-options">
+                    <label class="payment-option">
+                        <input type="radio" name="paymentMethod" value="Cash" checked="checked" />
+                        <span class="payment-icon">💵</span>
+                        <span class="payment-label">Cash</span>
+                    </label>
+                    <label class="payment-option">
+                        <input type="radio" name="paymentMethod" value="Card" />
+                        <span class="payment-icon">💳</span>
+                        <span class="payment-label">Credit / Debit Card</span>
+                    </label>
+                    <label class="payment-option">
+                        <input type="radio" name="paymentMethod" value="E-Wallet" />
+                        <span class="payment-icon">📱</span>
+                        <span class="payment-label">E-Wallet (Touch 'n Go / GrabPay)</span>
+                    </label>
+                </div>
+
+                <button type="submit" class="checkout-btn">Pay RM @Model.TotalAmount.ToString("0.00")</button>
+            </form>
+        </div>
+
+    </div>
+</div>

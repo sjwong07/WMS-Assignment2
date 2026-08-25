@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using System.Text.RegularExpressions;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 using WMS_Assignment.Models;
 
 namespace WMS_Assignment.Controllers;
@@ -250,7 +253,7 @@ public class HomeController(DB db, Helper hp) : Controller
         if (userId == null) return RedirectToAction("Login");
 
         var order = await db.Orders
-            .Include(o => o.OrderDetails)
+            .Include(o => o.OrderDetails).ThenInclude(od => od.MenuItem)
             .Where(o => o.UserId == userId && o.Status == "Pending")
             .FirstOrDefaultAsync();
 
@@ -307,5 +310,76 @@ public class HomeController(DB db, Helper hp) : Controller
 
         var user = db.Users.FirstOrDefault(u => u.Username == username);
         return user?.Id;
+    }
+    // GET: /Home/ReceiptPdf/{id}
+    public async Task<IActionResult> ReceiptPdf(string id)
+    {
+        var order = await db.Orders
+            .Include(o => o.OrderDetails).ThenInclude(od => od.MenuItem)
+            .Include(o => o.Table)
+            .Include(o => o.User)
+            .FirstOrDefaultAsync(o => o.Id == id);
+
+        if (order == null) return NotFound();
+
+        var pdfBytes = Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Margin(30);
+                page.Size(PageSizes.A5);
+                page.DefaultTextStyle(x => x.FontSize(11));
+
+                page.Header().Column(col =>
+                {
+                    col.Item().Text("WagEat Cafe").FontSize(20).Bold();
+                    col.Item().Text("E-Receipt").FontSize(14).FontColor(Colors.Grey.Darken1);
+                });
+
+                page.Content().PaddingVertical(15).Column(col =>
+                {
+                    col.Item().Text($"Order ID: {order.Id}");
+                    col.Item().Text($"Customer: {order.User?.Name}");
+                    col.Item().Text($"Table: {order.Table?.Id}");
+                    col.Item().Text($"Date: {order.OrderDate:dd MMM yyyy, hh:mm tt}");
+                    col.Item().PaddingTop(10);
+
+                    col.Item().Table(table =>
+                    {
+                        table.ColumnsDefinition(c =>
+                        {
+                            c.RelativeColumn(3);
+                            c.RelativeColumn(1);
+                            c.RelativeColumn(2);
+                            c.RelativeColumn(2);
+                        });
+
+                        table.Header(header =>
+                        {
+                            header.Cell().Text("Item").Bold();
+                            header.Cell().Text("Qty").Bold();
+                            header.Cell().Text("Unit Price").Bold();
+                            header.Cell().Text("Subtotal").Bold();
+                        });
+
+                        foreach (var od in order.OrderDetails)
+                        {
+                            table.Cell().Text(od.MenuItem?.Name ?? "");
+                            table.Cell().Text(od.Quantity.ToString());
+                            table.Cell().Text($"RM {od.UnitPrice:0.00}");
+                            table.Cell().Text($"RM {od.SubTotal:0.00}");
+                        }
+                    });
+
+                    col.Item().PaddingTop(15).AlignRight().Text($"Total Paid: RM {order.TotalAmount:0.00}").Bold().FontSize(13);
+                    col.Item().Text($"Payment Method: {order.PaymentMethod}");
+                    col.Item().Text($"Status: {order.PaymentStatus}");
+                });
+
+                page.Footer().AlignCenter().Text("Thank you for dining with WagEat Cafe!").FontColor(Colors.Grey.Darken1);
+            });
+        }).GeneratePdf();
+
+        return File(pdfBytes, "application/pdf", $"Receipt_{order.Id}.pdf");
     }
 }
