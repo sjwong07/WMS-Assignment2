@@ -4,35 +4,48 @@
     ViewData["Title"] = "E-Receipt";
 }
 
-<h2>E-Receipt</h2>
+<div class="receipt-page">
+    <div class="receipt-card">
+        @if (Model == null)
+        {
+            <p>Order not found.</p>
+        }
+        else
+        {
+            <h2 class="receipt-title">E-Receipt</h2>
 
-@if (Model == null)
-{
-    <p>Order not found.</p>
-}
-else
-{
-    <p>Order ID: @Model.Id</p>
-    <p>Customer: @Model.User?.Name</p>
-    <p>Table: @Model.Table?.Id</p>
-    <p>Date: @Model.OrderDate.ToString("dd MMM yyyy, hh:mm tt")</p>
-    <table>
-        <thead>
-            <tr><th>Item</th><th>Qty</th><th>Unit Price</th><th>Subtotal</th></tr>
-        </thead>
-        <tbody>
-            @foreach (var od in Model.OrderDetails)
-            {
-                <tr>
-                    <td>@od.MenuItem?.Name</td>
-                    <td>@od.Quantity</td>
-                    <td>RM @od.UnitPrice.ToString("0.00")</td>
-                    <td>RM @od.SubTotal.ToString("0.00")</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-    <h3>Total Paid: RM @Model.TotalAmount.ToString("0.00")</h3>
-    <p>Payment Method: @Model.PaymentMethod</p>
-    <p>Status: @Model.PaymentStatus</p>
-}
+            <p class="receipt-meta"><strong>Order ID:</strong> @Model.Id</p>
+            <p class="receipt-meta"><strong>Customer:</strong> @Model.User?.Name</p>
+            <p class="receipt-meta"><strong>Table:</strong> @Model.Table?.Id</p>
+            <p class="receipt-meta"><strong>Date:</strong> @Model.OrderDate.ToString("dd MMM yyyy, hh:mm tt")</p>
+
+            <table class="receipt-table">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Qty</th>
+                        <th>Unit Price</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var od in Model.OrderDetails)
+                    {
+                        <tr>
+                            <td>@od.MenuItem?.Name</td>
+                            <td>@od.Quantity</td>
+                            <td>RM @od.UnitPrice.ToString("0.00")</td>
+                            <td>RM @od.SubTotal.ToString("0.00")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <p class="receipt-total">Total Paid: RM @Model.TotalAmount.ToString("0.00")</p>
+            <p class="receipt-status">Payment Method: @Model.PaymentMethod</p>
+            <p class="receipt-status">Status: @Model.PaymentStatus</p>
+
+            <a href="/Home/ReceiptPdf/@Model.Id" class="receipt-pdf-btn">Download PDF Receipt</a>
+        }
+    </div>
+</div>
