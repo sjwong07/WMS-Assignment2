@@ -1,8 +1,20 @@
 global using WMS_Assignment.Models;
+using Microsoft.AspNetCore.DataProtection;
 using System.Globalization;
 using Microsoft.AspNetCore.Localization;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Ensure authentication cookies remain valid across application restarts and rebuilds
+var keysFolder = Path.Combine(builder.Environment.ContentRootPath, "Keys");
+if (!Directory.Exists(keysFolder))
+{
+    Directory.CreateDirectory(keysFolder);
+}
+
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(keysFolder))
+    .SetApplicationName("WMS_Assignment_App");
 
 // 1. Session and HttpContext
 builder.Services.AddSession();
@@ -14,7 +26,7 @@ builder.Services.AddLocalization(options =>
     options.ResourcesPath = "Resources";
 });
 
-// 3. Controllers and Views
+// 3. Controllers, Views, and Localization Support
 builder.Services.AddControllersWithViews()
     .AddViewLocalization()
     .AddDataAnnotationsLocalization();
@@ -29,27 +41,7 @@ builder.Services.AddSqlServer<DB>($@"
     AttachDbFilename={builder.Environment.ContentRootPath}\Restaurant.mdf;
 ");
 
-builder.Services.AddControllersWithViews()
-    .AddViewLocalization()
-    .AddDataAnnotationsLocalization();
-
-builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
-
-builder.Services.Configure<Microsoft.AspNetCore.Builder.RequestLocalizationOptions>(options =>
-{
-    var supportedCultures = new[]
-    {
-        new System.Globalization.CultureInfo("en"),
-        new System.Globalization.CultureInfo("ms"),
-        new System.Globalization.CultureInfo("zh")
-    };
-
-    options.DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture("en");
-    options.SupportedCultures = supportedCultures;
-    options.SupportedUICultures = supportedCultures;
-});
-
-// Configure Authentication with Cookie
+// 6. Configure Authentication with Cookie & Persistent Login Support
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = "CookieAuth";
@@ -61,7 +53,7 @@ builder.Services.AddAuthentication(options =>
     options.LoginPath = "/Security/Login";
     options.LogoutPath = "/Security/Logout";
     options.AccessDeniedPath = "/Security/AccessDenied";
-    options.ExpireTimeSpan = TimeSpan.FromHours(8);
+    options.ExpireTimeSpan = TimeSpan.FromDays(7); // Extended span to support Remember Me cookies
     options.SlidingExpiration = true;
     options.Cookie.Name = "WMSRestaurantAuth";
     options.Cookie.HttpOnly = true;
@@ -69,13 +61,14 @@ builder.Services.AddAuthentication(options =>
 });
 
 var app = builder.Build();
-// Seed Roles and Default Admin Account Automatically on Startup
+
+// 7. Seed Roles and Default Admin Account Automatically on Startup
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<DB>();
     var hp = scope.ServiceProvider.GetRequiredService<Helper>();
 
-    // 1. Ensure Roles exist
+    // Ensure Roles exist
     if (!db.Roles.Any())
     {
         db.Roles.AddRange(
@@ -85,7 +78,7 @@ using (var scope = app.Services.CreateScope())
         db.SaveChanges();
     }
 
-    // 2. Find existing admin or create a new one
+    // Find existing admin or create a new one
     var admin = db.Admins.FirstOrDefault(u => u.Username.ToLower() == "admin123")
                 ?? db.Users.OfType<Admin>().FirstOrDefault(u => u.Username.ToLower() == "admin123");
 
@@ -109,7 +102,6 @@ using (var scope = app.Services.CreateScope())
     }
     else
     {
-        // Force refresh hash and unlock on every startup
         admin.Hash = hp.HashPassword("Admin1234@");
         admin.RoleId = "Admin";
         admin.FailedLogin = 0;
@@ -118,7 +110,6 @@ using (var scope = app.Services.CreateScope())
 
     db.SaveChanges();
 }
-
 
 // 8. Configure Supported Languages (Cultures)
 var supportedCultures = new[]
@@ -135,17 +126,15 @@ var locOptions = new RequestLocalizationOptions
     SupportedUICultures = supportedCultures
 };
 
-// Ensure Cookie provider is first in line
 locOptions.RequestCultureProviders.Clear();
 locOptions.RequestCultureProviders.Add(new CookieRequestCultureProvider());
 
 app.UseRequestLocalization(locOptions);
 
+// 9. Pipeline Middleware
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
-app.UseRequestLocalization();
-
 app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();

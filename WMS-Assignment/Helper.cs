@@ -25,19 +25,19 @@ public class Helper(IWebHostEnvironment en,
             == PasswordVerificationResult.Success;
     }
 
-    public void Login(string username, string password, bool rememberMe)
+    public void Login(string username, string role, bool rememberMe)
     {
         List<Claim> claims = [
-            new(ClaimTypes.Name,username),
-           // new(ClaimTypes.Role,role),
-            ];
+            new(ClaimTypes.Name, username),
+            new(ClaimTypes.Role, role), // Enabled role claim for proper authorization
+        ];
 
         ClaimsIdentity identity = new(claims, "CookieAuth");
         ClaimsPrincipal principal = new(identity);
 
         AuthenticationProperties properties = new()
         {
-            IsPersistent = rememberMe,
+            IsPersistent = rememberMe, // Powers the Remember Me functionality
         };
 
         ct.HttpContext!.SignInAsync("CookieAuth", principal, properties);
@@ -47,7 +47,6 @@ public class Helper(IWebHostEnvironment en,
     {
         ct.HttpContext!.SignOutAsync("CookieAuth");
     }
-
 
     public string RandomPassword()
     {
@@ -81,8 +80,6 @@ public class Helper(IWebHostEnvironment en,
 
         return "";
     }
-
-
 
     public string SavePhoto(IFormFile f, string folder)
     {
@@ -135,7 +132,6 @@ public class Helper(IWebHostEnvironment en,
         try
         {
             smtp.Send(mail);
-
             Console.WriteLine("EMAIL SENT SUCCESSFULLY");
         }
         catch (SmtpException ex)
@@ -152,5 +148,4 @@ public class Helper(IWebHostEnvironment en,
             throw;
         }
     }
-
 }
