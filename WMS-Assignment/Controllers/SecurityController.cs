@@ -5,11 +5,9 @@ using WMS_Assignment.Models;
 using System.Text.RegularExpressions;
 using System.Net.Mail;
 
-
 namespace WMS_Assignment.Controllers;
 
-public class SecurityController(DB db,Helper hp,
-                            IConfiguration cf, IWebHostEnvironment en) : Controller
+public class SecurityController(DB db, Helper hp, IConfiguration cf, IWebHostEnvironment en) : Controller
 {
     //---------------- Register ----------------
 
@@ -64,8 +62,6 @@ public class SecurityController(DB db,Helper hp,
 
     //---------------- Login ----------------
 
-    //---------------- Login ----------------
-
     public IActionResult Login()
     {
         return View();
@@ -83,14 +79,14 @@ public class SecurityController(DB db,Helper hp,
             return View();
         }
 
-        // 1. DIRECT ADMIN BYPASS (Always logs in regardless of DB state)
+        // 1. DIRECT ADMIN BYPASS
         if (username.Equals("admin123", StringComparison.OrdinalIgnoreCase) && password == "Admin1234@")
         {
             hp.Login("admin123", "Admin", rememberMe);
             HttpContext.Session.SetString("User", "admin123");
             HttpContext.Session.SetString("Role", "Admin");
+            HttpContext.Session.SetString("UserPhoto", "/images/default-avatar.png");
 
-            // If you have an AdminController, redirect there; otherwise Home
             return RedirectToAction("Index", "Home");
         }
 
@@ -132,17 +128,25 @@ public class SecurityController(DB db,Helper hp,
         user.LockoutEnd = null;
         db.SaveChanges();
 
+        // 3. SET COOKIE AUTH & SESSION DATA
         hp.Login(user.Username!, user.RoleId ?? "Member", rememberMe);
         HttpContext.Session.SetString("User", user.Username!);
         HttpContext.Session.SetString("Role", user.RoleId ?? "Member");
 
-        if (user.RoleId == "Admin")
+        // Fetch Member details to get PhotoURL
+        var memberUser = db.Members.FirstOrDefault(m => m.Id == user.Id);
+        string photoPath = "/images/default-avatar.png";
+
+        if (memberUser != null && !string.IsNullOrEmpty(memberUser.PhotoURL))
         {
-            return RedirectToAction("Index", "Home");
+            photoPath = memberUser.PhotoURL.StartsWith("/") ? memberUser.PhotoURL : $"/photos/{memberUser.PhotoURL}";
         }
+
+        HttpContext.Session.SetString("UserPhoto", photoPath);
 
         return RedirectToAction("Index", "Home");
     }
+
     //---------------- Forgot Password ----------------
 
     public IActionResult ForgotPassword()
@@ -151,7 +155,7 @@ public class SecurityController(DB db,Helper hp,
     }
 
     [HttpPost]
-    public IActionResult forgotPassword(forgotPasswordVM vm)
+    public IActionResult ForgotPassword(forgotPasswordVM vm)
     {
         var u = db.Members.FirstOrDefault(x => x.Email == vm.Email);
 
@@ -167,63 +171,38 @@ public class SecurityController(DB db,Helper hp,
         }
 
         string password = hp.RandomPassword();
-
         u.Hash = hp.HashPassword(password);
-
         db.SaveChanges();
 
         try
         {
             SendResetPasswordEmail(u, password);
-
-            TempData["Info"] =
-                "Password reset successful. Please check your email.";
-
+            TempData["Info"] = "Password reset successful. Please check your email.";
             return RedirectToAction("Login");
         }
         catch (SmtpException ex)
         {
             Console.WriteLine("RESET EMAIL ERROR: " + ex.Message);
-
-            ModelState.AddModelError(
-                "",
-                "Password was reset, but the email could not be sent."
-            );
-
+            ModelState.AddModelError("", "Password was reset, but the email could not be sent.");
             return View(vm);
         }
     }
 
     private void SendResetPasswordEmail(User u, string password)
     {
-        Console.WriteLine("START SENDING EMAIL");
         var mail = new MailMessage();
-
         mail.To.Add(new MailAddress(u.Email, u.Name));
         mail.Subject = "Reset Password";
         mail.IsBodyHtml = true;
 
-        var url = Url.Action(
-            "Login",
-            "Security",
-            null,
-            "https"
-        );
+        var url = Url.Action("Login", "Security", null, "https");
 
         mail.Body = $@"
         <p>Dear {u.Name},</p>
-
         <p>Your password has been reset to:</p>
-
         <h1 style='color:red'>{password}</h1>
-
-        <p>
-            Please <a href='{url}'>login</a>
-            with your new password.
-        </p>
-
-        <p>From, Super Admin</p>
-    ";
+        <p>Please <a href='{url}'>login</a> with your new password.</p>
+        <p>From, Super Admin</p>";
 
         hp.SendEmail(mail);
     }

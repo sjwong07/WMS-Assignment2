@@ -22,6 +22,13 @@ public class HomeController(DB db, Helper hp) : Controller
         return View(featuredItems);
     }
 
+    //---------------- Menu Routing Fix ----------------
+    public IActionResult Menu()
+    {
+        // Redirects to your Product Menu catalog
+        return RedirectToAction("Menu", "Product");
+    }
+
     public IActionResult About()
     {
         return View();
@@ -88,7 +95,7 @@ public class HomeController(DB db, Helper hp) : Controller
             return View("~/Views/Security/Login.cshtml");
         }
 
-        // Successful login â€” reset failed attempts
+        // Successful login — reset failed attempts
         user.FailedLogin = 0;
         user.LockoutEnd = null;
         await db.SaveChangesAsync();
@@ -106,6 +113,14 @@ public class HomeController(DB db, Helper hp) : Controller
 
         var claimsIdentity = new ClaimsIdentity(claims, "CookieAuth");
         await HttpContext.SignInAsync("CookieAuth", new ClaimsPrincipal(claimsIdentity));
+
+        // Set session variables for layout display
+        HttpContext.Session.SetString("User", user.Username ?? "");
+        HttpContext.Session.SetString("Role", user.RoleId ?? "Member");
+        if (!string.IsNullOrEmpty(member?.PhotoURL))
+        {
+            HttpContext.Session.SetString("UserPhoto", member.PhotoURL);
+        }
 
         return RedirectToAction("Menu", "Product");
     }
@@ -144,6 +159,13 @@ public class HomeController(DB db, Helper hp) : Controller
         var menuItem = await db.MenuItems.FindAsync(menuItemId);
         if (menuItem == null) return RedirectToAction("Menu", "Product");
 
+        // Ensure a valid table exists to avoid foreign key errors
+        if (string.IsNullOrEmpty(tableId))
+        {
+            var firstTable = await db.Tables.Select(t => t.Id).FirstOrDefaultAsync();
+            tableId = firstTable ?? "T01";
+        }
+
         var order = await db.Orders
             .Include(o => o.OrderDetails)
             .Where(o => o.UserId == userId && o.Status == "Pending")
@@ -159,6 +181,7 @@ public class HomeController(DB db, Helper hp) : Controller
                 OrderDate = DateTime.Now,
                 Status = "Pending",
                 PaymentStatus = "Unpaid",
+                PaymentMethod = "Pending", // Fix: NOT NULL database constraint resolved
                 TotalAmount = 0,
                 OrderDetails = new List<OrderDetail>()
             };
@@ -243,7 +266,7 @@ public class HomeController(DB db, Helper hp) : Controller
         var order = await db.Orders.FindAsync(orderId);
         if (order == null) return RedirectToAction("Cart");
 
-        order.PaymentMethod = paymentMethod;
+        order.PaymentMethod = string.IsNullOrEmpty(paymentMethod) ? "Cash" : paymentMethod;
         order.PaymentStatus = "Paid";
         order.Status = "Preparing";
         await db.SaveChangesAsync();
@@ -261,7 +284,6 @@ public class HomeController(DB db, Helper hp) : Controller
         }
     }
 
-
     public IActionResult SetLanguage(string culture, string returnUrl)
     {
         Response.Cookies.Append(
@@ -272,7 +294,8 @@ public class HomeController(DB db, Helper hp) : Controller
 
         return LocalRedirect(returnUrl ?? "~/");
     }
-    private string GetCurrentUserId()
+
+    private string? GetCurrentUserId()
     {
         // Try real cookie/claims login first
         var claimUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
