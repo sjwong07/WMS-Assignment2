@@ -84,7 +84,13 @@ public class Helper(IWebHostEnvironment en,
     public string SavePhoto(IFormFile f, string folder)
     {
         var file = Guid.NewGuid().ToString("n") + ".jpg";
-        var path = Path.Combine(en.WebRootPath, folder, file);
+        var folderPath = Path.Combine(en.WebRootPath, folder);
+        var path = Path.Combine(folderPath, file);
+
+        if (!Directory.Exists(folderPath))
+        {
+            Directory.CreateDirectory(folderPath);
+        }
 
         var options = new ResizeOptions
         {
@@ -97,7 +103,7 @@ public class Helper(IWebHostEnvironment en,
         img.Mutate(x => x.Resize(options));
         img.SaveAsJpeg(path);
 
-        return file;
+        return folder + "/" + file;
     }
 
     public void DeletePhoto(string fileName, string folder)

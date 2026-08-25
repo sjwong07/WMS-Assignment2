@@ -14,8 +14,11 @@ public class ProductController(DB db, Helper hp) : Controller
         var categories = db.FoodCategories.ToList();
 
         // Include Category to ensure Category.Name and Category.Id are loaded
-        var m = db.MenuItems.Include(x => x.Category).AsQueryable();
-
+        // We added .Include(x => x.MenuItemPhotos) here!
+        var m = db.MenuItems
+                  .Include(x => x.Category)
+                  .Include(x => x.Photos)
+                  .AsQueryable();
         if (!string.IsNullOrEmpty(search))
         {
             m = m.Where(item => item.Name.Contains(search) || item.Id.Contains(search));

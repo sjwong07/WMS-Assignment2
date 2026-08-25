@@ -34,7 +34,10 @@
 
                
                 <td>
-                    <button type="submit" class="btn-action btn-delete" asp-route-id="@item.Id">🗑️ Delete</button>
+                    <form asp-action="Delete" asp-controller="Admin" asp-route-id="@item.Id" method="post"
+                          class="delete-form">
+                        <button type="submit" class="btn-action btn-delete">Delete</button>
+                    </form>
                 </td>
                 <td>
                     <a asp-action="Update"

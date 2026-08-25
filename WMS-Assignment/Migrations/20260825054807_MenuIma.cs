@@ -360,13 +360,7 @@ namespace WMS_Assignment.Migrations
                 oldMaxLength: 100,
                 oldNullable: true);
 
-            migrationBuilder.AddColumn<string>(
-                name: "Password",
-                table: "Users",
-                type: "nvarchar(100)",
-                maxLength: 100,
-                nullable: false,
-                defaultValue: "");
+           
 
             migrationBuilder.AlterColumn<string>(
                 name: "TableType",

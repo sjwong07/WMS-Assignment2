@@ -11,7 +11,7 @@ public class AdminController(DB db, Helper hp) : Controller
 {
     public IActionResult AdminMenu()
     {
-        var m = db.MenuItems.Include(x => x.Category).ToList();
+        var m = db.MenuItems.Include(x => x.Category).Include(x => x.Photos).ToList();
         return View(m);
     }
 
@@ -42,17 +42,23 @@ public class AdminController(DB db, Helper hp) : Controller
             CategoryId = vm.CategoryId,
         };
 
-        if (vm.Photos != null && vm.Photos.Length > 0 && vm.Photos[0] != null)
+        if (vm.Photos != null)
         {
-            var photo = vm.Photos[0];
-            var error = hp.ValidatePhoto(photo);
-            if (!string.IsNullOrEmpty(error))
+            foreach (var photo in vm.Photos)
             {
-                ModelState.AddModelError("Photos", error);
-                vm.FoodCategories = db.FoodCategories.ToList();
-                return View(vm);
+                if (photo == null || photo.Length == 0) continue;
+
+                var error = hp.ValidatePhoto(photo);
+                if (!string.IsNullOrEmpty(error))
+                {
+                    ModelState.AddModelError("Photos", error);
+                    vm.FoodCategories = db.FoodCategories.ToList();
+                    return View(vm);
+                }
+
+                var url = hp.SavePhoto(photo, "Menu");
+                item.Photos.Add(new MenuItemPhoto { PhotoURL = url });
             }
-            item.PhotoURL = hp.SavePhoto(photo, "Menu");
         }
 
         db.MenuItems.Add(item);
@@ -80,7 +86,7 @@ public class AdminController(DB db, Helper hp) : Controller
 
     public IActionResult Update(string id)
     {
-        var item = db.MenuItems.Find(id);
+        var item = db.MenuItems.Include(x => x.Photos).FirstOrDefault(x => x.Id == id);
         if (item == null) return RedirectToAction("AdminMenu");
 
         var vm = new ProductUpdateVM
@@ -90,7 +96,7 @@ public class AdminController(DB db, Helper hp) : Controller
             description = item.Description,
             Price = item.Price.ToString("0.00"),
             CategoryId = item.CategoryId,
-            CurrentPhotoURL = item.PhotoURL,
+            CurrentPhotoURL = item.Photos,
             FoodCategories = db.FoodCategories.ToList(),
         };
 
@@ -100,13 +106,13 @@ public class AdminController(DB db, Helper hp) : Controller
     [HttpPost]
     public IActionResult Update(string id, ProductUpdateVM vm)
     {
-        var item = db.MenuItems.Find(id);
+        var item = db.MenuItems.Include(x => x.Photos).FirstOrDefault(x => x.Id == id);
         if (item == null) return RedirectToAction("AdminMenu");
 
         if (!ModelState.IsValid)
         {
             vm.FoodCategories = db.FoodCategories.ToList();
-            vm.CurrentPhotoURL = item.PhotoURL;
+            vm.CurrentPhotoURL = item.Photos;
             return View(vm);
         }
 
@@ -115,19 +121,24 @@ public class AdminController(DB db, Helper hp) : Controller
         item.Price = decimal.Parse(vm.Price);
         item.CategoryId = vm.CategoryId;
 
-        if (vm.Photos != null && vm.Photos.Length > 0 && vm.Photos[0] != null)
+        if (vm.Photos != null)
         {
-            var photo = vm.Photos[0];
-            var error = hp.ValidatePhoto(photo);
-            if (!string.IsNullOrEmpty(error))
+            foreach (var photo in vm.Photos)
             {
-                ModelState.AddModelError("Photos", error);
-                vm.FoodCategories = db.FoodCategories.ToList();
-                vm.CurrentPhotoURL = item.PhotoURL;
-                return View(vm);
+                if (photo == null || photo.Length == 0) continue;
+
+                var error = hp.ValidatePhoto(photo);
+                if (!string.IsNullOrEmpty(error))
+                {
+                    ModelState.AddModelError("Photos", error);
+                    vm.FoodCategories = db.FoodCategories.ToList();
+                    vm.CurrentPhotoURL = item.Photos;
+                    return View(vm);
+                }
+
+                var url = hp.SavePhoto(photo, "Menu");
+                item.Photos.Add(new MenuItemPhoto { PhotoURL = url });
             }
-            hp.DeletePhoto(item.PhotoURL, "Menu");
-            item.PhotoURL = hp.SavePhoto(photo, "Menu");
         }
 
         db.SaveChanges();
@@ -137,11 +148,28 @@ public class AdminController(DB db, Helper hp) : Controller
     }
 
     [HttpPost]
+    public IActionResult DeletePhoto(int photoId, string menuItemId)
+    {
+        var photo = db.MenuItemPhotos.Find(photoId);
+        if (photo != null)
+        {
+            hp.DeletePhoto(photo.PhotoURL, "");
+            db.MenuItemPhotos.Remove(photo);
+            db.SaveChanges();
+        }
+        return RedirectToAction("Update", new { id = menuItemId });
+    }
+
+    [HttpPost]
     public IActionResult Delete(string id)
     {
-        var item = db.MenuItems.Find(id);
+        var item = db.MenuItems.Include(x => x.Photos).FirstOrDefault(x => x.Id == id);
         if (item != null)
         {
+            foreach (var photo in item.Photos)
+            {
+                hp.DeletePhoto(photo.PhotoURL, "");
+            }
             db.MenuItems.Remove(item);
             db.SaveChanges();
             TempData["Info"] = "Item deleted successfully.";

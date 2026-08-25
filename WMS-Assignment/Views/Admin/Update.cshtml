@@ -1,1 +1,82 @@
-﻿
+﻿@model ProductUpdateVM
+
+
+@{
+    var hasPhoto = Model?.CurrentPhotoURL != null && Model.CurrentPhotoURL.Count > 0;
+    var photoSrc = hasPhoto
+        ? Url.Content("~/" + Model.CurrentPhotoURL.First().PhotoURL.TrimStart('/'))
+        : "";
+        var photoDisplayStyle = hasPhoto ? "display:block;" : "display:none;";
+}
+
+<div class="product-container">
+
+    <h2>Update Menu Item</h2>
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <form asp-action="Update" asp-controller="Admin" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data">
+
+        <!-- Hidden inputs required for binding existing data -->
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="CurrentPhotoURL" />
+
+        <div class="form-photo-preview">
+            <img id="photoPreview"
+                 src="@photoSrc"
+                 alt="Photo preview"
+                 style="@photoDisplayStyle" />
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Name"></label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="description"></label>
+            <textarea asp-for="description" class="form-control"></textarea>
+            <span asp-validation-for="description" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Price"></label>
+            <input asp-for="Price" class="form-control" />
+            <span asp-validation-for="Price" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="CategoryId"></label>
+            <select asp-for="CategoryId" class="form-control"
+                    asp-items="@(new SelectList(Model.FoodCategories ?? new List<WMS_Assignment.Models.FoodCategory>(), "Id", "Name"))">
+                <option value="">-- Select Category --</option>
+            </select>
+            <span asp-validation-for="CategoryId" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Photos"></label>
+            <input asp-for="Photos" type="file" multiple accept="image/*" class="form-control" onchange="previewPhoto(event)" />
+            <span asp-validation-for="Photos" class="text-danger"></span>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-action btn-update">Save Changes</button>
+            <a asp-action="AdminMenu" asp-controller="Admin" class="btn-action btn-cancel">Cancel</a>
+        </div>
+
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        function previewPhoto(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const preview = document.getElementById('photoPreview');
+            preview.src = URL.createObjectURL(file);
+            preview.style.display = 'block';
+        }
+    </script>
+}

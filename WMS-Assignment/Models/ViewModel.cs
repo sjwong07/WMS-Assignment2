@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using System.ComponentModel.DataAnnotations;
 
 namespace WMS_Assignment.Models;
@@ -120,8 +121,7 @@ public class ProfileVM
 
     public class ProductInsertVM
 {
-    [StringLength(5)]
-    [RegularExpression(@"P\d{3}", ErrorMessage = "Invalid {0} format.")]
+    [ValidateNever]
     public string Id { get; set; }
 
     [StringLength(100)]
@@ -138,7 +138,8 @@ public class ProfileVM
     [Required]
     public string CategoryId { get; set; }
 
-    public List<IFormFile>? Photos { get; set; }
+    public List<IFormFile> Photos { get; set; }
+    [ValidateNever]
 
     public IEnumerable<FoodCategory> FoodCategories { get; set; }
 
@@ -147,10 +148,10 @@ public class ProfileVM
 
     public class ProductUpdateVM
 {
+    [ValidateNever]
     public string Id {  get; set; }
 
-    [StringLength(5)]
-    [RegularExpression(@"P\d{3}", ErrorMessage = "Invalid {0} format.")]
+    [StringLength(100)]
     public string Name { get; set; }
 
     [StringLength(200)]
@@ -164,10 +165,12 @@ public class ProfileVM
     [Required]
     public string CategoryId { get; set; }
 
-    public IFormFile[] Photos { get; set; }
+    [ValidateNever]
+    public List<IFormFile> Photos { get; set; }
+    [ValidateNever]
+    public List<MenuItemPhoto> CurrentPhotoURL { get; set; }
 
-    public string? CurrentPhotoURL { get; set; }
-
+    [ValidateNever]
     public IEnumerable<FoodCategory> FoodCategories { get; set; }
 
 }

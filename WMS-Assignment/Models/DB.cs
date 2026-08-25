@@ -127,16 +127,16 @@ public class MenuItem
     public string CategoryId { get; set; } = string.Empty;
 
     public FoodCategory? Category { get; set; }
-    public string? PhotoURL { get; set; }
+    public List<MenuItemPhoto> Photos { get; set; } = new();
 }
 
 public class MenuItemPhoto
 {
     public int Id { get; set; }
 
-    public string MenuItemId { get; set; } = "";
+    public string PhotoURL { get; set; } 
 
-    public string Photo { get; set; } = "";
+    public string MenuItemId { get; set; } 
 
     public MenuItem MenuItem { get; set; } = null!;
 }

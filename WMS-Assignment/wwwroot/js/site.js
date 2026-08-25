@@ -143,3 +143,13 @@ function showNotification(message, type) {
         notification.alert('close');
     }, 5000);
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.delete-form').forEach(function (form) {
+        form.addEventListener('submit', function (e) {
+            if (!confirm('Confirm Delete?')) {
+                e.preventDefault();
+            }
+        });
+    });
+});

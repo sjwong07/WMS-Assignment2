@@ -4,6 +4,8 @@
 
     <h2>Create Menu Item</h2>
 
+    <div asp-validation-summary="All" class="text-danger"></div>
+
     <form asp-action="Create" method="post" enctype="multipart/form-data">
 
         <div class="form-photo-preview">
@@ -39,7 +41,7 @@
 
         <div class="form-group">
             <label asp-for="Photos"></label>
-            <input asp-for="Photos" type="file" accept="image/*" class="form-control" onchange="previewPhoto(event)" />
+            <input asp-for="Photos" type="file" multiple accept="image/*" class="form-control" onchange="previewPhoto(event)" />
             <span asp-validation-for="Photos" class="text-danger"></span>
         </div>
 
