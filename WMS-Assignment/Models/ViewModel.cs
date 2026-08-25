@@ -128,17 +128,23 @@ public class ProfileVM
    
     public string Name { get; set; }
 
-    [StringLength(5)]
+    [StringLength(200)]
     public string  description{ get; set; }
 
 
     [Range(0.01,999.99)]
     [RegularExpression(@"\d+(\.\d{1,2})?", ErrorMessage = "Invalid {0} format.")]
     public string Price { get; set; }
+    [Required]
+    public string CategoryId { get; set; }
 
-    public IFormFile Photo {  get; set; }
-  
+    public List<IFormFile>? Photos { get; set; }
+
+    public IEnumerable<FoodCategory> FoodCategories { get; set; }
+
 }
+
+
     public class ProductUpdateVM
 {
     public string Id {  get; set; }
@@ -147,7 +153,7 @@ public class ProfileVM
     [RegularExpression(@"P\d{3}", ErrorMessage = "Invalid {0} format.")]
     public string Name { get; set; }
 
-    [StringLength(5)]
+    [StringLength(200)]
     public string description { get; set; }
 
 
@@ -155,14 +161,16 @@ public class ProfileVM
     [RegularExpression(@"\d+(\.\d{1,2})?", ErrorMessage = "Invalid {0} format.")]
     public string Price { get; set; }
 
-    public IFormFile Photo { get; set; }
+    [Required]
+    public string CategoryId { get; set; }
+
+    public IFormFile[] Photos { get; set; }
+
+    public string? CurrentPhotoURL { get; set; }
+
+    public IEnumerable<FoodCategory> FoodCategories { get; set; }
 
 }
-  
-
-
-
-
 
 public class OrderDetailVM
     {

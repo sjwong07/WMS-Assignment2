@@ -4,7 +4,7 @@
 
     <div class="admin-menu-header">
         <h2>Menu Management</h2>
-        <a asp-action="Create" asp-controller="Product" class="btn-action btn-create">
+        <a asp-action="Create" asp-controller="Admin" class="btn-action btn-create">
             + Create New Item
         </a>
     </div>
@@ -38,7 +38,7 @@
                 </td>
                 <td>
                     <a asp-action="Update"
-                       asp-controller="Product"
+                       asp-controller="Admin"
                        asp-route-id="@item.Id"
                        class="btn-action btn-update">
                         ✏️ Update

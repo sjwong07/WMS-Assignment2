@@ -17,6 +17,9 @@ public class DB(DbContextOptions options) : DbContext(options)
     public DbSet<MenuItem> MenuItems { get; set; }
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderDetail> OrderDetails { get; set; }
+    public DbSet<MenuItemPhoto> MenuItemPhotos { get; set; }
+
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -65,9 +68,7 @@ public class User
     [MaxLength(100)]
     public string? Email { get; set; }
 
-    [DataType(DataType.Password)]
-    [MaxLength(100)]
-    public string? Password { get; set; }
+    
 
     [MaxLength(200)]
     public string? Hash { get; set; }
@@ -126,7 +127,20 @@ public class MenuItem
     public string CategoryId { get; set; } = string.Empty;
 
     public FoodCategory? Category { get; set; }
+    public string? PhotoURL { get; set; }
 }
+
+public class MenuItemPhoto
+{
+    public int Id { get; set; }
+
+    public string MenuItemId { get; set; } = "";
+
+    public string Photo { get; set; } = "";
+
+    public MenuItem MenuItem { get; set; } = null!;
+}
+
 
 public class Table
 {
