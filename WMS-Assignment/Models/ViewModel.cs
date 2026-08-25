@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using System.ComponentModel.DataAnnotations;
 
 namespace WMS_Assignment.Models;
@@ -120,34 +121,40 @@ public class ProfileVM
 
     public class ProductInsertVM
 {
-    [StringLength(5)]
-    [RegularExpression(@"P\d{3}", ErrorMessage = "Invalid {0} format.")]
+    [ValidateNever]
     public string Id { get; set; }
 
     [StringLength(100)]
    
     public string Name { get; set; }
 
-    [StringLength(5)]
+    [StringLength(200)]
     public string  description{ get; set; }
 
 
     [Range(0.01,999.99)]
     [RegularExpression(@"\d+(\.\d{1,2})?", ErrorMessage = "Invalid {0} format.")]
     public string Price { get; set; }
+    [Required]
+    public string CategoryId { get; set; }
 
-    public IFormFile Photo {  get; set; }
-  
+    public List<IFormFile> Photos { get; set; }
+    [ValidateNever]
+
+    public IEnumerable<FoodCategory> FoodCategories { get; set; }
+
 }
+
+
     public class ProductUpdateVM
 {
+    [ValidateNever]
     public string Id {  get; set; }
 
-    [StringLength(5)]
-    [RegularExpression(@"P\d{3}", ErrorMessage = "Invalid {0} format.")]
+    [StringLength(100)]
     public string Name { get; set; }
 
-    [StringLength(5)]
+    [StringLength(200)]
     public string description { get; set; }
 
 
@@ -155,14 +162,18 @@ public class ProfileVM
     [RegularExpression(@"\d+(\.\d{1,2})?", ErrorMessage = "Invalid {0} format.")]
     public string Price { get; set; }
 
-    public IFormFile Photo { get; set; }
+    [Required]
+    public string CategoryId { get; set; }
+
+    [ValidateNever]
+    public List<IFormFile> Photos { get; set; }
+    [ValidateNever]
+    public List<MenuItemPhoto> CurrentPhotoURL { get; set; }
+
+    [ValidateNever]
+    public IEnumerable<FoodCategory> FoodCategories { get; set; }
 
 }
-  
-
-
-
-
 
 public class OrderDetailVM
     {

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WMS_Assignment.Models;
 
@@ -11,9 +12,11 @@ using WMS_Assignment.Models;
 namespace WMS_Assignment.Migrations
 {
     [DbContext(typeof(DB))]
-    partial class DBModelSnapshot : ModelSnapshot
+    [Migration("20260825061007_Photo")]
+    partial class Photo
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -58,6 +61,9 @@ namespace WMS_Assignment.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<string>("PhotoURL")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<decimal>("Price")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
@@ -81,7 +87,7 @@ namespace WMS_Assignment.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("PhotoURL")
+                    b.Property<string>("Photo")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -292,7 +298,7 @@ namespace WMS_Assignment.Migrations
             modelBuilder.Entity("WMS_Assignment.Models.MenuItemPhoto", b =>
                 {
                     b.HasOne("WMS_Assignment.Models.MenuItem", "MenuItem")
-                        .WithMany("Photos")
+                        .WithMany()
                         .HasForeignKey("MenuItemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -337,11 +343,6 @@ namespace WMS_Assignment.Migrations
                         .HasForeignKey("RoleId");
 
                     b.Navigation("Role");
-                });
-
-            modelBuilder.Entity("WMS_Assignment.Models.MenuItem", b =>
-                {
-                    b.Navigation("Photos");
                 });
 
             modelBuilder.Entity("WMS_Assignment.Models.Order", b =>

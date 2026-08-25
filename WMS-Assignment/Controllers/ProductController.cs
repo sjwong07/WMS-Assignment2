@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using WMS_Assignment.Models;
 
@@ -13,8 +14,11 @@ public class ProductController(DB db, Helper hp) : Controller
         var categories = db.FoodCategories.ToList();
 
         // Include Category to ensure Category.Name and Category.Id are loaded
-        var m = db.MenuItems.Include(x => x.Category).AsQueryable();
-
+        // We added .Include(x => x.MenuItemPhotos) here!
+        var m = db.MenuItems
+                  .Include(x => x.Category)
+                  .Include(x => x.Photos)
+                  .AsQueryable();
         if (!string.IsNullOrEmpty(search))
         {
             m = m.Where(item => item.Name.Contains(search) || item.Id.Contains(search));
@@ -55,30 +59,5 @@ public class ProductController(DB db, Helper hp) : Controller
         return View(vm);
     }
 
-    public IActionResult AdminMenu()
-    {
-        var m = db.MenuItems.Include(x => x.Category).ToList();
-        return View(m);
-    }
-
-    public IActionResult Create()
-    {
-        return View();
-    }
-
-    [HttpPost]
-    public IActionResult Create(ProductInsertVM vm)
-    {
-        return View();
-    }
-
-    public IActionResult Update()
-    {
-        return View();
-    }
-
-    public IActionResult Delete()
-    {
-        return View();
-    }
+   
 }
