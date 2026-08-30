@@ -71,6 +71,7 @@ using (var scope = app.Services.CreateScope())
 
     
 
+
     var superadmin = db.SuperAdmins.FirstOrDefault(sa => sa.Username.ToLower() == "SuperAdmin123");
 
     if (superadmin == null)
@@ -93,6 +94,28 @@ using (var scope = app.Services.CreateScope())
         db.SaveChanges();
     }
 
+    var testMember = db.Members.FirstOrDefault(u => u.Username.ToLower() == "jennie12");
+    if (testMember == null)
+    {
+        testMember = new Member
+        {
+            Id = Guid.NewGuid().ToString(),
+            Username = "jennie12",
+            Name = "jenniekim",
+            Email = "jenniekim123@gmail.com",
+            FirstName = "jennie",
+            LastName = "kim",
+            RoleId = "Member",
+            Hash = hp.HashPassword("JennieKim1234@"),
+            CreatedDate = DateTime.Now,
+            FailedLogin = 0,
+            LockoutEnd = null
+        };
+        db.Members.Add(testMember);
+        db.SaveChanges();
+    }
+    
+
 
 
 
@@ -100,6 +123,25 @@ using (var scope = app.Services.CreateScope())
     var admin = db.Admins.FirstOrDefault(u => u.Username.ToLower() == "admin123")
                 ?? db.Users.OfType<Admin>().FirstOrDefault(u => u.Username.ToLower() == "admin123");
 
+  if (admin == null)
+    {
+        admin = new Admin
+        {
+            Id = Guid.NewGuid().ToString(),
+            Username = "admin123",
+            Name = "System Admin",
+            Email = "admin123@gmail.com",
+            FirstName = "System",
+            LastName = "Admin",
+            RoleId = "Admin",
+            Hash = hp.HashPassword("Admin1234@"),
+            CreatedDate = DateTime.Now,
+            FailedLogin = 0,
+            LockoutEnd = null
+        };
+        db.Admins.Add(admin);
+        db.SaveChanges();
+    }
    
 }
 
