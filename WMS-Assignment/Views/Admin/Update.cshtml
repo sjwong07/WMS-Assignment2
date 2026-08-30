@@ -16,7 +16,6 @@
 
     <form asp-action="Update" asp-controller="Admin" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data">
 
-        <!-- Hidden inputs required for binding existing data -->
         <input type="hidden" asp-for="Id" />
         <input type="hidden" asp-for="CurrentPhotoURL" />
 

@@ -108,20 +108,22 @@ public class MemberController(DB db, Helper hp) : Controller
     [HttpPost]
     public IActionResult UpdatePassword(UpdatePasswordVM vm)
     {
-        var u = db.Users.Find(User.Identity!.Name);
-        if(u == null)
+
+        var username = User.Identity!.Name?.Trim();
+        var member = db.Members.FirstOrDefault(m => m.Username.ToLower() == username!.ToLower());
+        if(member == null)
         {
             return RedirectToAction("Index");
         }
 
-        if(!hp.VerifyPassword(u.Hash, vm.CurrentPassword))
+        if(!hp.VerifyPassword(member.Hash, vm.CurrentPassword))
         {
             ModelState.AddModelError("Current", "Current Password Not Matched");
         }
 
         if (ModelState.IsValid)
         {
-            u.Hash = hp.HashPassword(vm.NewPassword);
+            member.Hash = hp.HashPassword(vm.NewPassword);
             db.SaveChanges();
 
             TempData["Info"] = "Password Updated.";
