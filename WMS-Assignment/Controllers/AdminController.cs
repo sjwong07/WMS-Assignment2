@@ -347,4 +347,46 @@ public class AdminController(DB db, Helper hp) : Controller
         TempData["Info"] = "All Record Cleared";
         return RedirectToAction("BannedUser");
     }
+
+    public IActionResult RegisterAdmin()
+    {
+        return View();
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult RegisterAdmin(RegisterAdminVM vm)
+    {
+        if (db.Users.Any(u => u.Username.ToLower() == vm.Username.Trim().ToLower()))
+        {
+            ModelState.AddModelError("Username", "This username is already taken.");
+        }
+
+        if (db.Users.Any(u => u.Email.ToLower() == vm.Email.Trim().ToLower()))
+        {
+            ModelState.AddModelError("Email", "This email address is already in use.");
+        }
+
+        if (ModelState.IsValid)
+        {
+            var admin = new Admin
+            {
+                Id = Guid.NewGuid().ToString(),  
+                Username = vm.Username.Trim(),
+                Name = vm.Username.Trim(),
+                Email = vm.Email.Trim(),
+                Hash = hp.HashPassword(vm.Password),
+                RoleId = "Admin",
+                CreatedDate = DateTime.Now
+            };
+
+            db.Admins.Add(admin);
+            db.SaveChanges();
+
+            TempData["Info"] = "Admin created successfully.";
+            return RedirectToAction("AdminList");   
+        }
+
+        return View(vm);
+    }
 }
