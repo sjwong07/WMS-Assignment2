@@ -26,7 +26,11 @@ namespace WMS_Assignment.Migrations
                 name: "FK_Orders_Users_UserId",
                 table: "Orders");
 
-           
+            migrationBuilder.DropForeignKey(
+                name: "FK_Users_Roles_RoleId",
+                table: "Users");
+
+
 
             migrationBuilder.AlterColumn<string>(
                 name: "Username",
@@ -204,10 +208,7 @@ namespace WMS_Assignment.Migrations
                 type: "nvarchar(max)",
                 nullable: true);
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Users_RoleId",
-                table: "Users",
-                column: "RoleId");
+            
 
             migrationBuilder.AddForeignKey(
                 name: "FK_OrderDetails_MenuItems_MenuItemId",
@@ -268,10 +269,7 @@ namespace WMS_Assignment.Migrations
                 name: "FK_Users_Roles_RoleId",
                 table: "Users");
 
-            migrationBuilder.DropIndex(
-                name: "IX_Users_RoleId",
-                table: "Users");
-
+            
             migrationBuilder.DropColumn(
                 name: "PhotoURL",
                 table: "MenuItems");

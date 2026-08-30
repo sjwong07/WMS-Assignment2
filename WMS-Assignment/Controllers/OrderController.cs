@@ -107,6 +107,6 @@ public class OrderController(DB db) : Controller
 
     private bool IsStaffOrAdmin(string roleId)
     {
-        return roleId == "RS01" || roleId == "RA01" || roleId == "Admin";
+        return roleId == "Admin" || roleId == "SuperAdmin";
     }
 }
