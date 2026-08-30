@@ -11,6 +11,7 @@ public class DB(DbContextOptions options) : DbContext(options)
     public DbSet<User> Users { get; set; }
     public DbSet<Admin> Admins { get; set; }
     public DbSet<Member> Members { get; set; }
+    public DbSet<SuperAdmin> SuperAdmins {  get; set; }
     public DbSet<Role> Roles { get; set; }
     public DbSet<Table> Tables { get; set; }
     public DbSet<FoodCategory> FoodCategories { get; set; }
@@ -18,7 +19,7 @@ public class DB(DbContextOptions options) : DbContext(options)
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderDetail> OrderDetails { get; set; }
     public DbSet<MenuItemPhoto> MenuItemPhotos { get; set; }
-
+    public DbSet<BannedUser> BannedUsers {  get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -68,7 +69,6 @@ public class User
     [MaxLength(100)]
     public string? Email { get; set; }
 
-    
 
     [MaxLength(200)]
     public string? Hash { get; set; }
@@ -89,16 +89,44 @@ public class User
     public int FailedLogin { get; set; } = 0;
 
     public DateTime? LockoutEnd { get; set; }
+    public bool IsBanned { get; set; } = false;
+
+    [MaxLength(500)]
+    public string? BanReason {  get; set; }
+    public ICollection<BannedUser> ? BannedRecord {  get; set; }
+
 }
 
 public class Admin : User
 {
 }
 
+public class SuperAdmin : User
+{
+}
+
 public class Member : User
 {
+    
+
     [MaxLength(100)]
     public string? PhotoURL { get; set; }
+}
+
+public class BannedUser
+{
+    [Key]
+    public string Id { get; set; }
+
+    [MaxLength(100)]
+    public string UserId { get; set; }
+
+    public DateTime BannedDate { get; set; } = DateTime.Now;
+
+    [MaxLength(200)]
+    public string Reason { get; set; }
+    
+    public User? User { get; set; }
 }
 
 public class FoodCategory

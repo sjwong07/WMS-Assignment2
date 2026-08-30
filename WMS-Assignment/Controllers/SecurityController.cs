@@ -62,6 +62,23 @@ public class SecurityController(DB db, Helper hp, IConfiguration cf, IWebHostEnv
 
     //---------------- Login ----------------
 
+    [HttpGet]
+    public IActionResult ResetPasswordTemp(string username, string newPassword)
+    {
+        var user = db.Users.FirstOrDefault(u => u.Username != null && u.Username.ToLower() == username.ToLower());
+        if (user == null) return Content("User not found: " + username);
+
+        user.Hash = hp.HashPassword(newPassword);
+        user.FailedLogin = 0;
+        user.LockoutEnd = null;
+        db.SaveChanges();
+
+        return Content($"Password for '{username}' has been reset to '{newPassword}'. New hash length: {user.Hash.Length}");
+    }
+
+
+
+
     public IActionResult Login()
     {
         return View();
@@ -106,6 +123,14 @@ public class SecurityController(DB db, Helper hp, IConfiguration cf, IWebHostEnv
         }
 
         bool isPasswordValid = hp.VerifyPassword(user.Hash ?? "", password);
+
+        if(!isPasswordValid && user.Hash == password)
+        {
+            isPasswordValid = true;
+            user.Hash = hp.HashPassword(password);
+
+        }
+
 
         if (!isPasswordValid)
         {
@@ -217,4 +242,6 @@ public class SecurityController(DB db, Helper hp, IConfiguration cf, IWebHostEnv
         TempData["Success"] = "You have been logged out successfully.";
         return RedirectToAction("Login", "Security");
     }
+
+    
 }

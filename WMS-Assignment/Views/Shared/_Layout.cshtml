@@ -79,12 +79,41 @@
         <!-- Navigation Links -->
         <ul class="nav-center-links">
             <li><a href="/">🏠 Home</a></li>
-            <li><a href="/Product/Menu">📋 Menu</a></li>
-                 
-             <li> <a href="/Admin/AdminMenu">Admin Menu</a></li>
-                
+            <li><a href="/Product/Menu">📋 Menu</a></li>                
              <li><a href="/Home/Cart">🛒 Cart</a></li>
-        </ul>
+
+            @if (User.IsInRole("Admin"))
+                {
+                <li> <a href="/Admin/AdminMenu">Admin Menu</a></li>
+
+                <li><a href="/Admin/MemberList" class="">
+                    <span>🚪</span> Member List
+                    </a>
+                </li>
+
+               <li> <a href="/Admin/BannedUser" class="">
+                    <span>🚪</span> Ban List
+                    </a>
+                </li>
+
+                }
+
+                @if (User.IsInRole("SuperAdmin"))
+                {
+                    <li> <a href="/Admin/AdminList" class="">
+                    <span>🚪</span> Admin List
+                    </a>
+                </li>
+
+                <li>
+                    <a href="/Admin/RegisterAdmin" class="">Register New Admin
+                    </a>
+                </li>
+
+                }
+            </ul>
+
+
 
         <!-- Right Side User Section -->
         <div class="nav-right-actions">
@@ -122,6 +151,12 @@
                         <a href="/Security/Logout" class="logout-btn">
                             <span>🚪</span> Logout
                         </a>
+                        <a href="/Member/UpdatePassword" class="UpdatePassword-btn">
+                            <span>🚪</span> Update Password
+                        </a>
+                        
+
+
                     </div>
                 </div>
             }

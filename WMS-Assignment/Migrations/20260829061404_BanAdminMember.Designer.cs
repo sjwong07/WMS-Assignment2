@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WMS_Assignment.Models;
 
@@ -11,9 +12,11 @@ using WMS_Assignment.Models;
 namespace WMS_Assignment.Migrations
 {
     [DbContext(typeof(DB))]
-    partial class DBModelSnapshot : ModelSnapshot
+    [Migration("20260829061404_BanAdminMember")]
+    partial class BanAdminMember
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,31 +24,6 @@ namespace WMS_Assignment.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("WMS_Assignment.Models.BannedUser", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("BannedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Reason")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("BannedUsers");
-                });
 
             modelBuilder.Entity("WMS_Assignment.Models.FoodCategory", b =>
                 {
@@ -232,17 +210,13 @@ namespace WMS_Assignment.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("BanReason")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Discriminator")
                         .IsRequired()
-                        .HasMaxLength(13)
-                        .HasColumnType("nvarchar(13)");
+                        .HasMaxLength(8)
+                        .HasColumnType("nvarchar(8)");
 
                     b.Property<string>("Email")
                         .HasMaxLength(100)
@@ -258,9 +232,6 @@ namespace WMS_Assignment.Migrations
                     b.Property<string>("Hash")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
-
-                    b.Property<bool>("IsBanned")
-                        .HasColumnType("bit");
 
                     b.Property<string>("LastName")
                         .HasMaxLength(100)
@@ -296,6 +267,15 @@ namespace WMS_Assignment.Migrations
                 {
                     b.HasBaseType("WMS_Assignment.Models.User");
 
+                    b.Property<bool>("IsBanned")
+                        .HasColumnType("bit");
+
+                    b.ToTable("Users", t =>
+                        {
+                            t.Property("IsBanned")
+                                .HasColumnName("Admin_IsBanned");
+                        });
+
                     b.HasDiscriminator().HasValue("Admin");
                 });
 
@@ -303,29 +283,14 @@ namespace WMS_Assignment.Migrations
                 {
                     b.HasBaseType("WMS_Assignment.Models.User");
 
+                    b.Property<bool>("IsBanned")
+                        .HasColumnType("bit");
+
                     b.Property<string>("PhotoURL")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
                     b.HasDiscriminator().HasValue("Member");
-                });
-
-            modelBuilder.Entity("WMS_Assignment.Models.SuperAdmin", b =>
-                {
-                    b.HasBaseType("WMS_Assignment.Models.User");
-
-                    b.HasDiscriminator().HasValue("SuperAdmin");
-                });
-
-            modelBuilder.Entity("WMS_Assignment.Models.BannedUser", b =>
-                {
-                    b.HasOne("WMS_Assignment.Models.User", "User")
-                        .WithMany("BannedRecord")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("WMS_Assignment.Models.MenuItem", b =>
@@ -397,11 +362,6 @@ namespace WMS_Assignment.Migrations
             modelBuilder.Entity("WMS_Assignment.Models.Order", b =>
                 {
                     b.Navigation("OrderDetails");
-                });
-
-            modelBuilder.Entity("WMS_Assignment.Models.User", b =>
-                {
-                    b.Navigation("BannedRecord");
                 });
 #pragma warning restore 612, 618
         }
