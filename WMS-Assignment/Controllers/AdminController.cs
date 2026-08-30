@@ -176,4 +176,175 @@ public class AdminController(DB db, Helper hp) : Controller
         }
         return RedirectToAction("AdminMenu");
     }
+
+    public IActionResult AdminList()
+    {
+        var admins = db.Users.OfType<Admin>().Select(a => new AdminListVM
+        {
+            Id = a.Id,
+            Username = a.Username,
+            Email = a.Email,
+            CreateDate = a.CreatedDate,
+            IsBanned = a.IsBanned
+        })
+        .ToList();
+
+        return View(admins);
+    }
+
+    public IActionResult BanAdmin(string id)
+    {
+        var admin = db.Users.OfType<Admin>().FirstOrDefault(a => a.Id == id);
+        if (admin == null)
+            return NotFound();
+
+        var vm = new BanVM
+        {
+            Id = admin.Id,
+            Username = admin.Username
+        };
+
+        return View(vm);
+    }
+
+    [HttpPost]
+    public IActionResult BanAdmin(BanVM vm)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(vm);   
+        }
+
+        var admin = db.Users.OfType<Admin>().FirstOrDefault(a => a.Id == vm.Id);
+        if (admin == null)
+            return NotFound();
+
+        admin.IsBanned = true;
+        admin.BanReason = vm.BanReason;
+
+        db.BannedUsers.Add(new BannedUser
+        {
+            Id = hp.GenerateNextBannedId(),
+            UserId = admin.Id,
+            Reason = vm.BanReason,
+            BannedDate = DateTime.Now
+        });
+
+        db.SaveChanges();
+
+        return RedirectToAction("AdminList");
+    }
+
+
+    public IActionResult MemberList()
+    {
+        var members = db.Users.OfType<Member>().Select(u => new MemberListVM
+        {
+            Id = u.Id,
+            Username = u.Username,
+            Email = u.Email,
+            CreateDate = u.CreatedDate,
+            IsBanned = u.IsBanned
+        })
+       .ToList();
+        return View(members);
+    }
+
+    public IActionResult BanMember(string id)
+    {
+        var member = db.Users.OfType<Member>().FirstOrDefault(m => m.Id == id);
+        if (member == null)
+            return NotFound();
+
+        var vm = new BanVM
+        {
+            Id = member.Id,
+            Username = member.Username
+        };
+
+        return View(vm);
+    }
+
+    [HttpPost]
+    public IActionResult BanMember(BanVM vm)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(vm);
+        }
+
+        var member = db.Users.OfType<Member>().FirstOrDefault(m => m.Id == vm.Id);
+        if (member == null)
+            return NotFound();
+
+        member.IsBanned = true;
+        member.BanReason = vm.BanReason;
+
+        db.BannedUsers.Add(new BannedUser
+        {
+            Id = hp.GenerateNextBannedId(),
+            UserId = member.Id,
+            Reason = vm.BanReason,
+            BannedDate = DateTime.Now
+        });
+
+        db.SaveChanges();
+
+        return RedirectToAction("MemberList");
+    }
+
+    public IActionResult BannedUser()
+    {
+        var records = db.BannedUsers
+            .Include(b => b.User)  
+            .OrderByDescending(b => b.BannedDate)
+            .ToList();
+
+        return View(records);
+    }
+
+    [HttpPost]
+    public IActionResult UnbanAdmin(string id)
+    {
+        var admin = db.Users.OfType<Admin>().FirstOrDefault(a => a.Id == id);
+        if (admin == null) return NotFound();
+
+        admin.IsBanned = false;
+        admin.BanReason = null;
+
+        var record = db.BannedUsers.FirstOrDefault(b => b.UserId == id);
+        if (record != null)
+            db.BannedUsers.Remove(record);
+
+        db.SaveChanges();
+        return RedirectToAction("AdminList");
+    }
+
+    [HttpPost]
+    public IActionResult UnbanMember(string id)
+    {
+        var member = db.Users.OfType<Member>().FirstOrDefault(m => m.Id == id);
+        if (member == null) return NotFound();
+
+        member.IsBanned = false;
+        member.BanReason = null;
+
+        var record = db.BannedUsers.FirstOrDefault(b => b.UserId == id);
+        if (record != null)
+            db.BannedUsers.Remove(record);
+
+        db.SaveChanges();
+        return RedirectToAction("MemberList");
+    }
+
+    [HttpPost]
+    public IActionResult ClearAllRecord()
+    {
+        var all = db.BannedUsers.ToList();
+        db.BannedUsers.RemoveRange(all);
+        db.SaveChanges();
+
+        TempData["Info"] = "All Record Cleared";
+        return RedirectToAction("BannedUser");
+    }
 }

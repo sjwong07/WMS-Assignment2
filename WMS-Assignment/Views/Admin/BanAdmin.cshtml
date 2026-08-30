@@ -1,0 +1,17 @@
+﻿@model BanVM
+
+<h2>Banned Admin: @Model.Username</h2>
+
+<form asp-controller="Admin" asp-action="BanAdmin" method="post">
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="Username" />
+
+    <div class="form-group">
+        <label asp-for="BanReason">Ban</label>
+        <textarea asp-for="BanReason" class="form-control" rows="4"></textarea>
+        <span asp-validation-for="BanReason" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-danger">Confirm Ban</button>
+    <a asp-action="AdminList" class="btn btn-secondary">Cancel</a>
+</form>

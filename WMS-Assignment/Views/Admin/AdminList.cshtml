@@ -1,0 +1,37 @@
+﻿@model List<AdminListVM>
+
+<h2>Admin List</h2>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Created Date</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Username</td>
+                <td>@item.Email</td>
+                <td>@item.CreateDate</td>
+                <td>
+                    @if (item.IsBanned)
+                    {
+                        <form asp-controller="Admin" asp-action="UnbanAdmin" asp-route-id="@item.Id" method="post" style="display:inline">
+                            <button type="submit" class="btn btn-secondary">Unban</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <a asp-controller="Admin" asp-action="BanAdmin" asp-route-id="@item.Id" class="btn btn-danger">
+                            Ban
+                        </a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

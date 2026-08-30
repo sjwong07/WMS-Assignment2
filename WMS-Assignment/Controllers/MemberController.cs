@@ -98,4 +98,35 @@ public class MemberController(DB db, Helper hp) : Controller
         vm.CurrentPhotoURL = member.PhotoURL;
         return View(vm);
     }
+
+    public IActionResult UpdatePassword()
+    {
+        return View();
+    }
+
+
+    [HttpPost]
+    public IActionResult UpdatePassword(UpdatePasswordVM vm)
+    {
+        var u = db.Users.Find(User.Identity!.Name);
+        if(u == null)
+        {
+            return RedirectToAction("Index");
+        }
+
+        if(!hp.VerifyPassword(u.Hash, vm.CurrentPassword))
+        {
+            ModelState.AddModelError("Current", "Current Password Not Matched");
+        }
+
+        if (ModelState.IsValid)
+        {
+            u.Hash = hp.HashPassword(vm.NewPassword);
+            db.SaveChanges();
+
+            TempData["Info"] = "Password Updated.";
+            return RedirectToAction();
+        }
+        return View();
+    }
 }

@@ -9,7 +9,7 @@ using System.Net;
 
 public class Helper(IWebHostEnvironment en,
                     IHttpContextAccessor ct,
-                    IConfiguration cf
+                    IConfiguration cf,DB db
                     )
 {
     private readonly PasswordHasher<object> ph = new();
@@ -153,5 +153,21 @@ public class Helper(IWebHostEnvironment en,
 
             throw;
         }
+    }
+
+    public string GenerateNextBannedId()
+    {
+        var lastId = db.BannedUsers
+            .OrderByDescending(x => x.Id)
+            .Select(x => x.Id)
+            .FirstOrDefault();
+
+        int next = 1;
+        if (!string.IsNullOrEmpty(lastId) && int.TryParse(lastId.Substring(1), out int n))
+        {
+            next = n + 1;
+        }
+
+        return "B" + next.ToString("000");
     }
 }

@@ -5,7 +5,14 @@ namespace WMS_Assignment.Models;
 
 #nullable disable warnings
 
-
+public class BanVM
+{
+    public string Id {  get; set; }
+    public string Username {  get; set; }
+    [Required(ErrorMessage ="Please write reason for ban")]
+    [MaxLength(400)]
+    public string BanReason {  get; set; }
+}
 
 
 public class RoleVM
@@ -202,3 +209,40 @@ public class OrderDetailVM
         public string Email { get; set; }
 
     }
+    
+    public class UpdatePasswordVM
+{
+    [DataType(DataType.Password)]
+    [MaxLength(20)]
+    public string CurrentPassword {  get; set; }
+
+    [DataType(DataType.Password)]
+    [MaxLength(20)]
+    public string NewPassword { get; set; }
+
+    [DataType(DataType.Password)]
+    [MaxLength(20)]
+    public string ConfirmPassword {  get; set; }
+}
+
+
+
+
+
+public class AdminListVM
+{
+    public string Id { get; set; }
+    public string Username { get; set; }
+    public string Email { get; set; }
+    public DateTime CreateDate { get; set; }
+    public bool IsBanned { get; set; }
+}
+
+public class MemberListVM
+{
+    public string Id { get; set; }
+    public string Username { get; set; }
+    public string Email { get; set; }
+    public DateTime CreateDate { get; set; }
+    public bool IsBanned { get; set; }
+}

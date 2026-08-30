@@ -69,47 +69,38 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<DB>();
     var hp = scope.ServiceProvider.GetRequiredService<Helper>();
 
-    // Ensure Roles exist
-    if (!db.Roles.Any())
+    
+
+    var superadmin = db.SuperAdmins.FirstOrDefault(sa => sa.Username.ToLower() == "SuperAdmin123");
+
+    if (superadmin == null)
     {
-        db.Roles.AddRange(
-            new Role { Id = "Member", Description = "Member" },
-            new Role { Id = "Admin", Description = "Admin" }
-        );
+        superadmin = new SuperAdmin
+        {
+            Id = Guid.NewGuid().ToString(),
+            Username = "SuperAdmin123",
+            Name = "SuperAdminDemo",
+            Email = "SuperAdminDemo123@gmail.com",
+            FirstName = "SuperAdmin",
+            LastName = "Demo",
+            RoleId = "SuperAdmin",
+            Hash = hp.HashPassword("SuperAdmin1234@"),
+            CreatedDate = DateTime.Now,
+            FailedLogin = 0,
+            LockoutEnd = null
+        };
+        db.SuperAdmins.Add(superadmin);
         db.SaveChanges();
     }
+
+
+
 
     // Find existing admin or create a new one
     var admin = db.Admins.FirstOrDefault(u => u.Username.ToLower() == "admin123")
                 ?? db.Users.OfType<Admin>().FirstOrDefault(u => u.Username.ToLower() == "admin123");
 
-    if (admin == null)
-    {
-        admin = new Admin
-        {
-            Id = Guid.NewGuid().ToString(),
-            Username = "admin123",
-            Name = "System Admin",
-            Email = "admin123@gmail.com",
-            FirstName = "System",
-            LastName = "Admin",
-            RoleId = "Admin",
-            Hash = hp.HashPassword("Admin1234@"),
-            CreatedDate = DateTime.Now,
-            FailedLogin = 0,
-            LockoutEnd = null
-        };
-        db.Admins.Add(admin);
-    }
-    else
-    {
-        admin.Hash = hp.HashPassword("Admin1234@");
-        admin.RoleId = "Admin";
-        admin.FailedLogin = 0;
-        admin.LockoutEnd = null;
-    }
-
-    db.SaveChanges();
+   
 }
 
 // 8. Configure Supported Languages (Cultures)
