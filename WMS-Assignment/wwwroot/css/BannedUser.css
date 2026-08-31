@@ -1,0 +1,64 @@
+﻿.banned-list-container {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 20px;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+    .banned-list-container h2 {
+        color: #2d2a26;
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+
+.btn-clear-all {
+    background-color: #e05252;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+    .btn-clear-all:hover {
+        background-color: #c94848;
+    }
+
+.banned-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+    .banned-table thead {
+        background-color: #fdf1e7;
+    }
+
+    .banned-table th {
+        text-align: left;
+        padding: 14px 18px;
+        color: #2d2a26;
+        font-weight: 600;
+        font-size: 14px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .banned-table td {
+        padding: 14px 18px;
+        font-size: 14px;
+        color: #4a4a4a;
+        border-bottom: 1px solid #f2f2f2;
+    }
+
+    .banned-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .banned-table tr:hover td {
+        background-color: #fffaf5;
+    }

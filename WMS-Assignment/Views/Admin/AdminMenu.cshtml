@@ -9,7 +9,6 @@
         </a>
     </div>
 
-
     <table class="admin-table">
 
         <tr>
@@ -20,7 +19,6 @@
             <th>Qty</th>
             <th>Delete</th>
             <th>Update</th>
-
         </tr>
 
         @foreach (var item in Model)
@@ -30,9 +28,8 @@
                 <td>@item.Name</td>
                 <td>@item.Description</td>
                 <td>RM @item.Price</td>
-                <td><input type="number" name="quantity" value="1" min="1" style="width:60px" /></td>
+                <td><input type="number" name="quantity" value="1" min="1" class="admin-qty-input" /></td>
 
-               
                 <td>
                     <form asp-action="Delete" asp-controller="Admin" asp-route-id="@item.Id" method="post"
                           class="delete-form">
@@ -47,8 +44,9 @@
                         ✏️ Update
                     </a>
                 </td>
-
             </tr>
         }
 
     </table>
+
+</div>

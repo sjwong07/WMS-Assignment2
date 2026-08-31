@@ -1,0 +1,100 @@
+﻿.list-page-container {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 20px;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+    .list-page-container h2 {
+        color: #2d2a26;
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+
+.btn-create {
+    display: inline-block;
+    background-color: #e8834e;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 24px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 20px;
+    transition: background-color 0.2s ease;
+}
+
+    .btn-create:hover {
+        background-color: #d9723c;
+        color: #fff;
+    }
+
+.custom-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+    .custom-table thead {
+        background-color: #fdf1e7;
+    }
+
+    .custom-table th {
+        text-align: left;
+        padding: 14px 18px;
+        color: #2d2a26;
+        font-weight: 600;
+        font-size: 14px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .custom-table td {
+        padding: 14px 18px;
+        font-size: 14px;
+        color: #4a4a4a;
+        border-bottom: 1px solid #f2f2f2;
+    }
+
+    .custom-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .custom-table tbody tr:hover {
+        background-color: #fffaf5;
+    }
+
+.btn-ban {
+    background-color: #fff0ee;
+    color: #e05252;
+    border: 1px solid #f5c6c0;
+    padding: 6px 16px;
+    border-radius: 18px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    transition: background-color 0.2s ease;
+}
+
+    .btn-ban:hover {
+        background-color: #ffe1dd;
+        color: #e05252;
+    }
+
+.btn-unban {
+    background-color: #eef7ee;
+    color: #4caf50;
+    border: 1px solid #c9e6c9;
+    padding: 6px 16px;
+    border-radius: 18px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+    .btn-unban:hover {
+        background-color: #ddf0dd;
+    }

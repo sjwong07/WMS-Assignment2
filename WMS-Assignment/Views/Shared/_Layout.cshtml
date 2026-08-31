@@ -1,22 +1,14 @@
 ﻿@using Microsoft.AspNetCore.Http
 @{
-    var username = Context.Session.GetString("User")
-                ?? Context.Session.GetString("Username")
-                ?? (User.Identity != null && User.Identity.IsAuthenticated ? User.Identity.Name : null);
-
-    var userRole = Context.Session.GetString("Role") ?? "Member";
-
-    var rawPhoto = Context.Session.GetString("UserPhoto")
-                ?? Context.Session.GetString("Photo")
-                ?? Context.Session.GetString("PhotoURL");
+    var username = User.Identity != null && User.Identity.IsAuthenticated ? User.Identity.Name : null;
+    var userRole = User.IsInRole("Admin") ? "Admin" : (User.IsInRole("SuperAdmin") ? "SuperAdmin" : "Member");
+    var rawPhoto = User.FindFirst("PhotoURL")?.Value;
 
     string userPhotoUrl = "/images/default-avatar.png";
 
     if (!string.IsNullOrEmpty(rawPhoto))
     {
-        userPhotoUrl = rawPhoto.StartsWith("/") || rawPhoto.StartsWith("http")
-            ? rawPhoto
-            : $"/photos/{rawPhoto}";
+        userPhotoUrl =  $"/photos/{rawPhoto}";
     }
     else if (!string.IsNullOrEmpty(username))
     {
@@ -45,6 +37,13 @@
     <link rel="stylesheet" href="~/css/checkout.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/forgotpassword.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/UpdatePassword.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/Profile.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/BanAdminMember.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/BannedUser.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/AdminMemberList.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/RegisterAdmin.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/CreateUpdateProduct.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/product-form.css" asp-append-version="true" />
 
     <!-- Hide Google Translate Default Top Bar -->
