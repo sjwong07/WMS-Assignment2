@@ -44,6 +44,7 @@
     <link rel="stylesheet" href="~/css/AdminMemberList.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/RegisterAdmin.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/CreateUpdateProduct.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/Detail.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/product-form.css" asp-append-version="true" />
 
     <!-- Hide Google Translate Default Top Bar -->
@@ -82,7 +83,7 @@
             <li><a href="/Product/Menu">📋 Menu</a></li>                
              <li><a href="/Home/Cart">🛒 Cart</a></li>
 
-            @if (User.IsInRole("Admin"))
+            @if (User.IsInRole("Admin")|| User.IsInRole("SuperAdmin"))
                 {
                 <li> <a href="/Admin/AdminMenu">Admin Menu</a></li>
 
@@ -97,6 +98,7 @@
                 </li>
 
                 }
+              
 
                 @if (User.IsInRole("SuperAdmin"))
                 {
@@ -104,6 +106,8 @@
                     <span>🚪</span> Admin List
                     </a>
                 </li>
+
+               
 
                 }
             </ul>
@@ -133,9 +137,13 @@
 
                     <!-- Dropdown Content -->
                     <div class="user-dropdown-menu" id="userMenu">
-                        <a href="/Member/Profile">
-                            <span>👤</span> Profile
-                        </a>
+                       
+                            <a href="/Member/Profile">
+                                <span>👤</span> Profile
+                            </a>
+                        
+                        
+                      
                         @if (userRole == "Admin")
                         {
                             <a href="/Admin/Dashboard">
@@ -149,9 +157,7 @@
                         <a href="/Member/UpdatePassword" class="UpdatePassword-btn">
                             <span>🚪</span> Update Password
                         </a>
-                        
-
-
+          
                     </div>
                 </div>
             }

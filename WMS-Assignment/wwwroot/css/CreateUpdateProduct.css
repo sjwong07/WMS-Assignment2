@@ -178,3 +178,42 @@
             width: 100%;
         }
 }
+
+.form-photo-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 1rem;
+}
+
+.preview-thumb {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.new-photo {
+    border: 2px solid #4CAF50; /* highlight newly-added, unsaved photos */
+}
+
+.photo-item {
+    position: relative;
+    display: inline-block;
+}
+
+.delete-photo-btn {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: #d9534f;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    font-size: 12px;
+    cursor: pointer;
+    line-height: 1;
+}

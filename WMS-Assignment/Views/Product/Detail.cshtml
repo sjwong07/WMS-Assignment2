@@ -1,1 +1,33 @@
-﻿<h1>Testing </h1>
+﻿@model MenuItem
+
+<div class="product-detail-container">
+    <div class="detail-gallery">
+        @if (Model.Photos != null && Model.Photos.Any())
+        {
+            var first = Model.Photos.First();
+            <img id="mainDetailImage" class="main-detail-img"
+                 src="@Url.Content("~/" + first.PhotoURL.TrimStart('/'))" alt="@Model.Name" />
+
+            <div class="thumb-strip">
+                @foreach (var photo in Model.Photos)
+                {
+                    <img src="@Url.Content("~/" + photo.PhotoURL.TrimStart('/'))"
+                         class="thumb-strip-img"
+                         onclick="document.getElementById('mainDetailImage').src = this.src;" />
+                }
+            </div>
+        }
+        else
+        {
+            <img class="main-detail-img" src="~/images/default-food.jpg" alt="No photo" />
+        }
+    </div>
+
+    <div class="detail-info">
+        <span class="item-code-tag">@Model.Id</span>
+        <h2>@Model.Name</h2>
+        <p class="detail-price">RM @Model.Price.ToString("0.00")</p>
+        <p class="detail-desc">@Model.Description</p>
+        <a asp-controller="Home" asp-action="Menu" class="btn-action btn-cancel">Back to Menu</a>
+    </div>
+</div>

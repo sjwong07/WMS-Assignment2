@@ -1,12 +1,7 @@
 ﻿@model ProductUpdateVM
 
-
 @{
     var hasPhoto = Model?.CurrentPhotoURL != null && Model.CurrentPhotoURL.Count > 0;
-    var photoSrc = hasPhoto
-        ? Url.Content("~/" + Model.CurrentPhotoURL.First().PhotoURL.TrimStart('/'))
-        : "";
-        var photoDisplayStyle = hasPhoto ? "display:block;" : "display:none;";
 }
 
 <div class="product-form-container">
@@ -19,11 +14,21 @@
         <input type="hidden" asp-for="Id" />
         <input type="hidden" asp-for="CurrentPhotoURL" />
 
-        <div class="form-photo-preview">
-            <img id="photoPreview"
-                 src="@photoSrc"
-                 alt="Photo preview"
-                 style="@photoDisplayStyle" />
+        <div class="form-photo-preview" id="photoPreviewContainer">
+            @if (hasPhoto)
+            {
+                foreach (var photo in Model.CurrentPhotoURL)
+                {
+                    <div class="photo-item">
+                        <img src="@Url.Content("~/" + photo.PhotoURL.TrimStart('/'))" class="preview-thumb" alt="Existing photo" />
+                        <button type="submit" form="deleteForm_@photo.Id" class="delete-photo-btn">✕</button>
+                    </div>
+                }
+            }
+            else
+            {
+                <img src="~/images/no-photo.png" class="preview-thumb" alt="No photo" id="noPhotoPlaceholder" />
+            }
         </div>
 
         <div class="form-group">
@@ -65,16 +70,33 @@
         </div>
 
     </form>
+
+    @if (hasPhoto)
+    {
+        foreach (var photo in Model.CurrentPhotoURL)
+        {
+            <form id="deleteForm_@photo.Id" asp-action="DeletePhoto" asp-controller="Admin" method="post" style="display:none;">
+                <input type="hidden" name="photoId" value="@photo.Id" />
+                <input type="hidden" name="menuItemId" value="@Model.Id" />
+            </form>
+        }
+    }
+
 </div>
 
+<script>
+    function previewPhoto(event) {
+        const files = event.target.files;
+        if (!files || files.length === 0) return;
 
-    <script>
-        function previewPhoto(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+        const placeholder = document.getElementById('noPhotoPlaceholder');
+        if (placeholder) placeholder.remove();
 
-            const preview = document.getElementById('photoPreview');
-            preview.src = URL.createObjectURL(file);
-            preview.style.display = 'block';
-        }
-    </script>
+        Array.from(files).forEach(file => {
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(file);
+            img.className = 'preview-thumb new-photo';
+            document.getElementById('photoPreviewContainer').appendChild(img);
+        });
+    }
+</script>

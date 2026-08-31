@@ -94,6 +94,10 @@
                             <input type="hidden" name="menuItemId" value="@itemId" />
                             <input type="hidden" name="tableId" value="T01" />
 
+                            <a asp-controller="Product" asp-action="Detail" asp-route-id="@itemId" class="btn-action btn-detail">
+                                Detail
+                            </a>
+
                             <div class="qty-counter">
                                 <button type="button" class="qty-btn">-</button>
                                 <input type="number" name="quantity" id="qty-@itemId" class="qty-input" value="1" min="1" max="99" readonly />

@@ -104,7 +104,7 @@ public class Helper(IWebHostEnvironment en,
         img.Mutate(x => x.Resize(options));
         img.SaveAsJpeg(path);
 
-        return file;
+        return folder + "/" +  file;
     }
 
     public void DeletePhoto(string fileName, string folder)

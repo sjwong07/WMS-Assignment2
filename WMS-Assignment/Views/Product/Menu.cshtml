@@ -12,24 +12,20 @@
             <input type="search" 
                    id="menuSearchInput" 
                    placeholder="Search For Product..." 
-                   autocomplete="off" 
-                   oninput="filterMenuItems()" />
+                   autocomplete="off" />
         </div>
 
         <!-- Filter Chips -->
         <div class="filter-chips">
-            <button type="button" class="chip active" onclick="setCategoryFilter('ALL', this)">
+            <button type="button" class="chip active" data-category="" onclick="setCategoryFilter('', this)">
                 All
             </button>
-            <button type="button" class="chip" onclick="setCategoryFilter('MAIN', this)">
-                Main Dish
-            </button>
-            <button type="button" class="chip" onclick="setCategoryFilter('SIDE', this)">
-                Side Dish
-            </button>
-            <button type="button" class="chip" onclick="setCategoryFilter('DRINK', this)">
-                Drink / Dessert
-            </button>
+            @foreach (var cat in Model.FoodCategories)
+            {
+                <button type="button" class="chip" data-category="@cat.Id" onclick="setCategoryFilter('@cat.Id', this)">
+                    @cat.Name
+                </button>
+            }
         </div>
 
         <!-- Price Range Inputs -->
@@ -38,15 +34,13 @@
                    id="minPriceInput" 
                    min="0" 
                    step="0.5" 
-                   placeholder="Min (RM)" 
-                   oninput="filterMenuItems()" />
+                   placeholder="Min (RM)" />
             <span>—</span>
             <input type="number" 
                    id="maxPriceInput" 
                    min="0" 
                    step="0.5" 
-                   placeholder="Max (RM)" 
-                   oninput="filterMenuItems()" />
+                   placeholder="Max (RM)" />
         </div>
     </div>
 
@@ -58,10 +52,11 @@
 
 @section foot {
     <script>
-        let activeCategory = 'ALL';
+        let activeCategory = '';
+        let debounceTimer;
 
-        function setCategoryFilter(categoryKey, element) {
-            activeCategory = categoryKey;
+        function setCategoryFilter(categoryId, element) {
+            activeCategory = categoryId;
 
             // Highlight active chip
             document.querySelectorAll('.filter-chips .chip').forEach(btn => btn.classList.remove('active'));
@@ -71,45 +66,29 @@
         }
 
         function filterMenuItems() {
-            const searchQuery = (document.getElementById('menuSearchInput').value || '').toLowerCase().trim();
-            const minPrice = parseFloat(document.getElementById('minPriceInput').value) || 0;
-            const maxPriceVal = parseFloat(document.getElementById('maxPriceInput').value);
-            const maxPrice = isNaN(maxPriceVal) ? Infinity : maxPriceVal;
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                const search = document.getElementById('menuSearchInput').value || '';
+                const minPrice = document.getElementById('minPriceInput').value || '';
+                const maxPrice = document.getElementById('maxPriceInput').value || '';
 
-            const cards = document.querySelectorAll('.food-grid .food-card');
+                const params = new URLSearchParams();
+                if (search) params.append('search', search);
+                if (minPrice) params.append('minPrice', minPrice);
+                if (maxPrice) params.append('maxPrice', maxPrice);
+                if (activeCategory) params.append('category', activeCategory);
 
-            cards.forEach(card => {
-                const id = (card.getAttribute('data-id') || '').toLowerCase().trim();
-                const name = (card.getAttribute('data-name') || '').toLowerCase().trim();
-                const catName = (card.getAttribute('data-category-name') || '').toLowerCase().trim();
-                const catId = (card.getAttribute('data-category-id') || '').toLowerCase().trim();
-                const price = parseFloat(card.getAttribute('data-price')) || 0;
-
-                // 1. Search Query Filter
-                const matchesSearch = name.includes(searchQuery) || id.includes(searchQuery);
-
-                // 2. Comprehensive Category Filter
-                let matchesCategory = false;
-                if (activeCategory === 'ALL') {
-                    matchesCategory = true;
-                } else if (activeCategory === 'MAIN') {
-                    matchesCategory = catName.includes('main') || id.startsWith('m') || id.startsWith('b') || catId.includes('main') || catId === 'c1' || catId === '1';
-                } else if (activeCategory === 'SIDE') {
-                    matchesCategory = catName.includes('side') || id.startsWith('s') || catId.includes('side') || catId === 'c2' || catId === '2';
-                } else if (activeCategory === 'DRINK') {
-                    matchesCategory = catName.includes('drink') || catName.includes('dessert') || catName.includes('beverage') || id.startsWith('d') || catId.includes('drink') || catId === 'c3' || catId === '3';
-                }
-
-                // 3. Price Filter
-                const matchesPrice = price >= minPrice && price <= maxPrice;
-
-                // Display or Hide Card
-                if (matchesSearch && matchesCategory && matchesPrice) {
-                    card.style.display = 'flex';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
+                fetch('/Product/Menu?' + params.toString(), {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(res => res.text())
+                .then(html => {
+                    document.getElementById('target').innerHTML = html;
+                })
+                .catch(err => console.error('Filter request failed:', err));
+            }, 250);
         }
 
         function incrementQty(id) {

@@ -8,8 +8,8 @@
 
     <form asp-action="Create" method="post" enctype="multipart/form-data">
 
-        <div class="form-photo-preview">
-            <img id="photoPreview" src="~/images/no-photo.png" alt="Photo preview" />
+        <div class="form-photo-preview" id="photoPreviewContainer">
+          <img src="~/images/no-photo.png" alt="No photo" id="noPhotoPlaceholder" />
         </div>
 
         <div class="form-group">
@@ -41,7 +41,7 @@
 
         <div class="form-group">
             <label asp-for="Photos"></label>
-            <input asp-for="Photos" type="file" multiple accept="image/*" class="form-control" onchange="previewPhoto(event)" />
+            <input asp-for="Photos" type="file" multiple accept="image/*" class="form-control" onchange="previewPhoto(event)" />            <small id="fileCountLabel" class="text-muted"></small>
             <span asp-validation-for="Photos" class="text-danger"></span>
         </div>
 
@@ -55,10 +55,21 @@
 </div>
 
 <script>
-    function previewPhoto(event) {
-        const file = event.target.files[0];
-        if (!file || file.length === 0) return;
-        const preview = document.getElementById('photoPreview');
-        preview.src = URL.createObjectURL(file);
+        function previewPhoto(event) {
+        const files = event.target.files;
+        const container = document.getElementById('photoPreviewContainer');
+        container.innerHTML = '';
+
+    if (!files || files.length === 0) {
+        container.innerHTML = '<img src="/images/no-photo.png" alt="No photo" />';
+        return;
+    }
+
+    Array.from(files).forEach(file => {
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(file);
+            img.className = 'preview-thumb';
+            container.appendChild(img);
+        });
     }
 </script>
