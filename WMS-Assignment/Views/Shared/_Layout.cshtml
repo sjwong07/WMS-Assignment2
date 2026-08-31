@@ -46,6 +46,8 @@
     <link rel="stylesheet" href="~/css/forgotpassword.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/product-form.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/report.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/order-tables.css" asp-append-version="true" />
 
     <!-- Hide Google Translate Default Top Bar -->
     <style>
@@ -82,10 +84,13 @@
             <li><a href="/">🏠 Home</a></li>
             <li><a href="/Product/Menu">📋 Menu</a></li>                
              <li><a href="/Home/Cart">🛒 Cart</a></li>
+            <li><a href="/Order/History">🧾 Order History</a></li>
 
             @if (User.IsInRole("Admin"))
                 {
                 <li> <a href="/Admin/AdminMenu">Admin Menu</a></li>
+                <li><a href="/Order/Maintenance">🍳 Order Maintenance</a></li>
+                <li><a href="/Order/Report">📊 Revenue Report</a></li>
 
                 <li><a href="/Admin/MemberList" class="">
                     <span>🚪</span> Member List
@@ -102,6 +107,8 @@
                 @if (User.IsInRole("SuperAdmin"))
                 {
                     <li> <a href="/Admin/AdminList" class="">
+                    <li><a href="/Order/Maintenance">🍳 Order Maintenance</a></li>
+                    <li><a href="/Order/Report">📊 Revenue Report</a></li>
                     <span>🚪</span> Admin List
                     </a>
                 </li>

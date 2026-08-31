@@ -5,49 +5,67 @@
     var statuses = new[] { "Pending", "Preparing", "Served", "Completed", "Cancelled" };
 }
 
-<h2>Order Maintenance</h2>
+<div class="pixel-page">
+    <div class="pixel-card">
+        <h2 class="pixel-title">🍳 Order Maintenance 🍳</h2>
+        <p class="pixel-subtitle">Keep the kitchen running smoothly!</p>
 
-<table>
-    <thead>
-        <tr>
-            <th>Order Id</th>
-            <th>Customer</th>
-            <th>Table</th>
-            <th>Order Date</th>
-            <th>Payment Status</th>
-            <th>Total Amount</th>
-            <th>Status</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var order in Model)
+        @if (!Model.Any())
         {
-            <tr>
-                <td>@order.Id</td>
-                <td>@order.User?.Name</td>
-                <td>@order.Table?.Id</td>
-                <td>@order.OrderDate.ToString("dd MMM yyyy, hh:mm tt")</td>
-                <td>@order.PaymentStatus</td>
-                <td>RM @order.TotalAmount.ToString("0.00")</td>
-                <td>
-                    <form asp-action="UpdateStatus" method="post" style="display:inline">
-                        <input type="hidden" name="orderId" value="@order.Id" />
-                        <select name="status" onchange="this.form.submit()">
-                            @foreach (var s in statuses)
-                            {
-                                if (s == order.Status)
-                                {
-                                    <option value="@s" selected>@s</option>
-                                }
-                                else
-                                {
-                                    <option value="@s">@s</option>
-                                }
-                            }
-                        </select>
-                    </form>
-                </td>
-            </tr>
+            <p class="pixel-empty">No orders to manage yet.</p>
         }
-    </tbody>
-</table>
+        else
+        {
+            <div class="pixel-table-wrap">
+                <table class="pixel-table">
+                    <thead>
+                        <tr>
+                            <th>Order Id</th>
+                            <th>Customer</th>
+                            <th>Table</th>
+                            <th>Order Date</th>
+                            <th>Payment</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in Model)
+                        {
+                            <tr>
+                                <td>@order.Id</td>
+                                <td>@order.User?.Name</td>
+                                <td>@order.Table?.Id</td>
+                                <td>@order.OrderDate.ToString("dd MMM yyyy, hh:mm tt")</td>
+                                <td>@order.PaymentStatus</td>
+                                <td>RM @order.TotalAmount.ToString("0.00")</td>
+                                <td>
+                                    <form asp-action="UpdateStatus" method="post" style="display:inline">
+                                        <input type="hidden" name="orderId" value="@order.Id" />
+                                        <select name="status" class="pixel-select" onchange="this.form.submit()">
+                                            @foreach (var s in statuses)
+                                            {
+                                                if (s == order.Status)
+                                                {
+                                                    <option value="@s" selected>@s</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@s">@s</option>
+                                                }
+                                            }
+                                        </select>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+        <div style="text-align:center;">
+            <a href="/Product/Menu" class="pixel-back-link">← BACK</a>
+        </div>
+    </div>
+</div>
