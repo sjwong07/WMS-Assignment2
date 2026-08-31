@@ -3,31 +3,62 @@
     ViewData["Title"] = "Revenue Report";
     var labels = ((IEnumerable<dynamic>)Model).Select(d => (string)d.Category).ToList();
     var values = ((IEnumerable<dynamic>)Model).Select(d => (decimal)d.Total).ToList();
+    var quantities = ((IEnumerable<dynamic>)Model).Select(d => (int)d.Quantity).ToList();
 }
 
-<h2>Revenue by Food Category</h2>
+<div class="report-page">
+    <div class="report-card">
+        <h2 class="report-title">🍰 Revenue by Food Category 🍰</h2>
+        <p class="report-subtitle">See what our little foodies love most!</p>
 
-<canvas id="revenueChart" style="max-width:500px"></canvas>
+        <div class="report-chart-wrap">
+            <canvas id="revenueChart" width="420" height="420"></canvas>
+        </div>
+
+        <div style="text-align:center;">
+            <a href="/Product/Menu" class="report-back-link">← BACK</a>
+        </div>
+    </div>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script>
     const labels = @Html.Raw(JsonSerializer.Serialize(labels));
     const values = @Html.Raw(JsonSerializer.Serialize(values));
+    const quantities = @Html.Raw(JsonSerializer.Serialize(quantities));
 
     new Chart(document.getElementById('revenueChart'), {
-    type: 'pie',
-    data: {
-    labels: labels,
-    datasets: [{
-    label: 'Revenue (RM)',
-    data: values,
-    backgroundColor: ['#4e79a7', '#f28e2b', '#e15759', '#76b7b2', '#59a14f']
-    }]
-    },
-    options: {
-    plugins: {
-    legend: { position: 'right' }
-    }
-    }
+        type: 'pie',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Revenue (RM)',
+                data: values,
+                backgroundColor: ['#4e79a7', '#f28e2b', '#e15759', '#76b7b2', '#59a14f'],
+                borderColor: '#3a2b22',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: false,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: { font: { size: 13 } }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const idx = context.dataIndex;
+                            const category = labels[idx];
+                            const revenue = values[idx].toFixed(2);
+                            const qty = quantities[idx];
+                            return `${category}: RM ${revenue} (${qty} items sold)`;
+                        }
+                    }
+                }
+            }
+        }
     });
 </script>

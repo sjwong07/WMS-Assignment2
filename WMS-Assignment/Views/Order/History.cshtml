@@ -2,48 +2,59 @@
 
 @{
     ViewData["Title"] = "Order History";
-    bool isStaffOrAdmin = User.IsInRole("RS01") || User.IsInRole("RA01");
+    bool isStaffOrAdmin = User.IsInRole("RS01") || User.IsInRole("RA01") || User.IsInRole("Admin") || User.IsInRole("SuperAdmin");
 }
 
-<h2>Order History</h2>
+<div class="pixel-page">
+    <div class="pixel-card">
+        <h2 class="pixel-title">🧾 Order History 🧾</h2>
+        <p class="pixel-subtitle">A look back at every tasty order!</p>
 
-@if (!Model.Any())
-{
-    <p>No orders found.</p>
-}
-else
-{
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Order Id</th>
-                @if (isStaffOrAdmin)
-                {
-                    <th>Customer</th>
-                }
-                <th>Table</th>
-                <th>Order Date</th>
-                <th>Status</th>
-                <th>Payment Status</th>
-                <th>Total Amount</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var order in Model)
-            {
-                <tr>
-                    <td>@order.Id</td>
-                    @if (isStaffOrAdmin)
-                    {
-                        <td>@order.User?.Name</td>
-                    }
-                    <td>@order.Table?.Id</td>
-                    <td>@order.OrderDate.ToString("dd MMM yyyy, hh:mm tt")</td>
-                    <td>@order.Status</td>
-                    <td>@order.PaymentStatus</td>
-                    <td>RM @order.TotalAmount.ToString("0.00")</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+        @if (!Model.Any())
+        {
+            <p class="pixel-empty">No orders found yet.</p>
+        }
+        else
+        {
+            <div class="pixel-table-wrap">
+                <table class="pixel-table">
+                    <thead>
+                        <tr>
+                            <th>Order Id</th>
+                            @if (isStaffOrAdmin)
+                            {
+                                <th>Customer</th>
+                            }
+                            <th>Table</th>
+                            <th>Order Date</th>
+                            <th>Status</th>
+                            <th>Payment</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in Model)
+                        {
+                            <tr>
+                                <td>@order.Id</td>
+                                @if (isStaffOrAdmin)
+                                {
+                                    <td>@order.User?.Name</td>
+                                }
+                                <td>@order.Table?.Id</td>
+                                <td>@order.OrderDate.ToString("dd MMM yyyy, hh:mm tt")</td>
+                                <td><span class="pixel-badge">@order.Status</span></td>
+                                <td>@order.PaymentStatus</td>
+                                <td>RM @order.TotalAmount.ToString("0.00")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+        <div style="text-align:center;">
+            <a href="/Product/Menu" class="pixel-back-link">← BACK</a>
+        </div>
+    </div>
+</div>

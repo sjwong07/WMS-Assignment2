@@ -96,11 +96,12 @@ public class OrderController(DB db) : Controller
             .Include(od => od.MenuItem).ThenInclude(m => m.Category)
             .GroupBy(od => od.MenuItem.Category.Name)
             .Select(g => new
-            {
-                Category = g.Key,
-                Total = g.Sum(od => od.SubTotal)
-            })
-            .ToListAsync();
+         {
+        Category = g.Key,
+        Total = g.Sum(od => od.SubTotal),
+        Quantity = g.Sum(od => od.Quantity)
+    })
+    .ToListAsync();
 
         return View("Piechart", data);
     }
