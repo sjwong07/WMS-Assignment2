@@ -1,29 +1,30 @@
 ﻿@model List<BannedUser>
 
+<div class="banned-list-container">
+    <form asp-controller="Admin" asp-action="ClearAllRecord" method="post">
+        <button type="submit" class="btn-clear-all">Clear All Records</button>
+    </form>
 
-<form asp-controller="Admin" asp-action="ClearAllRecord" method="post">
-    <button type="submit" class="btn btn-danger mb-3">Clear All Records</button>
-</form>
-
-<h2>Banned User Record</h2>
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Username</th>
-            <th>Email</th>
-            <th>Reason</th>
-            <th>Banned Date</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
+    <h2>Banned User Record</h2>
+    <table class="banned-table">
+        <thead>
             <tr>
-                <td>@item.User?.Username</td>
-                <td>@item.User?.Email</td>
-                <td>@item.Reason</td>
-                <td>@item.BannedDate.ToString("yyyy-MM-dd HH:mm")</td>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Reason</th>
+                <th>Banned Date</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.User?.Username</td>
+                    <td>@item.User?.Email</td>
+                    <td>@item.Reason</td>
+                    <td>@item.BannedDate.ToString("yyyy-MM-dd HH:mm")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

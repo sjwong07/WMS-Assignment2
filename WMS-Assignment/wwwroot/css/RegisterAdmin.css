@@ -1,0 +1,86 @@
+﻿.register-admin-container {
+    max-width: 480px;
+    margin: 60px auto;
+    background: #fff;
+    padding: 36px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    font-family: 'Segoe UI', sans-serif;
+}
+
+    .register-admin-container h2 {
+        color: #2d2a26;
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+
+    .register-admin-container .text-danger {
+        color: #dc2626;
+        font-size: 13px;
+        margin-bottom: 16px;
+        display: block;
+    }
+
+    .register-admin-container .form-group {
+        margin-bottom: 18px;
+    }
+
+    .register-admin-container label {
+        display: block;
+        font-weight: 600;
+        color: #2d2a26;
+        font-size: 14px;
+        margin-bottom: 6px;
+    }
+
+    .register-admin-container input {
+        width: 100%;
+        padding: 11px 14px;
+        border: 1px solid #e5ddd5;
+        border-radius: 10px;
+        font-size: 14px;
+        box-sizing: border-box;
+        outline: none;
+    }
+
+        .register-admin-container input:focus {
+            border-color: #e8834e;
+        }
+
+    .register-admin-container span.field-validation-error {
+        color: #dc2626;
+        font-size: 12px;
+        margin-top: 4px;
+        display: block;
+    }
+
+.register-admin-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 26px;
+}
+
+    .register-admin-actions a {
+        color: #7a7a7a;
+        text-decoration: none;
+        font-size: 14px;
+    }
+
+        .register-admin-actions a:hover {
+            color: #e8834e;
+        }
+
+.btn-register-create {
+    background-color: #d97736;
+    color: #fff;
+    border: none;
+    padding: 12px 26px;
+    border-radius: 22px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+    .btn-register-create:hover {
+        background-color: #c2652a;
+    }

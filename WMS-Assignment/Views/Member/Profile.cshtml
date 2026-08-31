@@ -4,12 +4,14 @@
     ViewBag.Title = "My Profile";
 }
 
-<div class="menu-page-container" style="padding: 2.5rem 1rem; display: flex; justify-content: center; align-items: center; min-height: 80vh;">
-    <div style="width: 100%; max-width: 480px; background: #ffffff; padding: 2.2rem; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); border: 1px solid #fed7aa;">
+
+
+<div class="profile-page-wrapper">
+    <div class="profile-card">
 
         @if (TempData["Success"] != null)
         {
-            <div style="background: #e8f5e9; color: #2e7d32; padding: 10px 14px; border-radius: 12px; margin-bottom: 18px; font-size: 0.9rem; font-weight: 600; text-align: center;">
+            <div class="profile-success-msg">
                 ✓ @TempData["Success"]
             </div>
         }
@@ -18,53 +20,46 @@
             @Html.AntiForgeryToken()
 
             <!-- Profile Photo & Live Preview -->
-            <div style="text-align: center; margin-bottom: 1.8rem;">
-                <div style="position: relative; display: inline-block;">
+            <div class="avatar-block">
+                <div class="avatar-wrap">
                     @if (!string.IsNullOrEmpty(Model.CurrentPhotoURL))
                     {
-                        <img id="avatarPreview" src="~/photos/@Model.CurrentPhotoURL" alt="Profile Photo"
-                             style="width: 108px; height: 108px; border-radius: 50%; object-fit: cover; border: 3px solid #d97736; box-shadow: 0 6px 14px rgba(217,119,54,0.25);" />
+                        <img id="avatarPreview" class="avatar-img" src="~/photos/@Model.CurrentPhotoURL" alt="Profile Photo" />
                     }
                     else
                     {
-                        <div id="avatarPlaceholder"
-                             style="width: 108px; height: 108px; border-radius: 50%; background: #d97736; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: 700; margin: 0 auto; box-shadow: 0 6px 14px rgba(217,119,54,0.25);">
+                        <div id="avatarPlaceholder" class="avatar-placeholder">
                             @(Model.Username.Length >= 2 ? Model.Username.Substring(0, 2).ToUpper() : "ME")
                         </div>
-                        <img id="avatarPreview" src="#" alt="Profile Photo"
-                             style="width: 108px; height: 108px; border-radius: 50%; object-fit: cover; border: 3px solid #d97736; display: none;" />
+                        <img id="avatarPreview" class="avatar-img hidden" src="#" alt="Profile Photo" />
                     }
 
-                    <label for="photoUpload" title="Change Photo"
-                           style="position: absolute; bottom: 2px; right: 2px; background: #d97736; color: #ffffff; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 3px solid #ffffff; font-size: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.15);">
+                    <label for="photoUpload" title="Change Photo" class="avatar-upload-btn">
                         📷
                     </label>
                     <input type="file" id="photoUpload" asp-for="Photo" accept="image/*" style="display: none;" onchange="previewImage(this);" />
                 </div>
 
-                <h2 style="margin: 12px 0 4px 0; font-size: 1.35rem; font-weight: 700; color: #1f2937;">@Model.Username</h2>
-                <span style="font-size: 0.8rem; background: #fdf6f0; color: #d97736; padding: 3px 12px; border-radius: 20px; font-weight: 700; border: 1px solid #fed7aa; display: inline-block;">Member</span>
+                <h2 class="profile-username">@Model.Username</h2>
+                <span class="profile-role-badge">Member</span>
             </div>
 
             <!-- Username Field -->
-            <div style="margin-bottom: 1.2rem;">
-                <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #4b5563; margin-bottom: 6px;">Username</label>
-                <input type="text" asp-for="Username" required
-                       style="width: 100%; padding: 11px 14px; border: 1.5px solid #fed7aa; border-radius: 12px; font-size: 0.95rem; outline: none; background: #fffdfa;" />
-                <span asp-validation-for="Username" style="color: #dc2626; font-size: 0.8rem; margin-top: 4px; display: block;"></span>
+            <div class="profile-field">
+                <label>Username</label>
+                <input type="text" asp-for="Username" required />
+                <span asp-validation-for="Username" class="profile-field-error"></span>
             </div>
 
             <!-- Email Field -->
-            <div style="margin-bottom: 1.6rem;">
-                <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #4b5563; margin-bottom: 6px;">Email Address</label>
-                <input type="email" asp-for="Email" required
-                       style="width: 100%; padding: 11px 14px; border: 1.5px solid #fed7aa; border-radius: 12px; font-size: 0.95rem; outline: none; background: #fffdfa;" />
-                <span asp-validation-for="Email" style="color: #dc2626; font-size: 0.8rem; margin-top: 4px; display: block;"></span>
+            <div class="profile-field email-field">
+                <label>Email Address</label>
+                <input type="email" asp-for="Email" required />
+                <span asp-validation-for="Email" class="profile-field-error"></span>
             </div>
 
             <!-- Submit Button -->
-            <button type="submit"
-                    style="width: 100%; background: #d97736; color: #ffffff; border: none; padding: 13px; border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 12px rgba(217,119,54,0.3);">
+            <button type="submit" class="profile-save-btn">
                 Save Changes
             </button>
         </form>
@@ -75,12 +70,12 @@
     function previewImage(input) {
         if (input.files && input.files[0]) {
             const reader = new FileReader();
-            reader.onload = function (e) {
+            reader.onload = function(e) {
                 const preview = document.getElementById('avatarPreview');
                 const placeholder = document.getElementById('avatarPlaceholder');
 
                 preview.src = e.target.result;
-                preview.style.display = 'block';
+                preview.classList.remove('hidden');
 
                 if (placeholder) {
                     placeholder.style.display = 'none';

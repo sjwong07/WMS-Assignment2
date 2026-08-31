@@ -9,12 +9,14 @@ namespace WMS_Assignment.Controllers;
 [Authorize]
 public class AdminController(DB db, Helper hp) : Controller
 {
+    [Authorize(Roles = "Admin,SuperAdmin")]
     public IActionResult AdminMenu()
     {
         var m = db.MenuItems.Include(x => x.Category).Include(x => x.Photos).ToList();
         return View(m);
     }
 
+    [Authorize(Roles ="Admin,SuperAdmin")]
     public IActionResult Create()
     {
         var vm = new ProductInsertVM
@@ -49,6 +51,7 @@ public class AdminController(DB db, Helper hp) : Controller
                 if (photo == null || photo.Length == 0) continue;
 
                 var error = hp.ValidatePhoto(photo);
+
                 if (!string.IsNullOrEmpty(error))
                 {
                     ModelState.AddModelError("Photos", error);
@@ -57,6 +60,7 @@ public class AdminController(DB db, Helper hp) : Controller
                 }
 
                 var url = hp.SavePhoto(photo, "Menu");
+
                 item.Photos.Add(new MenuItemPhoto { PhotoURL = url });
             }
         }
@@ -70,20 +74,21 @@ public class AdminController(DB db, Helper hp) : Controller
 
     private string GenerateNextId()
     {
-        var lastId = db.MenuItems
-            .OrderByDescending(x => x.Id)
-            .Select(x => x.Id)
-            .FirstOrDefault();
+        var maxNum = db.MenuItems
+            .Where(x => x.Id.StartsWith("P"))
+            .Select(x => x.Id.Substring(1))
+            .AsEnumerable()                         // switch to LINQ-to-Objects for TryParse
+            .Select(s => int.TryParse(s, out int n) ? n : 0)
+            .DefaultIfEmpty(0)
+            .Max();
 
-        int next = 1;
-        if (!string.IsNullOrEmpty(lastId) && int.TryParse(lastId.Substring(1), out int n))
-        {
-            next = n + 1;
-        }
-
+        int next = maxNum + 1;
         return "P" + next.ToString("000");
     }
 
+
+
+    [Authorize(Roles = "Admin,SuperAdmin")]
     public IActionResult Update(string id)
     {
         var item = db.MenuItems.Include(x => x.Photos).FirstOrDefault(x => x.Id == id);
@@ -177,6 +182,7 @@ public class AdminController(DB db, Helper hp) : Controller
         return RedirectToAction("AdminMenu");
     }
 
+    [Authorize(Roles = "SuperAdmin")]
     public IActionResult AdminList()
     {
         var admins = db.Users.OfType<Admin>().Select(a => new AdminListVM
@@ -192,6 +198,7 @@ public class AdminController(DB db, Helper hp) : Controller
         return View(admins);
     }
 
+    [Authorize(Roles = "SuperAdmin")]
     public IActionResult BanAdmin(string id)
     {
         var admin = db.Users.OfType<Admin>().FirstOrDefault(a => a.Id == id);
@@ -235,7 +242,7 @@ public class AdminController(DB db, Helper hp) : Controller
         return RedirectToAction("AdminList");
     }
 
-
+    [Authorize(Roles = "Admin,SuperAdmin")]
     public IActionResult MemberList()
     {
         var members = db.Users.OfType<Member>().Select(u => new MemberListVM
@@ -250,6 +257,7 @@ public class AdminController(DB db, Helper hp) : Controller
         return View(members);
     }
 
+    [Authorize(Roles = "Admin,SuperAdmin")]
     public IActionResult BanMember(string id)
     {
         var member = db.Users.OfType<Member>().FirstOrDefault(m => m.Id == id);
@@ -293,6 +301,7 @@ public class AdminController(DB db, Helper hp) : Controller
         return RedirectToAction("MemberList");
     }
 
+    [Authorize(Roles = "Admin,SuperAdmin")]
     public IActionResult BannedUser()
     {
         var records = db.BannedUsers

@@ -59,5 +59,16 @@ public class ProductController(DB db, Helper hp) : Controller
         return View(vm);
     }
 
-   
+    public IActionResult Detail(string id)
+    {
+        var item = db.MenuItems
+            .Include(x => x.Category)
+            .Include(x => x.Photos)
+            .FirstOrDefault(x => x.Id == id);
+
+        if (item == null) return NotFound();
+
+        return View(item);
+    }
+
 }

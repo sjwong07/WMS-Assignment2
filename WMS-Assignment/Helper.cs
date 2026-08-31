@@ -30,6 +30,7 @@ public class Helper(IWebHostEnvironment en,
         List<Claim> claims = [
             new(ClaimTypes.Name, username),
             new(ClaimTypes.Role, role), // Enabled role claim for proper authorization
+           
         ];
 
         ClaimsIdentity identity = new(claims, "CookieAuth");
@@ -103,7 +104,7 @@ public class Helper(IWebHostEnvironment en,
         img.Mutate(x => x.Resize(options));
         img.SaveAsJpeg(path);
 
-        return folder + "/" + file;
+        return folder + "/" +  file;
     }
 
     public void DeletePhoto(string fileName, string folder)

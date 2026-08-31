@@ -40,8 +40,23 @@
                 else categoryName = "Drink / Dessert";
             }
 
-            string photoName = $"{itemId}.jpg";
+            string photoUrl = "/images/default-food.jpg";
+
+            try
+            {
+                var firstPhoto = ((IEnumerable<dynamic>)item.Photos)?.Cast<dynamic>().FirstOrDefault();
+                string raw = firstPhoto != null ? Convert.ToString(firstPhoto.PhotoURL) : null;
+                if (!string.IsNullOrWhiteSpace(raw))
+                {
+                    photoUrl = raw.StartsWith("/") ? raw : "/" + raw;
+                }
+            }
+            catch{ }
+
+            
+            
             decimal price = 0;
+
             try { price = Convert.ToDecimal(item.Price); } catch { }
 
             <div class="food-card" 
@@ -53,10 +68,10 @@
 
                 <!-- Image with Category Badge -->
                 <div class="food-img-wrapper">
-                    <img src="/Menu/@photoName" 
+                    <img src="@photoUrl" 
                          alt="@itemName" 
                          class="food-img" 
-                         onerror="this.onerror=null; this.src='/uploads/@photoName'; this.onerror=function(){this.src='/images/default-food.jpg';};" />
+                         onerror="this.onerror=null; this.src= '/images/default-food.jpg';" />
                     
                     <span class="category-badge">@categoryName</span>
                 </div>
@@ -78,6 +93,10 @@
                         <form asp-controller="Home" asp-action="AddToOrder" method="post" class="order-controls">
                             <input type="hidden" name="menuItemId" value="@itemId" />
                             <input type="hidden" name="tableId" value="T01" />
+
+                            <a asp-controller="Product" asp-action="Detail" asp-route-id="@itemId" class="btn-action btn-detail">
+                                Detail
+                            </a>
 
                             <div class="qty-counter">
                                 <button type="button" class="qty-btn">-</button>
