@@ -74,9 +74,9 @@ public class Helper(IWebHostEnvironment en,
         {
             return "Only JPG, WEBP and PNG photo is allowed";
         }
-        else if (f.Length > 1 * 1024 * 1024)
+        else if (f.Length > 3 * 1024 * 1024)
         {
-            return "Photo size cannot be more than 1MB";
+            return "Photo size cannot be more than 3MB";
         }
 
         return "";
