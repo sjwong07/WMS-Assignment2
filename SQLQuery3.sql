@@ -1,1 +1,0 @@
-SELECT Username, Email, RoleId FROM Users WHERE Username = 'admin123';
