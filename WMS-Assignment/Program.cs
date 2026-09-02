@@ -36,9 +36,15 @@ builder.Services.AddAuthorization();
 builder.Services.AddScoped<Helper>();
 
 // 5. Database Connection
+var databasePath = Path.Combine(
+    builder.Environment.ContentRootPath,
+    "Restaurant.mdf"
+);
+
 builder.Services.AddSqlServer<DB>($@"
     Data Source=(LocalDB)\MSSQLLocalDB;
-    AttachDbFilename={builder.Environment.ContentRootPath}\Restaurant.mdf;
+    AttachDbFilename={databasePath};
+    Integrated Security=True;
 ");
 
 // 6. Configure Authentication with Cookie & Persistent Login Support
@@ -69,10 +75,12 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<DB>();
     var hp = scope.ServiceProvider.GetRequiredService<Helper>();
 
-    
 
 
-    var superadmin = db.SuperAdmins.FirstOrDefault(sa => sa.Username.ToLower() == "SuperAdmin123");
+
+    var superadmin = db.SuperAdmins.FirstOrDefault(
+    sa => sa.Username.ToLower() == "superadmin123"
+);
 
     if (superadmin == null)
     {

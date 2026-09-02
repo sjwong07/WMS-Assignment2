@@ -9,10 +9,10 @@
         <!-- Search Bar -->
         <div class="search-box">
             <i>🔍</i>
-            <input type="search" 
-                   id="menuSearchInput" 
-                   placeholder="Search For Product..." 
-                   autocomplete="off" 
+            <input type="search"
+                   id="menuSearchInput"
+                   placeholder="Search For Product..."
+                   autocomplete="off"
                    oninput="filterMenuItems()" />
         </div>
 
@@ -31,18 +31,18 @@
 
         <!-- Price Range Inputs -->
         <div class="price-filters">
-            <input type="number" 
-                   id="minPriceInput" 
-                   min="0" 
-                   step="0.5" 
-                   placeholder="Min (RM)" 
+            <input type="number"
+                   id="minPriceInput"
+                   min="0"
+                   step="0.5"
+                   placeholder="Min (RM)"
                    oninput="filterMenuItems()" />
             <span>—</span>
-            <input type="number" 
-                   id="maxPriceInput" 
-                   min="0" 
-                   step="0.5" 
-                   placeholder="Max (RM)" 
+            <input type="number"
+                   id="maxPriceInput"
+                   min="0"
+                   step="0.5"
+                   placeholder="Max (RM)"
                    oninput="filterMenuItems()" />
         </div>
     </div>
@@ -86,11 +86,11 @@
                         'X-Requested-With': 'XMLHttpRequest'
                     }
                 })
-                .then(res => res.text())
-                .then(html => {
-                    document.getElementById('target').innerHTML = html;
-                })
-                .catch(err => console.error('Filter request failed:', err));
+                    .then(res => res.text())
+                    .then(html => {
+                        document.getElementById('target').innerHTML = html;
+                    })
+                    .catch(err => console.error('Filter request failed:', err));
             }, 250);
         }
 
@@ -106,6 +106,24 @@
             if (input && parseInt(input.value) > 1) {
                 input.value = parseInt(input.value) - 1;
             }
+        }
+
+        function toggleFav(id, btn) {
+            fetch('/Product/ToggleFavorite?menuItemId=' + id, {
+                method: 'POST',
+                headers: {
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        btn.classList.toggle('active', data.isFavorite);
+                    } else if (data.message === 'Unauthorized') {
+                        window.location.href = '/Security/Login';
+                    }
+                })
+                .catch(err => console.error('Favorite toggle failed:', err));
         }
     </script>
 }

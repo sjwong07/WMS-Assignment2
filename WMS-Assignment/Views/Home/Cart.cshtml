@@ -1,17 +1,25 @@
 ﻿@model Order
+@inject WMS_Assignment.Models.DB db
 
 @{
     ViewData["Title"] = "Your Order & Cart";
     var tableId = Model?.Table?.Id ?? Model?.TableId ?? "T01";
     var hasItems = Model != null && Model.OrderDetails != null && Model.OrderDetails.Any();
     var totalAmount = Model?.TotalAmount ?? 0;
+    var tables = db.Tables.ToList();
 }
-
 <div class="cart-page-container">
     <div class="cart-header-title">
         <h2>🛍️ Your Order</h2>
         <span class="table-badge">📍 Table: <strong>@tableId</strong></span>
     </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-warning" style="background: #fdf3e6; color: #8a6d3b; padding: 12px 20px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #faebcc; font-weight: 500;">
+            ⚠️ @TempData["Error"]
+        </div>
+    }
 
     @if (hasItems)
     {
@@ -38,10 +46,19 @@
                                 <tr>
                                     <td>
                                         <div class="cart-item-meta">
-                                            <img src="/photos/@photoName" 
-                                                 alt="@menuItem?.Name" 
-                                                 class="cart-item-img"
-                                                 onerror="this.onerror=null; this.src='/uploads/@photoName'; this.onerror=function(){this.src='/images/default-food.jpg';};" />
+                                            <div class="cart-item-img-container" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; background: #f4ece1; border-radius: 8px; overflow: hidden; flex-shrink: 0; position: relative;">
+                                                <!-- Fallback SVG Container (Hidden by default, shown if image fails or missing) -->
+                                                <div class="cart-fallback-icon" style="position: absolute; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">
+                                                    <svg viewBox="0 0 24 24" width="30" height="30" fill="#d08c47">
+                                                        <path d="M2 21h18v-2H2M20 8h-2V5h2m0-2H4v5h14v2H4s-2 0-2 2v2c0 2 2 2 2 2h14c2 0 2-2 2-2v-2c0-2-2-2-2-2z" />
+                                                    </svg>
+                                                </div>
+                                                <img src="/photos/@photoName"
+                                                     alt="@menuItem?.Name"
+                                                     class="cart-item-img"
+                                                     style="width: 100%; height: 100%; object-fit: cover; position: relative; z-index: 2;"
+                                                     onerror="this.onerror=function(){this.style.display='none';}; this.src='/uploads/@photoName';" />
+                                            </div>
                                             <div>
                                                 <div class="cart-item-name">@(menuItem?.Name ?? "Food Item")</div>
                                                 <small class="cart-item-cat">@(menuItem?.Category?.Name ?? "Drink / Dessert")</small>
@@ -90,9 +107,24 @@
                     <strong>@(Model.OrderDetails?.Sum(d => d.Quantity) ?? 0) item(s)</strong>
                 </div>
 
-                <div class="summary-line">
-                    <span>Table Number:</span>
-                    <strong>@tableId</strong>
+                <div class="summary-line" style="flex-direction: column; align-items: flex-start; gap: 8px; margin-bottom: 15px;">
+                    <span>Select Table Number:</span>
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap; width: 100%;">
+                        @foreach (var t in tables)
+                        {
+                            var isSelected = t.Id == tableId;
+                            var btnBg = isSelected ? "#d08c47" : "#f4ece1";
+                            var btnColor = isSelected ? "#ffffff" : "#332920";
+
+                            <form asp-action="UpdateTable" method="post" style="margin: 0;">
+                                <input type="hidden" name="orderId" value="@Model.Id" />
+                                <input type="hidden" name="tableId" value="@t.Id" />
+                                <button type="submit" style="background: @btnBg; color: @btnColor; border: 1px solid #dcd0c0; padding: 5px 10px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                                    @t.Id
+                                </button>
+                            </form>
+                        }
+                    </div>
                 </div>
 
                 <div class="summary-line">

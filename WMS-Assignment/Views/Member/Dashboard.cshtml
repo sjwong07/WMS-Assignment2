@@ -1,0 +1,41 @@
+﻿@model IEnumerable<Order>
+
+@{
+    ViewData["Title"] = "Member Dashboard";
+    var totalOrders = ViewBag.TotalOrders ?? 0;
+    var activeOrders = ViewBag.ActiveOrders ?? 0;
+    var totalSpent = ViewBag.TotalSpent ?? 0m;
+}
+
+<div class="member-dashboard-wrapper">
+    <div class="dashboard-banner">
+        <h2>📊 Member Dashboard</h2>
+        <p>Welcome back! Here is an overview of your activity at WagEat Cafe.</p>
+    </div>
+
+    <!-- Stats Grid Cards -->
+    <div class="dashboard-stats-container">
+        <div class="stat-card">
+            <span class="stat-title">Total Orders</span>
+            <span class="stat-number">@totalOrders</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-title">Active / Pending</span>
+            <span class="stat-number stat-pending">@activeOrders</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-title">Total Spent</span>
+            <span class="stat-number stat-spent">RM @totalSpent.ToString("0.00")</span>
+        </div>
+    </div>
+
+    <!-- Quick Actions Card -->
+    <div class="dashboard-quick-actions">
+        <h3>Quick Actions</h3>
+        <div class="action-buttons-group">
+            <a href="/Product/Menu" class="action-btn btn-primary-custom">Browse Menu ➔</a>
+            <a href="/Home/Cart" class="action-btn btn-secondary-custom">View Cart</a>
+            <a href="/Order/History" class="action-btn btn-secondary-custom">Order History</a>
+        </div>
+    </div>
+</div>

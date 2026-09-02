@@ -1,4 +1,4 @@
-@model dynamic
+﻿@model dynamic
 
 @{
     IEnumerable<dynamic>? items = null;
@@ -16,7 +16,6 @@
         }
     }
 }
-
 <div class="food-grid">
     @if (items != null && items.Any())
     {
@@ -40,39 +39,52 @@
                 else categoryName = "Drink / Dessert";
             }
 
-            string photoUrl = "/images/default-food.jpg";
+            // Pick a matching animated food/drink SVG graphic based on category or item code
+            string fallbackSvg = categoryName.Contains("Main", StringComparison.OrdinalIgnoreCase) || itemId.StartsWith("M", StringComparison.OrdinalIgnoreCase)
+                ? "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><style>.bowl{animation:bounce 2s ease-in-out infinite;}@keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}</style><circle cx='100' cy='100' r='90' fill='%23f9f3ec'/><g class='bowl'><path d='M50 110 Q100 150 150 110 Z' fill='%23e5a96a'/><ellipse cx='100' cy='110' rx='50' ry='15' fill='%23d08c47'/><path d='M70 90 Q100 70 130 90' stroke='%23fff' stroke-width='4' fill='none' stroke-linecap='round'/></g><text x='50% ' y='170' text-anchor='middle' fill='%238a7b6b' font-family='sans-serif' font-size='14' font-weight='bold'>🍲 Fresh Dish</text></svg>"
+                : categoryName.Contains("Side", StringComparison.OrdinalIgnoreCase) || itemId.StartsWith("S", StringComparison.OrdinalIgnoreCase)
+                ? "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><style>.plate{animation:pulse 2s ease-in-out infinite;}@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.05);}}</style><circle cx='100' cy='100' r='90' fill='%23f9f3ec'/><circle class='plate' cx='100' cy='100' r='55' fill='%23e5a96a'/><circle cx='100' cy='100' r='40' fill='%23f9f3ec'/><text x='50%' y='170' text-anchor='middle' fill='%238a7b6b' font-family='sans-serif' font-size='14' font-weight='bold'>🥗 Side Snack</text></svg>"
+                : "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><style>.steam{animation:rise 2s ease-in-out infinite;}.cup{animation:tilt 3s ease-in-out infinite; transform-origin:center;}@keyframes rise{0%{transform:translateY(0); opacity:1;}100%{transform:translateY(-15px); opacity:0;}}@keyframes tilt{0%,100%{transform:rotate(0deg);}50%{transform:rotate(5deg);}}</style><circle cx='100' cy='100' r='90' fill='%23f9f3ec'/><g class='cup'><path d='M70 90 h60 v40 a20 20 0 0 1-20 20 h-20 a20 20 0 0 1-20-20 z' fill='%23e5a96a'/><path d='M130 100 h10 a10 10 0 0 1 10 10 v10 a10 10 0 0 1-10 10 h-10' stroke='%23e5a96a' stroke-width='6' fill='none'/></g><path class='steam' d='M90 70 q5 -10 0 -20' stroke='%23d08c47' stroke-width='3' fill='none' stroke-linecap='round'/><path class='steam' d='M110 75 q-5 -10 0 -20' stroke='%23d08c47' stroke-width='3' fill='none' stroke-linecap='round'/><text x='50%' y='170' text-anchor='middle' fill='%238a7b6b' font-family='sans-serif' font-size='14' font-weight='bold'>☕ Warm Brew</text></svg>";
+
+            string photoUrl = fallbackSvg;
 
             try
             {
-                var firstPhoto = ((IEnumerable<dynamic>)item.Photos)?.Cast<dynamic>().FirstOrDefault();
-                string raw = firstPhoto != null ? Convert.ToString(firstPhoto.PhotoURL) : null;
-                if (!string.IsNullOrWhiteSpace(raw))
+                string directRaw = Convert.ToString(item.PhotoURL ?? "").Replace("\\", "/").Trim();
+                if (!string.IsNullOrWhiteSpace(directRaw))
                 {
-                    photoUrl = raw.StartsWith("/") ? raw : "/" + raw;
+                    photoUrl = directRaw.StartsWith("/") ? directRaw : "/photos/" + directRaw;
+                }
+                else
+                {
+                    var firstPhoto = ((IEnumerable<dynamic>)item.Photos)?.Cast<dynamic>().FirstOrDefault();
+                    string raw = firstPhoto != null ? Convert.ToString(firstPhoto.PhotoURL)?.Replace("\\", "/")?.Trim() : null;
+                    if (!string.IsNullOrWhiteSpace(raw))
+                    {
+                        photoUrl = raw.StartsWith("/") ? raw : "/photos/" + raw;
+                    }
                 }
             }
-            catch{ }
+            catch { }
 
-            
-            
             decimal price = 0;
-
             try { price = Convert.ToDecimal(item.Price); } catch { }
 
-            <div class="food-card" 
-                 data-id="@itemId" 
-                 data-name="@itemName" 
+            <div class="food-card"
+                 data-id="@itemId"
+                 data-name="@itemName"
                  data-category-id="@categoryId"
-                 data-category-name="@categoryName" 
+                 data-category-name="@categoryName"
                  data-price="@price">
 
-                <!-- Image with Category Badge -->
-                <div class="food-img-wrapper">
-                    <img src="@photoUrl" 
-                         alt="@itemName" 
-                         class="food-img" 
-                         onerror="this.onerror=null; this.src= '/images/default-food.jpg';" />
-                    
+                <!-- Image with Category Badge & Animated Placeholder Support -->
+                <div class="food-img-wrapper" style="position: relative; overflow: hidden; height: 180px; background-color: #f9f3ec;">
+                    <img src="@photoUrl"
+                         alt="@itemName"
+                         class="food-img"
+                         style="width: 100%; height: 180px; object-fit: cover; display: block;"
+                         onerror="this.onerror=null; this.src='@fallbackSvg';" />
+
                     <span class="category-badge">@categoryName</span>
                 </div>
 

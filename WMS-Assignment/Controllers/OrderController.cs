@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WMS_Assignment.Models;
 
@@ -65,6 +65,38 @@ public class OrderController(DB db) : Controller
         return View(orders);
     }
 
+    // POST: /Order/Checkout
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Checkout(string orderId, string diningOption, string? tableNumber, string paymentMethod)
+    {
+        var userId = GetCurrentUserId();
+        if (userId == null) return RedirectToAction("Login", "Security");
+
+        var order = await db.Orders.FindAsync(orderId);
+        if (order == null)
+        {
+            return NotFound();
+        }
+
+        if (diningOption == "Dine-In" && string.IsNullOrWhiteSpace(tableNumber))
+        {
+            TempData["Error"] = "Please provide a table number for Dine-In orders.";
+            return RedirectToAction("Checkout", "Home", new { id = orderId });
+        }
+
+        order.DiningOption = diningOption;
+        order.TableNumber = diningOption == "Dine-In" ? tableNumber : null;
+        order.PaymentMethod = paymentMethod;
+        order.PaymentStatus = "Paid";
+        order.Status = "Pending";
+
+        await db.SaveChangesAsync();
+
+        TempData["Success"] = "Payment successful and order placed!";
+        return RedirectToAction("History");
+    }
+
     // POST: /Order/UpdateStatus
     [HttpPost]
     public async Task<IActionResult> UpdateStatus(string orderId, string status)
@@ -96,12 +128,12 @@ public class OrderController(DB db) : Controller
             .Include(od => od.MenuItem).ThenInclude(m => m.Category)
             .GroupBy(od => od.MenuItem.Category.Name)
             .Select(g => new
-         {
-        Category = g.Key,
-        Total = g.Sum(od => od.SubTotal),
-        Quantity = g.Sum(od => od.Quantity)
-    })
-    .ToListAsync();
+            {
+                Category = g.Key,
+                Total = g.Sum(od => od.SubTotal),
+                Quantity = g.Sum(od => od.Quantity)
+            })
+            .ToListAsync();
 
         return View("Piechart", data);
     }

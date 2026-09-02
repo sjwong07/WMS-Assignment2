@@ -2,9 +2,16 @@
 
 @{
     ViewBag.Title = "My Profile";
+
+    string photoUrl = "";
+    if (!string.IsNullOrWhiteSpace(Model?.CurrentPhotoURL))
+    {
+        var clean = Model.CurrentPhotoURL.Replace("\\", "/").Trim();
+        photoUrl = clean.StartsWith("/") ? clean : "/" + clean;
+    }
+
+    bool hasPhoto = !string.IsNullOrEmpty(photoUrl) && photoUrl != "/";
 }
-
-
 
 <div class="profile-page-wrapper">
     <div class="profile-card">
@@ -16,32 +23,36 @@
             </div>
         }
 
-        <form asp-controller="Member" asp-action="Profile" method="post" enctype="multipart/form-data">
+        <form asp-controller="@(User.IsInRole("Admin") || User.IsInRole("SuperAdmin") ? "Admin" : "Member")" asp-action="Profile" method="post" enctype="multipart/form-data" id="profileForm">
             @Html.AntiForgeryToken()
+
+            <!-- Hidden input to pass cropped base64 image data back to controller -->
+            <input type="hidden" id="croppedImageBase64" name="croppedImageBase64" />
 
             <!-- Profile Photo & Live Preview -->
             <div class="avatar-block">
                 <div class="avatar-wrap">
-                    @if (!string.IsNullOrEmpty(Model.CurrentPhotoURL))
-                    {
-                        <img id="avatarPreview" class="avatar-img" src="~/photos/@Model.CurrentPhotoURL" alt="Profile Photo" />
-                    }
-                    else
-                    {
-                        <div id="avatarPlaceholder" class="avatar-placeholder">
-                            @(Model.Username.Length >= 2 ? Model.Username.Substring(0, 2).ToUpper() : "ME")
-                        </div>
-                        <img id="avatarPreview" class="avatar-img hidden" src="#" alt="Profile Photo" />
-                    }
+                    <img id="avatarPreview"
+                         class="avatar-img @(hasPhoto ? "" : "hidden")"
+                         src="@photoUrl"
+                         alt="Profile Photo"
+                         style="@(hasPhoto ? "display:block;" : "display:none;")"
+                         onerror="this.style.display='none'; document.getElementById('avatarPlaceholder').style.display='flex';" />
 
-                    <label for="photoUpload" title="Change Photo" class="avatar-upload-btn">
+                    <div id="avatarPlaceholder"
+                         class="avatar-placeholder"
+                         style="display: @(hasPhoto ? "none" : "flex");">
+                        @(Model.Username?.Length >= 2 ? Model.Username.Substring(0, 2).ToUpper() : "ME")
+                    </div>
+
+                    <label for="photoUpload" title="Change Photo" class="avatar-upload-btn" style="background: none; border: none; font-size: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
                         📷
                     </label>
-                    <input type="file" id="photoUpload" asp-for="Photo" accept="image/*" style="display: none;" onchange="previewImage(this);" />
+                    <input type="file" id="photoUpload" accept="image/*" style="display: none;" onchange="initCropperModal(this);" />
                 </div>
 
                 <h2 class="profile-username">@Model.Username</h2>
-                <span class="profile-role-badge">Member</span>
+                <span class="profile-role-badge">@(User.IsInRole("Admin") || User.IsInRole("SuperAdmin") ? "Admin" : "Member")</span>
             </div>
 
             <!-- Username Field -->
@@ -66,22 +77,83 @@
     </div>
 </div>
 
-<script>
-    function previewImage(input) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const preview = document.getElementById('avatarPreview');
-                const placeholder = document.getElementById('avatarPlaceholder');
+<!-- Cropper Modal Popup Container -->
+<div id="cropperModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center;">
+    <div style="background:#fff; padding:20px; border-radius:12px; max-width:400px; width:90%; box-shadow:0 4px 20px rgba(0,0,0,0.2);">
+        <h3 style="margin-top:0; font-size:1.2rem; color:#332920;">Crop Profile Photo</h3>
+        <div style="max-height:300px; overflow:hidden; margin-bottom:15px;">
+            <img id="imageToCrop" style="max-width:100%; display:block;" />
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:10px;">
+            <button type="button" id="cancelCropBtn" style="padding:8px 16px; background:#e0d6c8; border:none; border-radius:6px; cursor:pointer; font-weight:600;">Cancel</button>
+            <button type="button" id="confirmCropBtn" style="padding:8px 16px; background:#d08c47; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:600;">Crop & Apply</button>
+        </div>
+    </div>
+</div>
 
-                preview.src = e.target.result;
-                preview.classList.remove('hidden');
+@section foot {
+    <script>
+        let cropper = null;
+        const cropperModal = document.getElementById('cropperModal');
+        const imageToCrop = document.getElementById('imageToCrop');
+        const confirmCropBtn = document.getElementById('confirmCropBtn');
+        const cancelCropBtn = document.getElementById('cancelCropBtn');
+        const croppedInput = document.getElementById('croppedImageBase64');
+        const avatarPreview = document.getElementById('avatarPreview');
+        const avatarPlaceholder = document.getElementById('avatarPlaceholder');
 
-                if (placeholder) {
-                    placeholder.style.display = 'none';
-                }
-            };
-            reader.readAsDataURL(input.files[0]);
+        function initCropperModal(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imageToCrop.src = e.target.result;
+                    cropperModal.style.display = 'flex';
+
+                    if (cropper) {
+                        cropper.destroy();
+                    }
+
+                    cropper = new Cropper(imageToCrop, {
+                        aspectRatio: 1,
+                        viewMode: 1,
+                        autoCropArea: 1,
+                    });
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
         }
-    }
-</script>
+
+        confirmCropBtn.addEventListener('click', function() {
+            if (cropper) {
+                const canvas = cropper.getCroppedCanvas({
+                    width: 300,
+                    height: 300
+                });
+
+                const base64Data = canvas.toDataURL('image/jpeg');
+                croppedInput.value = base64Data;
+
+                // Update live preview immediately
+                avatarPreview.src = base64Data;
+                avatarPreview.style.display = 'block';
+                avatarPreview.classList.remove('hidden');
+                if (avatarPlaceholder) {
+                    avatarPlaceholder.style.display = 'none';
+                }
+
+                cropperModal.style.display = 'none';
+                cropper.destroy();
+                cropper = null;
+            }
+        });
+
+        cancelCropBtn.addEventListener('click', function() {
+            cropperModal.style.display = 'none';
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
+            document.getElementById('photoUpload').value = ''; // Reset file input
+        });
+    </script>
+}

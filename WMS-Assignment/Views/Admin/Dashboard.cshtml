@@ -1,0 +1,62 @@
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    var totalMenuItems = ViewBag.TotalMenuItems ?? 0;
+    var totalOrders = ViewBag.TotalOrders ?? 0;
+    var activeOrders = ViewBag.ActiveOrders ?? 0;
+    var totalRevenue = ViewBag.TotalRevenue ?? 0m;
+    var totalMembers = ViewBag.TotalMembers ?? 0;
+}
+
+<div class="admin-dashboard-container">
+    <div class="dashboard-header">
+        <h1>Admin Dashboard</h1>
+        <p class="dashboard-subtitle">Welcome to the WagEat Administration Dashboard.</p>
+    </div>
+
+    <!-- Metrics Stats Grid -->
+    <div class="admin-stats-grid">
+        <div class="admin-stat-card">
+            <span class="stat-label">Total Menu Items</span>
+            <span class="stat-value">@totalMenuItems</span>
+        </div>
+        <div class="admin-stat-card">
+            <span class="stat-label">Active Orders</span>
+            <span class="stat-value stat-highlight">@activeOrders</span>
+        </div>
+        <div class="admin-stat-card">
+            <span class="stat-label">Total Revenue</span>
+            <span class="stat-value stat-revenue">RM @totalRevenue.ToString("0.00")</span>
+        </div>
+        <div class="admin-stat-card">
+            <span class="stat-label">Total Members</span>
+            <span class="stat-value">@totalMembers</span>
+        </div>
+    </div>
+
+    <!-- Management Cards Grid -->
+    <div class="admin-cards-grid">
+        <div class="admin-action-card">
+            <h3>Manage Menu</h3>
+            <p>Add, update, or remove catalog food and drink items.</p>
+            <a href="/Admin/AdminMenu" class="admin-btn">Go to Menu</a>
+        </div>
+
+        <div class="admin-action-card">
+            <h3>Order Maintenance</h3>
+            <p>Monitor and manage active customer orders.</p>
+            <a href="/Order/Maintenance" class="admin-btn">View Orders</a>
+        </div>
+
+        <div class="admin-action-card">
+            <h3>Revenue Report</h3>
+            <p>Check analytics, sales performance, and receipts.</p>
+            <a href="/Order/Report" class="admin-btn">View Reports</a>
+        </div>
+
+        <div class="admin-action-card">
+            <h3>Member List</h3>
+            <p>Review registered customer accounts and manage bans.</p>
+            <a href="/Admin/MemberList" class="admin-btn">View Members</a>
+        </div>
+    </div>
+</div>

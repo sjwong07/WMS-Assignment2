@@ -1,26 +1,48 @@
 ﻿@using Microsoft.AspNetCore.Http
+@inject WMS_Assignment.Models.DB db
 @{
     var username = User.Identity != null && User.Identity.IsAuthenticated ? User.Identity.Name : null;
     var userRole = User.IsInRole("Admin") ? "Admin" : (User.IsInRole("SuperAdmin") ? "SuperAdmin" : "Member");
-    var rawPhoto = User.FindFirst("PhotoURL")?.Value;
 
-    string userPhotoUrl = "/images/default-avatar.png";
+    // Retrieve photo directly from the database to ensure it's always up-to-date
+    string? rawPhoto = null;
+    if (!string.IsNullOrEmpty(username))
+    {
+        var userRecord = db.Users.FirstOrDefault(u => u.Username != null && u.Username.ToLower() == username.ToLower());
+        rawPhoto = userRecord?.PhotoURL;
+    }
+
+    if (string.IsNullOrEmpty(rawPhoto))
+    {
+        rawPhoto = User.FindFirst("PhotoURL")?.Value;
+    }
+
+    // Default to UI-avatars fallback
+    string userPhotoUrl = $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(username ?? "User")}&background=E5A96A&color=fff";
 
     if (!string.IsNullOrEmpty(rawPhoto))
     {
-        userPhotoUrl =  $"/photos/{rawPhoto}";
-    }
-    else if (!string.IsNullOrEmpty(username))
-    {
-        userPhotoUrl = $"/photos/{username}.jpg";
+        var clean = rawPhoto.Replace("\\", "/").Trim();
+        if (clean.StartsWith("photos/", StringComparison.OrdinalIgnoreCase))
+        {
+            userPhotoUrl = "/" + clean;
+        }
+        else if (clean.StartsWith("/"))
+        {
+            userPhotoUrl = clean;
+        }
+        else
+        {
+            userPhotoUrl = "/photos/" + clean;
+        }
     }
 
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
     bool isAuthPage = string.Equals(currentController, "Security", StringComparison.OrdinalIgnoreCase)
-                   && (string.Equals(currentAction, "Login", StringComparison.OrdinalIgnoreCase)
-                       || string.Equals(currentAction, "Register", StringComparison.OrdinalIgnoreCase)
-                       || string.Equals(currentAction, "ForgotPassword", StringComparison.OrdinalIgnoreCase));
+                    && (string.Equals(currentAction, "Login", StringComparison.OrdinalIgnoreCase)
+                        || string.Equals(currentAction, "Register", StringComparison.OrdinalIgnoreCase)
+                        || string.Equals(currentAction, "ForgotPassword", StringComparison.OrdinalIgnoreCase));
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -29,12 +51,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewBag.Title - WagEat</title>
 
+    <!-- Cropper.js CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" />
+
     <!-- External Stylesheets -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/menu.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/AdminMenu.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/checkout.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/receipt.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/forgotpassword.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/UpdatePassword.css" asp-append-version="true" />
@@ -48,24 +74,6 @@
     <link rel="stylesheet" href="~/css/product-form.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/report.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/order-tables.css" asp-append-version="true" />
-
-    <!-- Hide Google Translate Default Top Bar -->
-    <style>
-        .goog-te-banner-frame.skiptranslate,
-        .goog-te-banner-frame,
-        #goog-gt-tt,
-        .goog-te-balloon-frame {
-            display: none !important;
-        }
-
-        body {
-            top: 0px !important;
-        }
-
-        .skiptranslate {
-            display: none !important;
-        }
-    </style>
 </head>
 <body>
 
@@ -82,43 +90,29 @@
         <!-- Navigation Links -->
         <ul class="nav-center-links">
             <li><a href="/">🏠 Home</a></li>
-            <li><a href="/Product/Menu">📋 Menu</a></li> 
+            <li><a href="/Product/Menu">📋 Menu</a></li>
             <li><a href="/Order/History">🧾 Order History</a></li>
 
-            @if (User.IsInRole("Member")){
-
+            @if (User.IsInRole("Member") || User.IsInRole("Admin") || User.IsInRole("SuperAdmin"))
+            {
                 <li><a href="/Home/Cart">🛒 Cart</a></li>
-
             }
-            
-             
-            @if (User.IsInRole("Admin")|| User.IsInRole("SuperAdmin"))
-                {
-                <li> <a href="/Admin/AdminMenu">Admin Menu</a></li>
+
+            @if (User.IsInRole("Admin") || User.IsInRole("SuperAdmin"))
+            {
+                <li><a href="/Admin/AdminMenu">Admin Menu</a></li>
                 <li><a href="/Order/Maintenance">🍳 Order Maintenance</a></li>
                 <li><a href="/Order/Report">📊 Revenue Report</a></li>
+                <li><a href="/Admin/BannedUser"><span>🚪</span> Ban List</a></li>
+                <li><a href="/Admin/MemberList"><span>🚪</span> Member List</a></li>
+            }
 
-                 <li> <a href="/Admin/BannedUser" class="">
-                    <span>🚪</span> Ban List
-                    </a>
-                </li>
+            @if (User.IsInRole("SuperAdmin"))
+            {
+                <li><a href="/Admin/AdminList"><span>🚪</span> Admin List</a></li>
+            }
+        </ul>
 
-                <li><a href="/Admin/MemberList" class="">
-                    <span>🚪</span> Member List
-                    </a>
-                </li>
-                }
-              
-
-                @if (User.IsInRole("SuperAdmin"))
-                {
-                    <li> <a href="/Admin/AdminList" class="">
-                    <span>🚪</span> Admin List
-                    </a>
-                </li>
-
-                }
-            </ul>
         <!-- Right Side User Section -->
         <div class="nav-right-actions">
             @if (!string.IsNullOrEmpty(username))
@@ -127,7 +121,7 @@
                     <img src="@userPhotoUrl"
                          alt="@username"
                          class="user-avatar-img"
-                         onerror="this.onerror=null; this.src='/uploads/@(username).jpg'; this.onerror=function(){this.src='/images/default-avatar.png';};" />
+                         onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=@Uri.EscapeDataString(username ?? "User")&background=E5A96A&color=fff';" />
 
                     <span class="username-text">@username</span>
 
@@ -142,24 +136,31 @@
 
                     <!-- Dropdown Content -->
                     <div class="user-dropdown-menu" id="userMenu">
-                       
-                            <a href="/Member/Profile">
+                        @if (User.IsInRole("Admin") || User.IsInRole("SuperAdmin"))
+                        {
+                            <a href="/Admin/Profile">
                                 <span>👤</span> Profile
                             </a>
-                        
-                      
-                        @if (userRole == "Admin")
-                        {
                             <a href="/Admin/Dashboard">
                                 <span>⚙️</span> Dashboard
                             </a>
                         }
+                        else
+                        {
+                            <a href="/Member/Profile">
+                                <span>👤</span> Profile
+                            </a>
+                            <a href="/Member/Dashboard">
+                                <span>📊</span> Dashboard
+                            </a>
+                        }
+
                         <div class="user-dropdown-divider"></div>
-                        
+
                         <a href="/Member/UpdatePassword" class="UpdatePassword-btn">
-                            <span>🚪</span> Update Password
+                            <span>🔑</span> Update Password
                         </a>
-                        
+
                         <a href="/Security/Logout" class="logout-btn">
                             <span>🚪</span> Logout
                         </a>
@@ -178,63 +179,66 @@
         @RenderBody()
     </main>
 
+    <!-- Cropper.js JavaScript Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
     <!-- Google Translate Script -->
     <script type="text/javascript">
-        function googleTranslateElementInit() {
-            new google.translate.TranslateElement({
-                pageLanguage: 'en',
-                includedLanguages: 'en,ms,zh-CN',
-                autoDisplay: false
-            }, 'google_translate_element');
-        }
+            function googleTranslateElementInit() {
+                new google.translate.TranslateElement({
+                    pageLanguage: 'en',
+                    includedLanguages: 'en,ms,zh-CN',
+                    autoDisplay: false
+                }, 'google_translate_element');
+            }
     </script>
     <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
     <!-- Custom Handlers -->
     <script>
-        function toggleUserDropdown(event) {
-            if (event.target.tagName.toLowerCase() === 'select' || event.target.tagName.toLowerCase() === 'option') {
-                return;
+            function toggleUserDropdown(event) {
+                if (event.target.tagName.toLowerCase() === 'select' || event.target.tagName.toLowerCase() === 'option') {
+                    return;
+                }
+                event.stopPropagation();
+                const dropdown = document.getElementById('userMenu');
+                if (dropdown) {
+                    dropdown.classList.toggle('show');
+                }
             }
-            event.stopPropagation();
-            const dropdown = document.getElementById('userMenu');
-            if (dropdown) {
-                dropdown.classList.toggle('show');
+
+            function changeLanguage(langCode, event) {
+                if (event) event.stopPropagation();
+
+                const cookieValue = '/en/' + langCode;
+                document.cookie = 'googtrans=' + cookieValue + '; path=/;';
+                document.cookie = 'googtrans=' + cookieValue + '; path=/; domain=' + window.location.hostname;
+                localStorage.setItem('selectedLanguage', langCode);
+
+                const selectElement = document.querySelector('.goog-te-combo');
+                if (selectElement) {
+                    selectElement.value = langCode;
+                    selectElement.dispatchEvent(new Event('change'));
+                } else {
+                    window.location.reload();
+                }
             }
-        }
 
-        function changeLanguage(langCode, event) {
-            if (event) event.stopPropagation();
+            window.addEventListener('DOMContentLoaded', () => {
+                const savedLang = localStorage.getItem('selectedLanguage') || 'en';
+                const selector = document.getElementById('langSelector');
+                if (selector) {
+                    selector.value = savedLang;
+                }
+            });
 
-            const cookieValue = '/en/' + langCode;
-            document.cookie = 'googtrans=' + cookieValue + '; path=/;';
-            document.cookie = 'googtrans=' + cookieValue + '; path=/; domain=' + window.location.hostname;
-            localStorage.setItem('selectedLanguage', langCode);
-
-            const selectElement = document.querySelector('.goog-te-combo');
-            if (selectElement) {
-                selectElement.value = langCode;
-                selectElement.dispatchEvent(new Event('change'));
-            } else {
-                window.location.reload();
-            }
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            const savedLang = localStorage.getItem('selectedLanguage') || 'en';
-            const selector = document.getElementById('langSelector');
-            if (selector) {
-                selector.value = savedLang;
-            }
-        });
-
-        document.addEventListener('click', function (e) {
-            const dropdown = document.getElementById('userMenu');
-            const trigger = document.getElementById('userDropdownTrigger');
-            if (dropdown && trigger && !trigger.contains(e.target)) {
-                dropdown.classList.remove('show');
-            }
-        });
+            document.addEventListener('click', function(e) {
+                const dropdown = document.getElementById('userMenu');
+                const trigger = document.getElementById('userDropdownTrigger');
+                if (dropdown && trigger && !trigger.contains(e.target)) {
+                    dropdown.classList.remove('show');
+                }
+            });
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)

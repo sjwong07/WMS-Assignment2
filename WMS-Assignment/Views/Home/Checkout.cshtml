@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "Checkout";
     var subtotal = Model.OrderDetails.Sum(od => od.SubTotal);
+    var totalAmount = Model.TotalAmount;
 }
 
 <div class="checkout-page">
@@ -42,38 +43,116 @@
             </div>
             <div class="checkout-summary-row grand-total">
                 <span>Total</span>
-                <span>RM @Model.TotalAmount.ToString("0.00")</span>
+                <span>RM @totalAmount.ToString("0.00")</span>
             </div>
         </div>
 
-        <!-- Right Panel: Payment Selection -->
+        <!-- Right Panel: Payment Selection & Dining Options -->
         <div class="checkout-panel">
-            <div class="checkout-panel-title">Select Payment Method</div>
+            <div class="checkout-panel-title">Dining & Payment Options</div>
 
             <form asp-action="Checkout" method="post">
                 <input type="hidden" name="orderId" value="@Model.Id" />
 
-                <div class="payment-options">
-                    <label class="payment-option">
-                        <input type="radio" name="paymentMethod" value="Cash" checked="checked" />
+                <!-- Dining Option Selection -->
+                <div style="margin-bottom: 20px; background: #fdfbf7; padding: 15px; border-radius: 10px; border: 1px solid #f0e6db;">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #665c54; margin-bottom: 8px;">Dining Option</label>
+                    <select name="diningOption" id="diningOptionSelect" class="form-control" onchange="toggleTableInput()" style="width: 100%; padding: 10px; border: 1px solid #dcd0c0; border-radius: 8px; margin-bottom: 12px; background: #fff;">
+                        <option value="Dine-In">Dine-In</option>
+                        <option value="Takeaway">Takeaway</option>
+                    </select>
+
+                    <div id="tableNumberContainer">
+                        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #665c54; margin-bottom: 5px;">Table Number</label>
+                        <input type="text" name="tableNumber" id="tableNumberInput" placeholder="e.g. Table 4" style="width: 100%; padding: 10px; border: 1px solid #dcd0c0; border-radius: 8px;" />
+                    </div>
+                </div>
+
+                <div class="checkout-panel-title" style="margin-top: 15px; margin-bottom: 10px;">Select Payment Method</div>
+
+                <div class="payment-options" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+                    <label class="payment-option" style="display: flex; align-items: center; gap: 10px; padding: 12px; border: 1px solid #dcd0c0; border-radius: 10px; cursor: pointer;">
+                        <input type="radio" name="paymentMethod" value="Cash" checked="checked" onchange="togglePaymentFields('Cash')" />
                         <span class="payment-icon">💵</span>
                         <span class="payment-label">Cash</span>
                     </label>
-                    <label class="payment-option">
-                        <input type="radio" name="paymentMethod" value="Card" />
+                    <label class="payment-option" style="display: flex; align-items: center; gap: 10px; padding: 12px; border: 1px solid #dcd0c0; border-radius: 10px; cursor: pointer;">
+                        <input type="radio" name="paymentMethod" value="Card" onchange="togglePaymentFields('Card')" />
                         <span class="payment-icon">💳</span>
                         <span class="payment-label">Credit / Debit Card</span>
                     </label>
-                    <label class="payment-option">
-                        <input type="radio" name="paymentMethod" value="E-Wallet" />
+                    <label class="payment-option" style="display: flex; align-items: center; gap: 10px; padding: 12px; border: 1px solid #dcd0c0; border-radius: 10px; cursor: pointer;">
+                        <input type="radio" name="paymentMethod" value="E-Wallet" onchange="togglePaymentFields('E-Wallet')" />
                         <span class="payment-icon">📱</span>
                         <span class="payment-label">E-Wallet (Touch 'n Go / GrabPay)</span>
                     </label>
                 </div>
 
-                <button type="submit" class="checkout-btn">Pay RM @Model.TotalAmount.ToString("0.00")</button>
+                <!-- Dynamic Payment Fields Container -->
+                <div id="cashFields" style="margin-bottom: 20px; background: #fdfbf7; padding: 15px; border-radius: 10px; border: 1px solid #f0e6db;">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #665c54; margin-bottom: 5px;">Amount Given by Customer (RM)</label>
+                    <input type="number" id="amountGiven" step="0.01" min="@totalAmount" placeholder="0.00" oninput="calculateChange(@totalAmount)" style="width: 100%; padding: 10px; border: 1px solid #dcd0c0; border-radius: 8px; margin-bottom: 10px;" />
+                    <div style="display: flex; justify-content: space-between; font-weight: 600; color: #332920;">
+                        <span>Change Amount:</span>
+                        <span id="changeDisplay" style="color: #2e7d32;">RM 0.00</span>
+                    </div>
+                </div>
+
+                <div id="cardFields" style="display: none; margin-bottom: 20px; background: #fdfbf7; padding: 15px; border-radius: 10px; border: 1px solid #f0e6db;">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #665c54; margin-bottom: 5px;">Card Number</label>
+                    <input type="text" placeholder="1234 5678 9012 3456" maxlength="19" style="width: 100%; padding: 10px; border: 1px solid #dcd0c0; border-radius: 8px; margin-bottom: 10px;" />
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <input type="text" placeholder="MM/YY" maxlength="5" style="width: 100%; padding: 10px; border: 1px solid #dcd0c0; border-radius: 8px;" />
+                        <input type="password" placeholder="CVV" maxlength="4" style="width: 100%; padding: 10px; border: 1px solid #dcd0c0; border-radius: 8px;" />
+                    </div>
+                </div>
+
+                <div id="ewalletFields" style="display: none; margin-bottom: 20px; background: #fdfbf7; padding: 15px; border-radius: 10px; border: 1px solid #f0e6db;">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #665c54; margin-bottom: 5px;">E-Wallet Phone Number</label>
+                    <input type="tel" placeholder="+60 12-345 6789" style="width: 100%; padding: 10px; border: 1px solid #dcd0c0; border-radius: 8px;" />
+                </div>
+
+                <button type="submit" class="checkout-btn">Pay RM @totalAmount.ToString("0.00")</button>
             </form>
         </div>
 
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        function toggleTableInput() {
+            const option = document.getElementById('diningOptionSelect').value;
+            const container = document.getElementById('tableNumberContainer');
+            const input = document.getElementById('tableNumberInput');
+
+            if (option === 'Dine-In') {
+                container.style.display = 'block';
+                input.required = true;
+            } else {
+                container.style.display = 'none';
+                input.required = false;
+                input.value = '';
+            }
+        }
+
+        function togglePaymentFields(method) {
+            document.getElementById('cashFields').style.display = method === 'Cash' ? 'block' : 'none';
+            document.getElementById('cardFields').style.display = method === 'Card' ? 'block' : 'none';
+            document.getElementById('ewalletFields').style.display = method === 'E-Wallet' ? 'block' : 'none';
+        }
+
+        function calculateChange(total) {
+            const given = parseFloat(document.getElementById('amountGiven').value) || 0;
+            const change = given - total;
+            const changeDisplay = document.getElementById('changeDisplay');
+            if (change >= 0) {
+                changeDisplay.textContent = 'RM ' + change.toFixed(2);
+                changeDisplay.style.color = '#2e7d32';
+            } else {
+                changeDisplay.textContent = 'Insufficient Amount';
+                changeDisplay.style.color = '#c62828';
+            }
+        }
+    </script>
+}

@@ -1,10 +1,10 @@
-﻿@model List<Order>
+﻿@using System.Globalization
+@model List<Order>
 
 @{
     ViewData["Title"] = "Order History";
     bool isStaffOrAdmin = User.IsInRole("RS01") || User.IsInRole("RA01") || User.IsInRole("Admin") || User.IsInRole("SuperAdmin");
 }
-
 <div class="pixel-page">
     <div class="pixel-card">
         <h2 class="pixel-title">🧾 Order History 🧾</h2>
@@ -42,7 +42,7 @@
                                     <td>@order.User?.Name</td>
                                 }
                                 <td>@order.Table?.Id</td>
-                                <td>@order.OrderDate.ToString("dd MMM yyyy, hh:mm tt")</td>
+                                <td>@order.OrderDate.ToString("dd MMM yyyy, hh:mm tt", CultureInfo.InvariantCulture)</td>
                                 <td><span class="pixel-badge">@order.Status</span></td>
                                 <td>@order.PaymentStatus</td>
                                 <td>RM @order.TotalAmount.ToString("0.00")</td>

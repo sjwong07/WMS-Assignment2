@@ -11,7 +11,7 @@ public class DB(DbContextOptions options) : DbContext(options)
     public DbSet<User> Users { get; set; }
     public DbSet<Admin> Admins { get; set; }
     public DbSet<Member> Members { get; set; }
-    public DbSet<SuperAdmin> SuperAdmins {  get; set; }
+    public DbSet<SuperAdmin> SuperAdmins { get; set; }
     public DbSet<Role> Roles { get; set; }
     public DbSet<Table> Tables { get; set; }
     public DbSet<FoodCategory> FoodCategories { get; set; }
@@ -19,14 +19,14 @@ public class DB(DbContextOptions options) : DbContext(options)
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderDetail> OrderDetails { get; set; }
     public DbSet<MenuItemPhoto> MenuItemPhotos { get; set; }
-    public DbSet<BannedUser> BannedUsers {  get; set; }
-
+    public DbSet<BannedUser> BannedUsers { get; set; }
+    public DbSet<Review> Reviews { get; set; }
+    public DbSet<Favorite> Favorites { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        // Fix decimal precision warnings
         modelBuilder.Entity<MenuItem>()
             .Property(m => m.Price)
             .HasPrecision(18, 2);
@@ -69,7 +69,6 @@ public class User
     [MaxLength(100)]
     public string? Email { get; set; }
 
-
     [MaxLength(200)]
     public string? Hash { get; set; }
 
@@ -92,40 +91,36 @@ public class User
     public bool IsBanned { get; set; } = false;
 
     [MaxLength(500)]
-    public string? BanReason {  get; set; }
-    public ICollection<BannedUser> ? BannedRecord {  get; set; }
-
-}
-
-public class Admin : User
-{
-}
-
-public class SuperAdmin : User
-{
-}
-
-public class Member : User
-{
-    
+    public string? BanReason { get; set; }
+    public ICollection<BannedUser>? BannedRecord { get; set; }
 
     [MaxLength(100)]
     public string? PhotoURL { get; set; }
 }
 
+public class Admin : User { }
+
+public class SuperAdmin : User { }
+
+public class Member : User
+{
+    [MaxLength(100)]
+    public new string? PhotoURL { get; set; }
+}
+
 public class BannedUser
 {
     [Key]
-    public string Id { get; set; }
+    public string Id { get; set; } = string.Empty;
 
     [MaxLength(100)]
-    public string UserId { get; set; }
+    public string UserId { get; set; } = string.Empty;
 
     public DateTime BannedDate { get; set; } = DateTime.Now;
 
     [MaxLength(200)]
-    public string Reason { get; set; }
-    
+    public string Reason { get; set; } = string.Empty;
+
     public User? User { get; set; }
 }
 
@@ -160,15 +155,12 @@ public class MenuItem
 
 public class MenuItemPhoto
 {
+    [Key]
     public int Id { get; set; }
-
-    public string PhotoURL { get; set; } 
-
-    public string MenuItemId { get; set; } 
-
+    public string PhotoURL { get; set; } = string.Empty;
+    public string MenuItemId { get; set; } = string.Empty;
     public MenuItem MenuItem { get; set; } = null!;
 }
-
 
 public class Table
 {
@@ -195,6 +187,12 @@ public class Order
     public string? TableId { get; set; }
 
     public Table? Table { get; set; }
+
+    [MaxLength(20)]
+    public string DiningOption { get; set; } = "Dine-In";
+
+    [MaxLength(50)]
+    public string? TableNumber { get; set; }
 
     public DateTime OrderDate { get; set; }
 
@@ -232,4 +230,29 @@ public class OrderDetail
     public decimal UnitPrice { get; set; }
 
     public decimal SubTotal { get; set; }
+}
+
+public class Review
+{
+    [Key]
+    public int Id { get; set; }
+    public string MenuItemId { get; set; } = string.Empty;
+    public MenuItem? MenuItem { get; set; }
+    public string UserId { get; set; } = string.Empty;
+    public User? User { get; set; }
+    [Range(1, 5)]
+    public int Rating { get; set; }
+    [MaxLength(500)]
+    public string? Comment { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
+}
+
+public class Favorite
+{
+    [Key]
+    public int Id { get; set; }
+    public string UserId { get; set; } = string.Empty;
+    public User? User { get; set; }
+    public string MenuItemId { get; set; } = string.Empty;
+    public MenuItem? MenuItem { get; set; }
 }

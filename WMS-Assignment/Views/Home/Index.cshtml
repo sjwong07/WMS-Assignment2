@@ -1,9 +1,8 @@
-@model IEnumerable<WMS_Assignment.Models.MenuItem>
+﻿@model IEnumerable<WMS_Assignment.Models.MenuItem>
 
 @{
     ViewData["Title"] = "Home";
 }
-
 <div class="menu-page-container">
     <div class="filter-chips">
         <button class="chip active">All</button>
@@ -34,7 +33,7 @@
                         <p class="food-desc">@item.Description</p>
 
                         <div class="card-actions">
-                            @if (User.IsInRole("Admin"))
+                            @if (User.IsInRole("Admin") || User.IsInRole("SuperAdmin"))
                             {
                                 <div class="admin-links">
                                     <a asp-controller="Product" asp-action="Detail" asp-route-id="@item.Id" class="link-btn">Detail</a>
@@ -45,7 +44,7 @@
                             <!-- Quantity & Add to Cart Form -->
                             <form asp-controller="Home" asp-action="AddToOrder" method="post" class="order-controls">
                                 <input type="hidden" name="menuItemId" value="@item.Id" />
-                                <input type="hidden" name="tableId" value="T01" /> <!-- Replace with dynamic table session/parameter if applicable -->
+                                <input type="hidden" name="tableId" value="T01" />
 
                                 <div class="qty-counter">
                                     <button type="button" class="qty-btn" onclick="decrementQty(this)">-</button>
@@ -65,6 +64,42 @@
                 <p class="text-muted">No featured items available right now.</p>
             </div>
         }
+    </div>
+
+    <!-- Store Location & Maps Integration Section -->
+    <div class="map-section-container">
+        <div class="map-header">
+            <h2 class="map-title">🗺️ Visit Our Store & Events</h2>
+            <p class="map-subtitle">Find our flagship store location and upcoming community activities below.</p>
+        </div>
+
+        <div class="map-card">
+            <div class="map-iframe-wrapper">
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3983.802379379685!2d101.711977!3d3.157884!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zM8KwMDknMjguNCJOIDEwMcKwNDInNDMuMSJF!5e0!3m2!1sen!2smy!4v1620000000000!5m2!1sen!2smy"
+                        width="100%"
+                        height="100%"
+                        style="border:0;"
+                        allowfullscreen=""
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+            </div>
+
+            <div class="map-details">
+                <div class="map-detail-item">
+                    <strong class="map-detail-heading">📍 Store Location</strong>
+                    <p class="map-detail-text">WagEat Cafe, Setapak, Kuala Lumpur</p>
+                </div>
+                <div class="map-detail-item">
+                    <strong class="map-detail-heading">🕒 Operating Hours</strong>
+                    <p class="map-detail-text">Mon - Sun: 9:00 AM - 11:00 PM</p>
+                </div>
+                <div class="map-detail-item">
+                    <strong class="map-detail-heading">📞 Support Line</strong>
+                    <p class="map-detail-text">+6010-378-9888</p>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 

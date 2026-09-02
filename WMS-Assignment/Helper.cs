@@ -27,10 +27,16 @@ public class Helper(IWebHostEnvironment en,
 
     public void Login(string username, string role, bool rememberMe)
     {
+        // Query the database to retrieve the user's photo and ID upon login
+        var member = db.Members.FirstOrDefault(m => m.Username.ToLower() == username.ToLower());
+        string photoUrl = member?.PhotoURL ?? "";
+        string userId = member?.Id ?? "";
+
         List<Claim> claims = [
             new(ClaimTypes.Name, username),
-            new(ClaimTypes.Role, role), // Enabled role claim for proper authorization
-           
+            new(ClaimTypes.NameIdentifier, userId),
+            new(ClaimTypes.Role, role),
+            new("PhotoURL", photoUrl) // Include PhotoURL claim in the login cookie
         ];
 
         ClaimsIdentity identity = new(claims, "CookieAuth");
@@ -38,7 +44,7 @@ public class Helper(IWebHostEnvironment en,
 
         AuthenticationProperties properties = new()
         {
-            IsPersistent = rememberMe, // Powers the Remember Me functionality
+            IsPersistent = rememberMe,
         };
 
         ct.HttpContext!.SignInAsync("CookieAuth", principal, properties);

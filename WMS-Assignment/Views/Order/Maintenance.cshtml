@@ -22,7 +22,7 @@
                         <tr>
                             <th>Order Id</th>
                             <th>Customer</th>
-                            <th>Table</th>
+                            <th>Dining / Table</th>
                             <th>Order Date</th>
                             <th>Payment</th>
                             <th>Total</th>
@@ -35,7 +35,18 @@
                             <tr>
                                 <td>@order.Id</td>
                                 <td>@order.User?.Name</td>
-                                <td>@order.Table?.Id</td>
+                                <td>
+                                    <!-- Display Dining Option & Table -->
+                                    <span class="badge @(order.DiningOption == "Dine-In" ? "bg-warning text-dark" : "bg-info text-white")" style="padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700;">
+                                        @(string.IsNullOrEmpty(order.DiningOption) ? "Dine-In" : order.DiningOption)
+                                    </span>
+                                    @if (string.IsNullOrEmpty(order.DiningOption) || order.DiningOption == "Dine-In")
+                                    {
+                                        <div class="small text-muted fw-bold" style="margin-top: 3px;">
+                                            Table: @(order.Table?.Id ?? order.TableNumber ?? "N/A")
+                                        </div>
+                                    }
+                                </td>
                                 <td>@order.OrderDate.ToString("dd MMM yyyy, hh:mm tt")</td>
                                 <td>@order.PaymentStatus</td>
                                 <td>RM @order.TotalAmount.ToString("0.00")</td>
@@ -64,7 +75,7 @@
             </div>
         }
 
-        <div style="text-align:center;">
+        <div style="text-align:center; margin-top: 20px;">
             <a href="/Product/Menu" class="pixel-back-link">← BACK</a>
         </div>
     </div>

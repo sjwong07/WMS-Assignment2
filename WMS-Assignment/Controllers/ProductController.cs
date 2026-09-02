@@ -9,16 +9,23 @@ namespace WMS_Assignment.Controllers;
 
 public class ProductController(DB db, Helper hp) : Controller
 {
+    private string GetCurrentUserId()
+    {
+        var username = HttpContext.Session.GetString("User") ?? User.Identity?.Name;
+        if (username == null) return null;
+        var user = db.Users.FirstOrDefault(u => u.Username.ToLower() == username.ToLower());
+        return user?.Id;
+    }
+
     public IActionResult Menu(string? search, List<string>? category, decimal? minPrice, decimal? maxPrice)
     {
         var categories = db.FoodCategories.ToList();
 
-        // Include Category to ensure Category.Name and Category.Id are loaded
-        // We added .Include(x => x.MenuItemPhotos) here!
         var m = db.MenuItems
                   .Include(x => x.Category)
                   .Include(x => x.Photos)
                   .AsQueryable();
+
         if (!string.IsNullOrEmpty(search))
         {
             m = m.Where(item => item.Name.Contains(search) || item.Id.Contains(search));
@@ -71,4 +78,67 @@ public class ProductController(DB db, Helper hp) : Controller
         return View(item);
     }
 
+    // POST: /Product/SubmitReview
+    [HttpPost]
+    [Authorize(Roles = "Member")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SubmitReview(string menuItemId, int rating, string comment)
+    {
+        var userId = GetCurrentUserId();
+        if (userId == null) return RedirectToAction("Login", "Security");
+
+        // Verify that the user has a completed/paid order containing this menu item
+        bool hasPurchased = await db.Orders
+            .Where(o => o.UserId == userId && o.PaymentStatus == "Paid")
+            .SelectMany(o => o.OrderDetails)
+            .AnyAsync(od => od.MenuItemId == menuItemId);
+
+        if (!hasPurchased)
+        {
+            TempData["Error"] = "You can only review items that you have previously purchased.";
+            return RedirectToAction("Detail", new { id = menuItemId });
+        }
+
+        var review = new WMS_Assignment.Models.Review
+        {
+            MenuItemId = menuItemId,
+            UserId = userId,
+            Rating = Math.Clamp(rating, 1, 5),
+            Comment = comment?.Trim(),
+            CreatedAt = DateTime.Now
+        };
+
+        db.Reviews.Add(review);
+        await db.SaveChangesAsync();
+
+        TempData["Success"] = "Review submitted successfully!";
+        return RedirectToAction("Detail", new { id = menuItemId });
+    }
+
+    // POST: /Product/ToggleFavorite
+    [HttpPost]
+    [Authorize(Roles = "Member")]
+    public async Task<IActionResult> ToggleFavorite(string menuItemId)
+    {
+        var userId = GetCurrentUserId();
+        if (userId == null) return Json(new { success = false, message = "Unauthorized" });
+
+        var existing = await db.Favorites
+            .FirstOrDefaultAsync(f => f.UserId == userId && f.MenuItemId == menuItemId);
+
+        bool isFavorite;
+        if (existing != null)
+        {
+            db.Favorites.Remove(existing);
+            isFavorite = false;
+        }
+        else
+        {
+            db.Favorites.Add(new WMS_Assignment.Models.Favorite { UserId = userId, MenuItemId = menuItemId });
+            isFavorite = true;
+        }
+
+        await db.SaveChangesAsync();
+        return Json(new { success = true, isFavorite });
+    }
 }

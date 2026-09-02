@@ -1,51 +1,113 @@
-﻿@model Order
+﻿@using System.Globalization
+@model Order
 
 @{
     ViewData["Title"] = "E-Receipt";
+    var orderDateFormatted = Model?.OrderDate.ToString("dd MMM yyyy, hh:mm tt", CultureInfo.InvariantCulture) ?? "-";
 }
-
-<div class="receipt-page">
+<div class="receipt-page-container">
     <div class="receipt-card">
         @if (Model == null)
         {
-            <p>Order not found.</p>
+            <div class="receipt-not-found">
+                <p class="receipt-not-found-text">Order not found.</p>
+                <a href="/Product/Menu" class="btn-receipt-back">Return to Menu</a>
+            </div>
         }
         else
         {
-            <h2 class="receipt-title">E-Receipt</h2>
+            <!-- Header Branding & Status -->
+            <div class="receipt-header">
+                <div class="receipt-logo">☕</div>
+                <h2 class="receipt-store-title">WagEat Cafe</h2>
+                <p class="receipt-subtitle">Official Payment E-Receipt</p>
+                <div class="receipt-status-badge">
+                    ✓ Payment Successful
+                </div>
+            </div>
 
-            <p class="receipt-meta"><strong>Order ID:</strong> @Model.Id</p>
-            <p class="receipt-meta"><strong>Customer:</strong> @Model.User?.Name</p>
-            <p class="receipt-meta"><strong>Table:</strong> @Model.Table?.Id</p>
-            <p class="receipt-meta"><strong>Date:</strong> @Model.OrderDate.ToString("dd MMM yyyy, hh:mm tt")</p>
+            <!-- Order Meta Details Box -->
+            <div class="receipt-meta-grid">
+                <div class="meta-item">
+                    <span class="meta-label">Order ID</span>
+                    <strong class="meta-value">@Model.Id</strong>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Order Date</span>
+                    <strong class="meta-value">@orderDateFormatted</strong>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Customer</span>
+                    <strong class="meta-value">@Model.User?.Name</strong>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Table Number</span>
+                    <strong class="meta-value">📍 @(Model.Table?.Id ?? "T01")</strong>
+                </div>
+            </div>
 
-            <table class="receipt-table">
-                <thead>
-                    <tr>
-                        <th>Item</th>
-                        <th>Qty</th>
-                        <th>Unit Price</th>
-                        <th>Subtotal</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var od in Model.OrderDetails)
-                    {
-                        <tr>
-                            <td>@od.MenuItem?.Name</td>
-                            <td>@od.Quantity</td>
-                            <td>RM @od.UnitPrice.ToString("0.00")</td>
-                            <td>RM @od.SubTotal.ToString("0.00")</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+            <!-- Order Items Table -->
+            <div class="receipt-table-section">
+                <h4 class="receipt-section-title">Order Items</h4>
+                <div class="receipt-table-wrapper">
+                    <table class="receipt-items-table">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th class="text-center">Qty</th>
+                                <th class="text-right">Unit Price</th>
+                                <th class="text-right">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.OrderDetails != null)
+                            {
+                                foreach (var od in Model.OrderDetails)
+                                {
+                                    <tr>
+                                        <td class="item-name">@od.MenuItem?.Name</td>
+                                        <td class="item-qty text-center">@od.Quantity</td>
+                                        <td class="item-price">RM @od.UnitPrice.ToString("0.00")</td>
+                                        <td class="item-subtotal">RM @od.SubTotal.ToString("0.00")</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
-            <p class="receipt-total">Total Paid: RM @Model.TotalAmount.ToString("0.00")</p>
-            <p class="receipt-status">Payment Method: @Model.PaymentMethod</p>
-            <p class="receipt-status">Status: @Model.PaymentStatus</p>
+            <!-- Payment Summary Box -->
+            <div class="receipt-summary-box">
+                <div class="summary-row">
+                    <span>Payment Method</span>
+                    <strong class="summary-val">@Model.PaymentMethod</strong>
+                </div>
+                <div class="summary-row">
+                    <span>Payment Status</span>
+                    <strong class="summary-status-paid">@Model.PaymentStatus</strong>
+                </div>
+                <div class="summary-total-divider"></div>
+                <div class="summary-row summary-grand-total">
+                    <span>Total Paid</span>
+                    <span class="total-amount-highlight">RM @Model.TotalAmount.ToString("0.00")</span>
+                </div>
+            </div>
 
-            <a href="/Home/ReceiptPdf/@Model.Id" class="receipt-pdf-btn">Download PDF Receipt</a>
+            <!-- Action Buttons -->
+            <div class="receipt-actions">
+                <a href="/Home/ReceiptPdf/@Model.Id" target="_blank" class="btn-receipt-download">
+                    📥 Download PDF Receipt
+                </a>
+                <a href="/Product/Menu" class="btn-receipt-menu">
+                    ← Back to Menu
+                </a>
+            </div>
+
+            <!-- Footer Note -->
+            <div class="receipt-footer">
+                <p>Thank you for dining with WagEat Cafe! Please show this receipt if required.</p>
+            </div>
         }
     </div>
 </div>

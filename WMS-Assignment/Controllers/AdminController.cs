@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -10,13 +11,167 @@ namespace WMS_Assignment.Controllers;
 public class AdminController(DB db, Helper hp) : Controller
 {
     [Authorize(Roles = "Admin,SuperAdmin")]
+    public async Task<IActionResult> Dashboard()
+    {
+        // Gather key admin metrics
+        ViewBag.TotalMenuItems = await db.MenuItems.CountAsync();
+
+        // Check if Orders table exists in your context and count active/pending orders
+        var orders = await db.Orders.ToListAsync();
+        ViewBag.TotalOrders = orders.Count;
+        ViewBag.ActiveOrders = orders.Count(o => o.Status == "Pending" || o.Status == "Preparing");
+        ViewBag.TotalRevenue = orders.Where(o => o.PaymentStatus == "Paid").Sum(o => o.TotalAmount);
+
+        ViewBag.TotalMembers = await db.Users.OfType<Member>().CountAsync();
+
+        return View();
+    }
+
+    [Authorize(Roles = "Admin,SuperAdmin")]
+    public async Task<IActionResult> Profile()
+    {
+        var username = User.Identity?.Name?.Trim();
+        if (string.IsNullOrEmpty(username))
+        {
+            return RedirectToAction("Login", "Security");
+        }
+
+        var admin = await db.Users.FirstOrDefaultAsync(u => u.Username.ToLower() == username.ToLower());
+        if (admin == null)
+        {
+            return RedirectToAction("Index", "Home");
+        }
+
+        // Refresh authentication cookie claim if PhotoURL claim is missing or outdated
+        var currentClaimPhoto = User.FindFirst("PhotoURL")?.Value;
+        if (!string.IsNullOrEmpty(admin.PhotoURL) && currentClaimPhoto != admin.PhotoURL)
+        {
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, admin.Username ?? ""),
+                new Claim(ClaimTypes.NameIdentifier, admin.Id ?? ""),
+                new Claim(ClaimTypes.Role, admin.RoleId ?? "Admin"),
+                new Claim("PhotoURL", admin.PhotoURL ?? "")
+            };
+
+            var claimsIdentity = new ClaimsIdentity(claims, "CookieAuth");
+            await HttpContext.SignInAsync("CookieAuth", new ClaimsPrincipal(claimsIdentity), new AuthenticationProperties { IsPersistent = true });
+
+            HttpContext.Session.SetString("User", admin.Username ?? "");
+            HttpContext.Session.SetString("UserPhoto", admin.PhotoURL ?? "");
+        }
+
+        var vm = new UpdateProfileVM
+        {
+            Username = admin.Username,
+            Email = admin.Email,
+            CurrentPhotoURL = admin.PhotoURL
+        };
+
+        return View("~/Views/Member/Profile.cshtml", vm);
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "Admin,SuperAdmin")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Profile(UpdateProfileVM vm, string? croppedImageBase64)
+    {
+        var currentUsername = User.Identity?.Name?.Trim();
+        var admin = await db.Users.FirstOrDefaultAsync(u => u.Username.ToLower() == currentUsername!.ToLower());
+
+        if (admin == null)
+        {
+            return RedirectToAction("Login", "Security");
+        }
+
+        if (vm.Username.Trim().ToLower() != admin.Username.ToLower() &&
+            await db.Users.AnyAsync(u => u.Username.ToLower() == vm.Username.Trim().ToLower()))
+        {
+            ModelState.AddModelError("Username", "This username is already taken.");
+        }
+
+        if (vm.Email.Trim().ToLower() != admin.Email.ToLower() &&
+            await db.Users.AnyAsync(u => u.Email.ToLower() == vm.Email.Trim().ToLower()))
+        {
+            ModelState.AddModelError("Email", "This email address is already in use.");
+        }
+
+        if (ModelState.IsValid)
+        {
+            admin.Username = vm.Username.Trim();
+            admin.Name = vm.Username.Trim();
+            admin.Email = vm.Email.Trim();
+
+            if (!string.IsNullOrEmpty(croppedImageBase64))
+            {
+                try
+                {
+                    var base64Data = croppedImageBase64.Substring(croppedImageBase64.IndexOf(",") + 1);
+                    byte[] imageBytes = Convert.FromBase64String(base64Data);
+
+                    string fileName = "profile_" + Guid.NewGuid().ToString("N")[..8] + ".jpg";
+                    string filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "photos", fileName);
+
+                    if (!string.IsNullOrEmpty(admin.PhotoURL))
+                    {
+                        hp.DeletePhoto(admin.PhotoURL, "photos");
+                    }
+
+                    await System.IO.File.WriteAllBytesAsync(filePath, imageBytes);
+                    admin.PhotoURL = "photos/" + fileName;
+                }
+                catch
+                {
+                    ModelState.AddModelError("Photo", "Failed to process cropped image.");
+                    vm.CurrentPhotoURL = admin.PhotoURL;
+                    return View("~/Views/Member/Profile.cshtml", vm);
+                }
+            }
+            else if (vm.Photo != null && vm.Photo.Length > 0)
+            {
+                if (!string.IsNullOrEmpty(admin.PhotoURL))
+                {
+                    hp.DeletePhoto(admin.PhotoURL, "photos");
+                }
+                admin.PhotoURL = hp.SavePhoto(vm.Photo, "photos");
+            }
+
+            await db.SaveChangesAsync();
+
+            // Re-issue cookie claims with the updated photo
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, admin.Username ?? ""),
+                new Claim(ClaimTypes.NameIdentifier, admin.Id ?? ""),
+                new Claim(ClaimTypes.Role, admin.RoleId ?? "Admin"),
+                new Claim("PhotoURL", admin.PhotoURL ?? "")
+            };
+
+            var claimsIdentity = new ClaimsIdentity(claims, "CookieAuth");
+            await HttpContext.SignInAsync("CookieAuth", new ClaimsPrincipal(claimsIdentity), new AuthenticationProperties { IsPersistent = true });
+
+            HttpContext.Session.SetString("User", admin.Username ?? "");
+            if (!string.IsNullOrEmpty(admin.PhotoURL))
+            {
+                HttpContext.Session.SetString("UserPhoto", admin.PhotoURL);
+            }
+
+            TempData["Success"] = "Profile updated successfully!";
+            return RedirectToAction("Profile");
+        }
+
+        vm.CurrentPhotoURL = admin.PhotoURL;
+        return View("~/Views/Member/Profile.cshtml", vm);
+    }
+
+    [Authorize(Roles = "Admin,SuperAdmin")]
     public IActionResult AdminMenu()
     {
         var m = db.MenuItems.Include(x => x.Category).Include(x => x.Photos).ToList();
         return View(m);
     }
 
-    [Authorize(Roles ="Admin,SuperAdmin")]
+    [Authorize(Roles = "Admin,SuperAdmin")]
     public IActionResult Create()
     {
         var vm = new ProductInsertVM
@@ -77,7 +232,7 @@ public class AdminController(DB db, Helper hp) : Controller
         var maxNum = db.MenuItems
             .Where(x => x.Id.StartsWith("P"))
             .Select(x => x.Id.Substring(1))
-            .AsEnumerable()                         // switch to LINQ-to-Objects for TryParse
+            .AsEnumerable()
             .Select(s => int.TryParse(s, out int n) ? n : 0)
             .DefaultIfEmpty(0)
             .Max();
@@ -85,8 +240,6 @@ public class AdminController(DB db, Helper hp) : Controller
         int next = maxNum + 1;
         return "P" + next.ToString("000");
     }
-
-
 
     [Authorize(Roles = "Admin,SuperAdmin")]
     public IActionResult Update(string id)
@@ -219,7 +372,7 @@ public class AdminController(DB db, Helper hp) : Controller
     {
         if (!ModelState.IsValid)
         {
-            return View(vm);   
+            return View(vm);
         }
 
         var admin = db.Users.OfType<Admin>().FirstOrDefault(a => a.Id == vm.Id);
@@ -305,7 +458,7 @@ public class AdminController(DB db, Helper hp) : Controller
     public IActionResult BannedUser()
     {
         var records = db.BannedUsers
-            .Include(b => b.User)  
+            .Include(b => b.User)
             .OrderByDescending(b => b.BannedDate)
             .ToList();
 
@@ -380,7 +533,7 @@ public class AdminController(DB db, Helper hp) : Controller
         {
             var admin = new Admin
             {
-                Id = Guid.NewGuid().ToString(),  
+                Id = Guid.NewGuid().ToString(),
                 Username = vm.Username.Trim(),
                 Name = vm.Username.Trim(),
                 Email = vm.Email.Trim(),
@@ -389,11 +542,11 @@ public class AdminController(DB db, Helper hp) : Controller
                 CreatedDate = DateTime.Now
             };
 
-            db.Admins.Add(admin);
+            db.Users.Add(admin);
             db.SaveChanges();
 
             TempData["Info"] = "Admin created successfully.";
-            return RedirectToAction("AdminList");   
+            return RedirectToAction("AdminList");
         }
 
         return View(vm);

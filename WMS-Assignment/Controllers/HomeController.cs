@@ -3,11 +3,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
-using System.Text.RegularExpressions;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+using System.Globalization;
+using System.Security.Claims;
+using System.Text.RegularExpressions;
 using WMS_Assignment.Models;
 
 namespace WMS_Assignment.Controllers;
@@ -103,15 +104,15 @@ public class HomeController(DB db, Helper hp) : Controller
         user.LockoutEnd = null;
         await db.SaveChangesAsync();
 
-        // Retrieve Member details to get PhotoURL
-        var member = await db.Members.FirstOrDefaultAsync(m => m.Username == user.Username);
+        // Retrieve user record to capture PhotoURL for both members and admins
+        var userRecord = await db.Users.FirstOrDefaultAsync(u => u.Username == user.Username);
 
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.Name, user.Username ?? ""),
             new Claim(ClaimTypes.NameIdentifier, user.Id ?? ""),
             new Claim(ClaimTypes.Role, user.RoleId ?? "Member"),
-            new Claim("PhotoURL", member?.PhotoURL ?? "") // Stores photo filename in claims
+            new Claim("PhotoURL", userRecord?.PhotoURL ?? "")
         };
 
         var claimsIdentity = new ClaimsIdentity(claims, "CookieAuth");
@@ -120,9 +121,10 @@ public class HomeController(DB db, Helper hp) : Controller
         // Set session variables for layout display
         HttpContext.Session.SetString("User", user.Username ?? "");
         HttpContext.Session.SetString("Role", user.RoleId ?? "Member");
-        if (!string.IsNullOrEmpty(member?.PhotoURL))
+        var activePhoto = userRecord?.PhotoURL;
+        if (!string.IsNullOrEmpty(activePhoto))
         {
-            HttpContext.Session.SetString("UserPhoto", member.PhotoURL);
+            HttpContext.Session.SetString("UserPhoto", activePhoto);
         }
 
         return RedirectToAction("Menu", "Product");
@@ -156,6 +158,13 @@ public class HomeController(DB db, Helper hp) : Controller
         var userId = GetCurrentUserId();
         if (userId == null) return RedirectToAction("Login");
 
+        // Verify that the user actually exists in the db.Users table to prevent foreign key exception
+        var userExists = await db.Users.AnyAsync(u => u.Id == userId);
+        if (!userExists)
+        {
+            return RedirectToAction("Login");
+        }
+
         if (string.IsNullOrEmpty(menuItemId) || quantity < 1)
             return RedirectToAction("Menu", "Product");
 
@@ -184,7 +193,7 @@ public class HomeController(DB db, Helper hp) : Controller
                 OrderDate = DateTime.Now,
                 Status = "Pending",
                 PaymentStatus = "Unpaid",
-                PaymentMethod = "Pending", // Fix: NOT NULL database constraint resolved
+                PaymentMethod = "Pending",
                 TotalAmount = 0,
                 OrderDetails = new List<OrderDetail>()
             };
@@ -231,6 +240,18 @@ public class HomeController(DB db, Helper hp) : Controller
     }
 
     [HttpPost]
+    public async Task<IActionResult> UpdateTable(string orderId, string tableId)
+    {
+        var order = await db.Orders.FindAsync(orderId);
+        if (order != null && order.Status == "Pending")
+        {
+            order.TableId = tableId;
+            await db.SaveChangesAsync();
+        }
+        return RedirectToAction("Cart");
+    }
+
+    [HttpPost]
     public async Task<IActionResult> RemoveItem(string orderDetailId)
     {
         var detail = await db.OrderDetails.FindAsync(orderDetailId);
@@ -254,11 +275,19 @@ public class HomeController(DB db, Helper hp) : Controller
 
         var order = await db.Orders
             .Include(o => o.OrderDetails).ThenInclude(od => od.MenuItem)
+            .Include(o => o.Table)
             .Where(o => o.UserId == userId && o.Status == "Pending")
             .FirstOrDefaultAsync();
 
         if (order == null || order.OrderDetails == null || !order.OrderDetails.Any())
             return RedirectToAction("Cart");
+
+        // Force table selection validation before allowing entry to checkout/payment
+        if (string.IsNullOrEmpty(order.TableId))
+        {
+            TempData["Error"] = "Please select your table number before proceeding to checkout.";
+            return RedirectToAction("Cart");
+        }
 
         return View(order);
     }
@@ -268,6 +297,12 @@ public class HomeController(DB db, Helper hp) : Controller
     {
         var order = await db.Orders.FindAsync(orderId);
         if (order == null) return RedirectToAction("Cart");
+
+        if (string.IsNullOrEmpty(order.TableId))
+        {
+            TempData["Error"] = "Please select your table number before proceeding to checkout.";
+            return RedirectToAction("Cart");
+        }
 
         order.PaymentMethod = string.IsNullOrEmpty(paymentMethod) ? "Cash" : paymentMethod;
         order.PaymentStatus = "Paid";
@@ -287,6 +322,51 @@ public class HomeController(DB db, Helper hp) : Controller
         }
     }
 
+    [HttpGet]
+    public async Task<IActionResult> FilterMenu(string search, string category, decimal? minPrice, decimal? maxPrice, string sortOrder, int page = 1, int pageSize = 8)
+    {
+        var query = db.MenuItems.Include(m => m.Category).AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            query = query.Where(p => p.Name.Contains(search) || p.Id.Contains(search) || p.Description.Contains(search));
+        }
+
+        if (!string.IsNullOrWhiteSpace(category) && category != "All")
+        {
+            query = query.Where(p => (p.Category != null && p.Category.Name == category) || p.CategoryId == category);
+        }
+
+        if (minPrice.HasValue)
+        {
+            query = query.Where(p => p.Price >= minPrice.Value);
+        }
+        if (maxPrice.HasValue)
+        {
+            query = query.Where(p => p.Price <= maxPrice.Value);
+        }
+
+        query = sortOrder switch
+        {
+            "price_asc" => query.OrderBy(p => p.Price),
+            "price_desc" => query.OrderByDescending(p => p.Price),
+            "name_desc" => query.OrderByDescending(p => p.Name),
+            _ => query.OrderBy(p => p.Name),
+        };
+
+        int totalItems = await query.CountAsync();
+        var items = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+
+        var model = new
+        {
+            MenuItems = items,
+            CurrentPage = page,
+            TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize)
+        };
+
+        return PartialView("_A", model);
+    }
+
     public IActionResult SetLanguage(string culture, string returnUrl)
     {
         Response.Cookies.Append(
@@ -302,15 +382,23 @@ public class HomeController(DB db, Helper hp) : Controller
     {
         // Try real cookie/claims login first
         var claimUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (claimUserId != null) return claimUserId;
+        if (!string.IsNullOrEmpty(claimUserId))
+        {
+            var userById = db.Users.FirstOrDefault(u => u.Id == claimUserId);
+            if (userById != null) return userById.Id;
+        }
 
-        // Fall back to session-based login
-        var username = HttpContext.Session.GetString("User");
-        if (username == null) return null;
+        // Fall back to matching by username from claims or session
+        var username = User.Identity?.Name ?? HttpContext.Session.GetString("User");
+        if (!string.IsNullOrEmpty(username))
+        {
+            var user = db.Users.FirstOrDefault(u => u.Username!.ToLower() == username.ToLower());
+            if (user != null) return user.Id;
+        }
 
-        var user = db.Users.FirstOrDefault(u => u.Username == username);
-        return user?.Id;
+        return null;
     }
+
     // GET: /Home/ReceiptPdf/{id}
     public async Task<IActionResult> ReceiptPdf(string id)
     {
@@ -341,7 +429,7 @@ public class HomeController(DB db, Helper hp) : Controller
                     col.Item().Text($"Order ID: {order.Id}");
                     col.Item().Text($"Customer: {order.User?.Name}");
                     col.Item().Text($"Table: {order.Table?.Id}");
-                    col.Item().Text($"Date: {order.OrderDate:dd MMM yyyy, hh:mm tt}");
+                    col.Item().Text($"Date: {order.OrderDate.ToString("dd MMM yyyy, hh:mm tt", CultureInfo.InvariantCulture)}");
                     col.Item().PaddingTop(10);
 
                     col.Item().Table(table =>
@@ -362,16 +450,16 @@ public class HomeController(DB db, Helper hp) : Controller
                             header.Cell().Text("Subtotal").Bold();
                         });
 
-                        foreach (var od in order.OrderDetails)
+                        foreach (var od in order.OrderDetails!)
                         {
                             table.Cell().Text(od.MenuItem?.Name ?? "");
-                            table.Cell().Text(od.Quantity.ToString());
-                            table.Cell().Text($"RM {od.UnitPrice:0.00}");
-                            table.Cell().Text($"RM {od.SubTotal:0.00}");
+                            table.Cell().Text(od.Quantity.ToString(CultureInfo.InvariantCulture));
+                            table.Cell().Text(string.Format(CultureInfo.InvariantCulture, "RM {0:0.00}", od.UnitPrice));
+                            table.Cell().Text(string.Format(CultureInfo.InvariantCulture, "RM {0:0.00}", od.SubTotal));
                         }
                     });
 
-                    col.Item().PaddingTop(15).AlignRight().Text($"Total Paid: RM {order.TotalAmount:0.00}").Bold().FontSize(13);
+                    col.Item().PaddingTop(15).AlignRight().Text(string.Format(CultureInfo.InvariantCulture, "Total Paid: RM {0:0.00}", order.TotalAmount)).Bold().FontSize(13);
                     col.Item().Text($"Payment Method: {order.PaymentMethod}");
                     col.Item().Text($"Status: {order.PaymentStatus}");
                 });
