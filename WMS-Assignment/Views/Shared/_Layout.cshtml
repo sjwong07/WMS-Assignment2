@@ -138,7 +138,7 @@
                             </a>
 
                             <a href="/Security/Logout" class="logout-btn">
-                                <span>🚪</span> Logout
+                                <span></span> Logout
                             </a>
                         </div>
                     </div>
@@ -153,28 +153,28 @@
         <!-- Bottom Row: Navigation Links Function Bar -->
         <div class="navbar-bottom-row">
             <ul class="nav-center-links">
-                <li><a href="/">🏠 Home</a></li>
-                <li><a href="/Product/Menu">📋 Menu</a></li>
-                <li><a href="/Order/History">🧾 Order History</a></li>
+                <li><a href="/"> Home</a></li>
+                <li><a href="/Product/Menu"> Menu</a></li>
+                <li><a href="/Order/History"> Order History</a></li>
 
                 @if (User.IsInRole("Member") || User.IsInRole("Admin") || User.IsInRole("SuperAdmin"))
                 {
-                    <li><a href="/Home/Cart">🛒 Cart</a></li>
+                    <li><a href="/Home/Cart"> Cart</a></li>
                   
                 }
 
                 @if (User.IsInRole("Admin") || User.IsInRole("SuperAdmin"))
                 {
                     <li><a href="/Admin/AdminMenu">Admin Menu</a></li>
-                    <li><a href="/Order/Maintenance">🍳 Order Maintenance</a></li>
-                    <li><a href="/Order/Report">📊 Revenue Report</a></li>
-                    <li><a href="/Admin/BannedUser"><span>🚪</span> Ban List</a></li>
-                    <li><a href="/Admin/MemberList"><span>🚪</span> Member List</a></li>
+                    <li><a href="/Order/Maintenance"> Order Maintenance</a></li>
+                    <li><a href="/Order/Report">Revenue Report</a></li>
+                    <li><a href="/Admin/BannedUser">Ban List</a></li>
+                    <li><a href="/Admin/MemberList">Member List</a></li>
                 }
 
                 @if (User.IsInRole("SuperAdmin"))
                 {
-                    <li><a href="/Admin/AdminList"><span>🚪</span> Admin List</a></li>
+                    <li><a href="/Admin/AdminList"><span></span> Admin List</a></li>
                 }
             </ul>
         </div>

@@ -1,6 +1,6 @@
 /* ============================================
-    --- WagEat - Combined & Upgraded Styles ---
-    ============================================ */
+   --- WagEat - Combined & Upgraded Styles ---
+   ============================================ */
 
 /* --- Reset & Base --- */
 * {
@@ -17,8 +17,8 @@ body {
 }
 
 /* ============================================
-    --- Page Container ---
-    ============================================ */
+   --- Page Container ---
+   ============================================ */
 .menu-page-container {
     max-width: 1200px;
     margin: 2rem auto;
@@ -26,8 +26,8 @@ body {
 }
 
 /* ============================================
-    --- Search & Filter Controls ---
-    ============================================ */
+   --- Search & Filter Controls ---
+   ============================================ */
 .menu-controls {
     display: flex;
     flex-wrap: wrap;
@@ -148,8 +148,8 @@ body {
     }
 
 /* ============================================
-    --- Food Grid Layout ---
-    ============================================ */
+   --- Food Grid Layout ---
+   ============================================ */
 .food-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -157,8 +157,8 @@ body {
 }
 
 /* ============================================
-    --- Food Card Component ---
-    ============================================ */
+   --- Food Card Component ---
+   ============================================ */
 .food-card {
     background: #fcfaf8;
     border-radius: 20px;
@@ -357,8 +357,8 @@ body {
     }
 
 /* ============================================
-    --- Cart & Checkout Redesign Styles ---
-    ============================================ */
+   --- Cart & Checkout Redesign Styles ---
+   ============================================ */
 .cart-page-container {
     max-width: 1200px;
     margin: 2.5rem auto;
@@ -613,8 +613,8 @@ body {
 }
 
 /* ============================================
-    --- Login Container ---
-    ============================================ */
+   --- Login Container ---
+   ============================================ */
 .login-container {
     min-height: calc(100vh - 72px);
     display: flex;
@@ -1217,8 +1217,8 @@ body {
     }
 
 /* ============================================
-    --- Global Dropdown Menu ---
-    ============================================ */
+   --- Global Dropdown Menu ---
+   ============================================ */
 .dropdown-menu {
     display: none;
     position: absolute;
@@ -1270,8 +1270,8 @@ body {
 }
 
 /* ============================================
-    --- Navbar & Header Top Navigation ---
-    ============================================ */
+   --- Navbar & Header Top Navigation ---
+   ============================================ */
 .navbar-main {
     display: flex !important;
     flex-direction: row !important;
@@ -1306,7 +1306,7 @@ body {
     display: inline-flex !important;
     flex-direction: row !important;
     align-items: center !important;
-    gap: 2.2rem !important;
+    gap: 0.75rem !important;
     list-style: none !important;
     margin: 0 !important;
     padding: 0 !important;
@@ -1321,15 +1321,32 @@ body {
         display: inline-flex !important;
         align-items: center !important;
         gap: 6px !important;
-        color: #786d63 !important;
+        color: #6b5f52 !important;
+        background: #f8f5f1 !important;
+        border: 1px solid #e5dcd2 !important;
+        padding: 0.4rem 1rem !important;
+        border-radius: 50px !important;
         font-weight: 600 !important;
-        font-size: 0.95rem !important;
+        font-size: 0.9rem !important;
         text-decoration: none !important;
-        transition: all 0.2s ease !important;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02) !important;
     }
 
         .nav-center-links a:hover {
+            background: #ffffff !important;
+            border-color: #d98c5f !important;
             color: #d98c5f !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 12px rgba(217, 140, 95, 0.12) !important;
+        }
+
+        .nav-center-links a.active,
+        .nav-center-links a:active {
+            background: linear-gradient(135deg, #d98c5f, #b86a3e) !important;
+            color: #ffffff !important;
+            border-color: #d98c5f !important;
+            box-shadow: 0 4px 16px rgba(217, 140, 95, 0.25) !important;
         }
 
 .nav-right-actions {
@@ -1371,6 +1388,7 @@ body {
         border: 2px solid #ffffff !important;
         box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08) !important;
         background-color: #f0ebe5 !important;
+        object-position: center !important;
     }
 
     .nav-user-pill .username-text {
@@ -1468,8 +1486,8 @@ body {
 }
 
 /* ============================================
-    --- Responsive Media Queries ---
-    ============================================ */
+   --- Responsive Media Queries ---
+   ============================================ */
 @media (max-width: 860px) {
     .cart-grid-layout {
         grid-template-columns: 1fr;
@@ -2052,7 +2070,7 @@ body {
 
     .navbar-bottom-row .nav-center-links {
         display: flex !important;
-        gap: 2rem !important;
+        gap: 0.75rem !important;
         list-style: none !important;
         margin: 0 !important;
         padding: 0 !important;
@@ -2091,7 +2109,7 @@ body {
     }
 
 /* --- Added Styles for Photo Upload Button --- */
-@@keyframes bounce {
+@keyframes bounce {
     0%, 100% {
         transform: translateY(0);
     }
@@ -2123,3 +2141,32 @@ body {
         color: #212529;
         transform: translateY(-1px);
     }
+
+/* --- Default Animated Food / Drink Placeholder & Animation Styles --- */
+.default-food-placeholder {
+    width: 100%;
+    height: 100%;
+    background: #f9f4ef;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #b08d65;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.placeholder-animation {
+    animation: bounceIcon 2s ease-in-out infinite;
+    margin-bottom: 8px;
+}
+
+@keyframes bounceIcon {
+    0%, 100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-6px);
+    }
+}

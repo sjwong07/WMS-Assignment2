@@ -1,29 +1,68 @@
 ﻿@model IEnumerable<WMS_Assignment.Models.MenuItem>
+@inject WMS_Assignment.Models.DB db
 
 @{
     ViewData["Title"] = "Home";
+    var topProducts = Model?.Take(6).ToList() ?? new List<WMS_Assignment.Models.MenuItem>();
 }
-
 <div class="menu-page-container">
-    <div class="filter-chips">
-        <button class="chip active">All</button>
-        <button class="chip">Main Dish</button>
-        <button class="chip">Side Dish</button>
-        <button class="chip">Drink / Dessert</button>
+
+    <!-- 1. Stall Description & Hero Section -->
+    <div class="stall-hero-section" style="text-align: center; padding: 3rem 1rem 2rem; background: #fffaf5; border-radius: 20px; border: 1px solid #f3ece4; margin-bottom: 2.5rem; box-shadow: 0 4px 20px rgba(0,0,0,0.02);">
+        <h1 style="font-size: 2.5rem; font-weight: 800; color: #2a261f; margin-bottom: 0.75rem;">Welcome to <span style="color: #d98c5f;">WagEat</span> Cafe ☕</h1>
+        <p style="font-size: 1.05rem; color: #6b5f52; max-width: 700px; margin: 0 auto; line-height: 1.6;">
+            Discover our carefully crafted artisan coffees, refreshing beverages, and delightful handcrafted meals made fresh daily to elevate your everyday dining experience.
+        </p>
+    </div>
+
+    <!-- 2. Featured Chef's Special / Seasonal Recommendation Banner -->
+    <div class="chefs-special-banner" style="background: linear-gradient(135deg, #d98c5f, #b86a3e); color: #ffffff; border-radius: 20px; padding: 2rem 2.5rem; margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem; box-shadow: 0 8px 30px rgba(217, 140, 95, 0.25);">
+        <div style="flex: 1; min-width: 260px;">
+            <span style="background: rgba(255, 255, 255, 0.2); padding: 0.3rem 0.9rem; border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">✨ Chef's Seasonal Special</span>
+            <h2 style="font-size: 1.8rem; font-weight: 800; margin: 0.75rem 0 0.5rem;">ABC Ice Kacang & Creamy Butter Chicken Rice</h2>
+            <p style="font-size: 0.95rem; opacity: 0.9; margin: 0; line-height: 1.5;">Indulge in our limited-time autumn pairing crafted exclusively by our head chef to warm up your palate.</p>
+        </div>
+        <div>
+            <a href="/Product/Menu" style="background: #ffffff; color: #b86a3e; padding: 0.75rem 1.75rem; border-radius: 12px; font-weight: 700; text-decoration: none; display: inline-block; box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: transform 0.2s;">Order Special</a>
+        </div>
+    </div>
+
+    <!-- 3. Top Selling Products Section -->
+    <div class="section-header" style="margin-bottom: 1.5rem;">
+        <h2 style="font-size: 1.5rem; font-weight: 700; color: #2a261f;">🔥 Top Selling Products</h2>
     </div>
 
     <!-- Food Cards Grid -->
     <div class="food-grid">
-        @if (Model != null && Model.Any())
+        @if (topProducts.Any())
         {
-            @foreach (var item in Model)
+            @foreach (var item in topProducts)
             {
+                string itemId = Convert.ToString(item.Id ?? "").Trim();
+                string categoryName = item.Category?.Name ?? "Drink / Dessert";
+
+                string fallbackSvg = categoryName.Contains("Main", StringComparison.OrdinalIgnoreCase) || itemId.StartsWith("M", StringComparison.OrdinalIgnoreCase)
+                    ? "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><style>.bowl{animation:bounce 2s ease-in-out infinite;}@keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}</style><circle cx='100' cy='100' r='90' fill='%23f9f3ec'/><g class='bowl'><path d='M50 110 Q100 150 150 110 Z' fill='%23e5a96a'/><ellipse cx='100' cy='110' rx='50' ry='15' fill='%23d08c47'/><path d='M70 90 Q100 70 130 90' stroke='%23fff' stroke-width='4' fill='none' stroke-linecap='round'/></g><text x='50% ' y='170' text-anchor='middle' fill='%238a7b6b' font-family='sans-serif' font-size='14' font-weight='bold'>🍲 Fresh Dish</text></svg>"
+                    : categoryName.Contains("Side", StringComparison.OrdinalIgnoreCase) || itemId.StartsWith("S", StringComparison.OrdinalIgnoreCase)
+                    ? "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><style>.plate{animation:pulse 2s ease-in-out infinite;}@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.05);}}</style><circle cx='100' cy='100' r='90' fill='%23f9f3ec'/><circle class='plate' cx='100' cy='100' r='55' fill='%23e5a96a'/><circle cx='100' cy='100' r='40' fill='%23f9f3ec'/><text x='50%' y='170' text-anchor='middle' fill='%238a7b6b' font-family='sans-serif' font-size='14' font-weight='bold'>🥗 Side Snack</text></svg>"
+                    : "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><style>.steam{animation:rise 2s ease-in-out infinite;}.cup{animation:tilt 3s ease-in-out infinite; transform-origin:center;}@keyframes rise{0%{transform:translateY(0); opacity:1;}100%{transform:translateY(-15px); opacity:0;}}@keyframes tilt{0%,100%{transform:rotate(0deg);}50%{transform:rotate(5deg);}}</style><circle cx='100' cy='100' r='90' fill='%23f9f3ec'/><g class='cup'><path d='M70 90 h60 v40 a20 20 0 0 1-20 20 h-20 a20 20 0 0 1-20-20 z' fill='%23e5a96a'/><path d='M130 100 h10 a10 10 0 0 1 10 10 v10 a10 10 0 0 1-10 10 h-10' stroke='%23e5a96a' stroke-width='6' fill='none'/></g><path class='steam' d='M90 70 q5 -10 0 -20' stroke='%23d08c47' stroke-width='3' fill='none' stroke-linecap='round'/><path class='steam' d='M110 75 q-5 -10 0 -20' stroke='%23d08c47' stroke-width='3' fill='none' stroke-linecap='round'/><text x='50%' y='170' text-anchor='middle' fill='%238a7b6b' font-family='sans-serif' font-size='14' font-weight='bold'>☕ Warm Brew</text></svg>";
+
+                string photoUrl = fallbackSvg;
+                string directRaw = item.PhotoURL?.Replace("\\", "/").Trim();
+                if (!string.IsNullOrWhiteSpace(directRaw))
+                {
+                    string resolvedRaw = directRaw.StartsWith("~/") ? directRaw : (directRaw.StartsWith("/") ? directRaw : "~/" + directRaw.TrimStart('/'));
+                    photoUrl = Url.Content(resolvedRaw);
+                }
+
                 <div class="food-card">
-                    <div class="food-img-wrapper">
-                        <img src="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500&auto=format&fit=crop&q=60"
+                    <div class="food-img-wrapper" style="position: relative; height: 180px; background-color: #f9f3ec;">
+                        <img src="@photoUrl"
                              alt="@item.Name"
-                             class="food-img" />
-                        <span class="category-badge">@(item.Category?.Name ?? "Menu Item")</span>
+                             class="food-img"
+                             style="width: 100%; height: 180px; object-fit: cover; display: block;"
+                             onerror="this.onerror=null; this.src='@fallbackSvg';" />
+                        <span class="category-badge">@categoryName</span>
                     </div>
 
                     <div class="food-info">
@@ -62,12 +101,43 @@
         else
         {
             <div class="text-center py-5 w-100">
-                <p class="text-muted">No featured items available right now.</p>
+                <p class="text-muted">No top products available right now.</p>
             </div>
         }
     </div>
 
-    <!-- Store Location & Maps Integration Section -->
+    <!-- 4. Loyalty / Member Perks Teaser Section -->
+    <div class="member-perks-section" style="background: #fff8f0; border: 1px solid #fed7aa; border-radius: 20px; padding: 2.5rem; margin: 3rem 0; text-align: center;">
+        <span style="font-size: 2.5rem;">👑</span>
+        <h3 style="font-size: 1.5rem; font-weight: 800; color: #2a261f; margin: 0.5rem 0 0.5rem;">Join WagEat Rewards & Earn Perks</h3>
+        <p style="color: #6b5f52; max-width: 600px; margin: 0 auto; font-size: 0.95rem;">Unlock instant member pricing, earn 5% cashback points on every meal, and get a free birthday beverage on us!</p>
+    </div>
+
+    <!-- 5. Customer Reviews / Testimonials Section -->
+    <div class="testimonials-section" style="margin: 3rem 0;">
+        <div class="section-header" style="margin-bottom: 1.5rem; text-align: center;">
+            <h2 style="font-size: 1.5rem; font-weight: 700; color: #2a261f;">💬 What Our Customers Say</h2>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+            <div style="background: #fff; border: 1px solid #eee8e1; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+                <div style="color: #d98c5f; font-size: 1.1rem; margin-bottom: 0.5rem;">⭐⭐⭐⭐⭐</div>
+                <p style="font-size: 0.9rem; color: #6b5f52; font-style: italic; margin-bottom: 1rem;">"The Caffè Latte here is exceptionally smooth, and the ordering system from the table is super seamless!"</p>
+                <strong style="font-size: 0.85rem; color: #2a261f;">— Sarah Tan</strong>
+            </div>
+            <div style="background: #fff; border: 1px solid #eee8e1; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+                <div style="color: #d98c5f; font-size: 1.1rem; margin-bottom: 0.5rem;">⭐⭐⭐⭐⭐</div>
+                <p style="font-size: 0.9rem; color: #6b5f52; font-style: italic; margin-bottom: 1rem;">"Absolute favorite cafe spot in Setapak. Great ambiance, fast service, and delicious food portions."</p>
+                <strong style="font-size: 0.85rem; color: #2a261f;">— Marcus Lee</strong>
+            </div>
+            <div style="background: #fff; border: 1px solid #eee8e1; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+                <div style="color: #d98c5f; font-size: 1.1rem; margin-bottom: 0.5rem;">⭐⭐⭐⭐⭐</div>
+                <p style="font-size: 0.9rem; color: #6b5f52; font-style: italic; margin-bottom: 1rem;">"Love the digital receipt feature and the ease of picking tables. Will definitely come back often!"</p>
+                <strong style="font-size: 0.85rem; color: #2a261f;">— Aisyah Rahim</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. Store Location & Maps Integration Section -->
     <div class="map-section-container">
         <div class="map-header">
             <h2 class="map-title">🗺️ Visit Our Store & Events</h2>
@@ -102,6 +172,18 @@
             </div>
         </div>
     </div>
+
+    <!-- 7. Footer Information Section -->
+    <footer class="site-footer" style="margin-top: 4rem; padding: 2.5rem 0 1.5rem; border-top: 1px solid #e5dcd2; text-align: center; color: #6b5f52;">
+        <div style="max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px;">
+            <p style="font-weight: 600; font-size: 1rem; color: #2a261f; margin: 0;">WagEat Restaurant Management System</p>
+            <p style="font-size: 0.9rem; margin: 0;">Serving quality food with automated convenience. Contact us via support@wageat.com.</p>
+            <div style="margin-top: 1rem; font-size: 0.85rem; color: #b09a88; border-top: 1px dashed #e5dcd2; padding-top: 1rem;">
+                Developed by OSH-NYX-WSJ
+            </div>
+        </div>
+    </footer>
+
 </div>
 
 <script>
@@ -113,7 +195,7 @@
     function decrementQty(btn) {
         const input = btn.parentElement.querySelector('.qty-input');
         if (parseInt(input.value) > 1) {
-            input.value = parseInt(input.value) - 1;
+            input.value = parseInt(input.value - 1);
         }
     }
 </script>

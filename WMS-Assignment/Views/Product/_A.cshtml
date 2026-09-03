@@ -53,7 +53,8 @@
                 string directRaw = Convert.ToString(item.PhotoURL ?? "").Replace("\\", "/").Trim();
                 if (!string.IsNullOrWhiteSpace(directRaw))
                 {
-                    photoUrl = directRaw.StartsWith("/") ? directRaw : "/photos/" + directRaw;
+                    photoUrl = directRaw.StartsWith("~/") ? Url.Content(directRaw) : (directRaw.StartsWith("/") ? directRaw : "~/" + directRaw.TrimStart('/'));
+                    photoUrl = Url.Content(photoUrl);
                 }
                 else
                 {
@@ -61,7 +62,8 @@
                     string raw = firstPhoto != null ? Convert.ToString(firstPhoto.PhotoURL)?.Replace("\\", "/")?.Trim() : null;
                     if (!string.IsNullOrWhiteSpace(raw))
                     {
-                        photoUrl = raw.StartsWith("/") ? raw : "/photos/" + raw;
+                        string resolvedRaw = raw.StartsWith("~/") ? raw : (raw.StartsWith("/") ? raw : "~/" + raw.TrimStart('/'));
+                        photoUrl = Url.Content(resolvedRaw);
                     }
                 }
             }

@@ -44,27 +44,36 @@
                             @foreach (var od in Model!.OrderDetails!)
                             {
                                 var menuItem = od.MenuItem;
-                                var photoName = $"{menuItem?.Id}.jpg";
+                                string itemId = Convert.ToString(menuItem?.Id ?? "").Trim();
+                                string categoryName = menuItem?.Category?.Name ?? "Drink / Dessert";
+
+                                string fallbackSvg = categoryName.Contains("Main", StringComparison.OrdinalIgnoreCase) || itemId.StartsWith("M", StringComparison.OrdinalIgnoreCase)
+                                    ? "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><style>.bowl{animation:bounce 2s ease-in-out infinite;}@keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}</style><circle cx='100' cy='100' r='90' fill='%23f9f3ec'/><g class='bowl'><path d='M50 110 Q100 150 150 110 Z' fill='%23e5a96a'/><ellipse cx='100' cy='110' rx='50' ry='15' fill='%23d08c47'/><path d='M70 90 Q100 70 130 90' stroke='%23fff' stroke-width='4' fill='none' stroke-linecap='round'/></g><text x='50% ' y='170' text-anchor='middle' fill='%238a7b6b' font-family='sans-serif' font-size='14' font-weight='bold'>🍲 Fresh Dish</text></svg>"
+                                    : categoryName.Contains("Side", StringComparison.OrdinalIgnoreCase) || itemId.StartsWith("S", StringComparison.OrdinalIgnoreCase)
+                                    ? "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><style>.plate{animation:pulse 2s ease-in-out infinite;}@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.05);}}</style><circle cx='100' cy='100' r='90' fill='%23f9f3ec'/><circle class='plate' cx='100' cy='100' r='55' fill='%23e5a96a'/><circle cx='100' cy='100' r='40' fill='%23f9f3ec'/><text x='50%' y='170' text-anchor='middle' fill='%238a7b6b' font-family='sans-serif' font-size='14' font-weight='bold'>🥗 Side Snack</text></svg>"
+                                    : "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><style>.steam{animation:rise 2s ease-in-out infinite;}.cup{animation:tilt 3s ease-in-out infinite; transform-origin:center;}@keyframes rise{0%{transform:translateY(0); opacity:1;}100%{transform:translateY(-15px); opacity:0;}}@keyframes tilt{0%,100%{transform:rotate(0deg);}50%{transform:rotate(5deg);}}</style><circle cx='100' cy='100' r='90' fill='%23f9f3ec'/><g class='cup'><path d='M70 90 h60 v40 a20 20 0 0 1-20 20 h-20 a20 20 0 0 1-20-20 z' fill='%23e5a96a'/><path d='M130 100 h10 a10 10 0 0 1 10 10 v10 a10 10 0 0 1-10 10 h-10' stroke='%23e5a96a' stroke-width='6' fill='none'/></g><path class='steam' d='M90 70 q5 -10 0 -20' stroke='%23d08c47' stroke-width='3' fill='none' stroke-linecap='round'/><path class='steam' d='M110 75 q-5 -10 0 -20' stroke='%23d08c47' stroke-width='3' fill='none' stroke-linecap='round'/><text x='50%' y='170' text-anchor='middle' fill='%238a7b6b' font-family='sans-serif' font-size='14' font-weight='bold'>☕ Warm Brew</text></svg>";
+
+                                string photoUrl = fallbackSvg;
+                                string directRaw = menuItem?.PhotoURL?.Replace("\\", "/").Trim();
+                                if (!string.IsNullOrWhiteSpace(directRaw))
+                                {
+                                    string resolvedRaw = directRaw.StartsWith("~/") ? directRaw : (directRaw.StartsWith("/") ? directRaw : "~/" + directRaw.TrimStart('/'));
+                                    photoUrl = Url.Content(resolvedRaw);
+                                }
 
                                 <tr>
                                     <td>
                                         <div class="cart-item-meta">
-                                            <div class="cart-item-img-container" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; background: #f4ece1; border-radius: 8px; overflow: hidden; flex-shrink: 0; position: relative;">
-                                                <!-- Fallback SVG Container (Hidden by default, shown if image fails or missing) -->
-                                                <div class="cart-fallback-icon" style="position: absolute; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">
-                                                    <svg viewBox="0 0 24 24" width="30" height="30" fill="#d08c47">
-                                                        <path d="M2 21h18v-2H2M20 8h-2V5h2m0-2H4v5h14v2H4s-2 0-2 2v2c0 2 2 2 2 2h14c2 0 2-2 2-2v-2c0-2-2-2-2-2z" />
-                                                    </svg>
-                                                </div>
-                                                <img src="/photos/@photoName"
+                                            <div class="cart-item-img-container" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; background: #f9f3ec; border-radius: 8px; overflow: hidden; flex-shrink: 0; position: relative;">
+                                                <img src="@photoUrl"
                                                      alt="@menuItem?.Name"
                                                      class="cart-item-img"
                                                      style="width: 100%; height: 100%; object-fit: cover; position: relative; z-index: 2;"
-                                                     onerror="this.onerror=function(){this.style.display='none';}; this.src='/uploads/@photoName';" />
+                                                     onerror="this.onerror=null; this.src='@fallbackSvg';" />
                                             </div>
                                             <div>
                                                 <div class="cart-item-name">@(menuItem?.Name ?? "Food Item")</div>
-                                                <small class="cart-item-cat">@(menuItem?.Category?.Name ?? "Drink / Dessert")</small>
+                                                <small class="cart-item-cat">@categoryName</small>
                                             </div>
                                         </div>
                                     </td>

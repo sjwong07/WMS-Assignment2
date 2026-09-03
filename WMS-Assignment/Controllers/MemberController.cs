@@ -39,7 +39,7 @@ public class MemberController(DB db, Helper hp) : Controller
     }
 
     // GET: /Member/Profile
-    public IActionResult Profile()
+    public async Task<IActionResult> Profile()
     {
         var username = User.Identity?.Name?.Trim();
         if (string.IsNullOrEmpty(username))
@@ -47,7 +47,7 @@ public class MemberController(DB db, Helper hp) : Controller
             return RedirectToAction("Login", "Security");
         }
 
-        var member = db.Members.FirstOrDefault(m => m.Username.ToLower() == username.ToLower());
+        var member = await db.Users.FirstOrDefaultAsync(u => u.Username.ToLower() == username.ToLower());
         if (member == null)
         {
             return RedirectToAction("Index", "Home");
@@ -69,7 +69,7 @@ public class MemberController(DB db, Helper hp) : Controller
     public async Task<IActionResult> Profile(UpdateProfileVM vm, string? croppedImageBase64)
     {
         var currentUsername = User.Identity?.Name?.Trim();
-        var member = db.Members.FirstOrDefault(m => m.Username.ToLower() == currentUsername!.ToLower());
+        var member = await db.Users.FirstOrDefaultAsync(u => u.Username.ToLower() == currentUsername!.ToLower());
 
         if (member == null)
         {
@@ -78,14 +78,14 @@ public class MemberController(DB db, Helper hp) : Controller
 
         // Check if new username is already taken by someone else
         if (vm.Username.Trim().ToLower() != member.Username.ToLower() &&
-            db.Members.Any(m => m.Username.ToLower() == vm.Username.Trim().ToLower()))
+            await db.Users.AnyAsync(u => u.Username.ToLower() == vm.Username.Trim().ToLower()))
         {
             ModelState.AddModelError("Username", "This username is already taken.");
         }
 
         // Check if new email is already taken by someone else
         if (vm.Email.Trim().ToLower() != member.Email.ToLower() &&
-            db.Members.Any(m => m.Email.ToLower() == vm.Email.Trim().ToLower()))
+            await db.Users.AnyAsync(u => u.Email.ToLower() == vm.Email.Trim().ToLower()))
         {
             ModelState.AddModelError("Email", "This email address is already in use.");
         }
@@ -142,7 +142,7 @@ public class MemberController(DB db, Helper hp) : Controller
                 member.PhotoURL = hp.SavePhoto(vm.Photo, "photos");
             }
 
-            db.SaveChanges();
+            await db.SaveChangesAsync();
 
             // Re-issue the auth cookie so navbar (username + photo) reflects changes immediately
             var claims = new List<Claim>
@@ -162,6 +162,8 @@ public class MemberController(DB db, Helper hp) : Controller
             await HttpContext.SignInAsync("CookieAuth", new ClaimsPrincipal(claimsIdentity), authProperties);
 
             TempData["Success"] = "Profile updated successfully!";
+
+            vm.CurrentPhotoURL = member.PhotoURL;
             return RedirectToAction("Profile");
         }
 
@@ -176,10 +178,10 @@ public class MemberController(DB db, Helper hp) : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult UpdatePassword(UpdatePasswordVM vm)
+    public async Task<IActionResult> UpdatePassword(UpdatePasswordVM vm)
     {
         var username = User.Identity!.Name?.Trim();
-        var member = db.Members.FirstOrDefault(m => m.Username.ToLower() == username!.ToLower());
+        var member = await db.Users.FirstOrDefaultAsync(u => u.Username.ToLower() == username!.ToLower());
         if (member == null)
         {
             return RedirectToAction("Index");
@@ -193,7 +195,7 @@ public class MemberController(DB db, Helper hp) : Controller
         if (ModelState.IsValid)
         {
             member.Hash = hp.HashPassword(vm.NewPassword);
-            db.SaveChanges();
+            await db.SaveChangesAsync();
 
             TempData["Info"] = "Password Updated.";
             return RedirectToAction();

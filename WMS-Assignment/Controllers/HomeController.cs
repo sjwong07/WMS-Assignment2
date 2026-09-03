@@ -17,11 +17,36 @@ public class HomeController(DB db, Helper hp) : Controller
 {
     public async Task<IActionResult> Index()
     {
-        // Fetch featured items
-        var featuredItems = await db.MenuItems
+        // Fetch 2 Main Dishes, 2 Side Dishes (snacks), and 2 Drinks/Desserts
+        var mainDishes = await db.MenuItems
             .Include(m => m.Category)
-            .Take(4)
+            .Where(m => m.Category != null && m.Category.Name.Contains("Main"))
+            .Take(2)
             .ToListAsync();
+
+        var sideDishes = await db.MenuItems
+            .Include(m => m.Category)
+            .Where(m => m.Category != null && m.Category.Name.Contains("Side"))
+            .Take(2)
+            .ToListAsync();
+
+        var drinks = await db.MenuItems
+            .Include(m => m.Category)
+            .Where(m => m.Category != null && (m.Category.Name.Contains("Drink") || m.Category.Name.Contains("Dessert")))
+            .Take(2)
+            .ToListAsync();
+
+        // Combine them into a single list of 6 items
+        var featuredItems = mainDishes.Concat(sideDishes).Concat(drinks).ToList();
+
+        // Fallback if categories don't match exact strings: take any 6 if list is short
+        if (featuredItems.Count < 6)
+        {
+            featuredItems = await db.MenuItems
+                .Include(m => m.Category)
+                .Take(6)
+                .ToListAsync();
+        }
 
         return View(featuredItems);
     }

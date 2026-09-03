@@ -7,12 +7,11 @@
     if (!string.IsNullOrWhiteSpace(Model?.CurrentPhotoURL))
     {
         var clean = Model.CurrentPhotoURL.Replace("\\", "/").Trim();
-        photoUrl = clean.StartsWith("/") ? clean : "/" + clean;
+        photoUrl = clean.StartsWith("/") ? clean : "/" + clean.TrimStart('~', '/');
     }
 
     bool hasPhoto = !string.IsNullOrEmpty(photoUrl) && photoUrl != "/";
 }
-
 <div class="profile-page-wrapper">
     <div class="profile-card">
 
@@ -31,21 +30,21 @@
 
             <!-- Profile Photo & Live Preview -->
             <div class="avatar-block">
-                <div class="avatar-wrap">
+                <div class="avatar-wrap" style="width: 88px; height: 88px; border-radius: 50%; overflow: hidden; position: relative; margin: 0 auto 1.25rem; background: #d98c5f; display: flex; align-items: center; justify-content: center;">
                     <img id="avatarPreview"
                          class="avatar-img @(hasPhoto ? "" : "hidden")"
                          src="@photoUrl"
                          alt="Profile Photo"
-                         style="@(hasPhoto ? "display:block;" : "display:none;")"
+                         style="@(hasPhoto ? "display:block;" : "display:none;"); width: 100%; height: 100%; object-fit: cover; object-position: center;"
                          onerror="this.style.display='none'; document.getElementById('avatarPlaceholder').style.display='flex';" />
 
                     <div id="avatarPlaceholder"
                          class="avatar-placeholder"
-                         style="display: @(hasPhoto ? "none" : "flex");">
+                         style="display: @(hasPhoto ? "none" : "flex"); width: 100%; height: 100%; align-items: center; justify-content: center; color: #fff; font-size: 2rem; font-weight: 700;">
                         @(Model.Username?.Length >= 2 ? Model.Username.Substring(0, 2).ToUpper() : "ME")
                     </div>
 
-                    <label for="photoUpload" title="Change Photo" class="avatar-upload-btn" style="background: none; border: none; font-size: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                    <label for="photoUpload" title="Change Photo" class="avatar-upload-btn" style="position: absolute; bottom: 0; right: 0; background: rgba(0,0,0,0.6); color: #fff; border-radius: 50%; width: 28px; height: 28px; font-size: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid #fff;">
                         📷
                     </label>
                     <input type="file" id="photoUpload" accept="image/*" style="display: none;" onchange="initCropperModal(this);" />
@@ -136,6 +135,10 @@
                 // Update live preview immediately
                 avatarPreview.src = base64Data;
                 avatarPreview.style.display = 'block';
+                avatarPreview.style.width = '100%';
+                avatarPreview.style.height = '100%';
+                avatarPreview.style.objectFit = 'cover';
+                avatarPreview.style.objectPosition = 'center';
                 avatarPreview.classList.remove('hidden');
                 if (avatarPlaceholder) {
                     avatarPlaceholder.style.display = 'none';
