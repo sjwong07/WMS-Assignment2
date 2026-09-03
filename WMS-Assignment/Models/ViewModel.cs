@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WMS_Assignment.Models;
 
@@ -269,4 +270,19 @@ public class MemberListVM
     public string Email { get; set; }
     public DateTime CreateDate { get; set; }
     public bool IsBanned { get; set; }
+}
+
+public class Review
+{
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int Id { get; set; }
+
+    public string MenuItemId { get; set; }
+    public MenuItem MenuItem { get; set; }
+    public string UserId { get; set; }
+    public User User { get; set; }
+    public int Rating { get; set; }
+    public string Comment { get; set; }
+    public DateTime CreatedAt { get; set; }
 }

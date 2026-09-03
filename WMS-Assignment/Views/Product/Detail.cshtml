@@ -1,4 +1,4 @@
-﻿@model MenuItem
+﻿@model WMS_Assignment.Models.MenuItem
 
 @{
     ViewBag.Title = "Product Detail";
@@ -59,5 +59,79 @@
         <p class="detail-price">RM @Model.Price.ToString("0.00")</p>
         <p class="detail-desc">@Model.Description</p>
         <a asp-controller="Home" asp-action="Menu" class="btn-action btn-cancel">Back to Menu</a>
+    </div>
+</div>
+
+<!-- Customer Reviews & Ratings Section -->
+<div class="product-reviews-wrapper">
+    <div class="reviews-header-block">
+        <h3>Customer Reviews & Ratings</h3>
+        <p class="reviews-subtitle">Real feedback from verified patrons</p>
+    </div>
+
+    <div class="reviews-grid-layout">
+        <!-- Left Side: Existing Reviews List -->
+        <div class="reviews-display-area">
+            @if (Model.Reviews != null && Model.Reviews.Any())
+            {
+                <div class="reviews-scroll-list">
+                    @foreach (var review in Model.Reviews)
+                    {
+                        <div class="modern-review-card">
+                            <div class="review-card-top">
+                                <span class="reviewer-name">@review.User?.Name</span>
+                                <span class="review-stars">@String.Concat(Enumerable.Repeat("★", review.Rating))</span>
+                            </div>
+                            <p class="review-text">@review.Comment</p>
+                            <span class="review-timestamp">@review.CreatedAt.ToString("MMM dd, yyyy - HH:mm")</span>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="no-reviews-box">
+                    <span class="no-reviews-icon">💬</span>
+                    <p>No reviews yet. Be the first to share your experience!</p>
+                </div>
+            }
+        </div>
+
+        <!-- Right Side: Add Review Form -->
+        <div class="review-form-container">
+            @if (Context.Session.GetString("User") != null)
+            {
+                <h4>Leave a Review</h4>
+                <form asp-controller="Product" asp-action="SubmitReview" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="menuItemId" value="@Model.Id" />
+
+                    <div class="form-field-group">
+                        <label>Rating</label>
+                        <select name="rating" class="modern-select">
+                            <option value="5">★★★★★ (5/5)</option>
+                            <option value="4">★★★★☆ (4/5)</option>
+                            <option value="3">★★★☆☆ (3/5)</option>
+                            <option value="2">★★☆☆☆ (2/5)</option>
+                            <option value="1">★☆☆☆☆ (1/5)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-field-group">
+                        <label>Your Thoughts</label>
+                        <textarea name="comment" rows="4" class="modern-textarea" placeholder="How was the flavor, temperature, or presentation?" maxlength="500" required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-modern-submit">Post Review</button>
+                </form>
+            }
+            else
+            {
+                <div class="login-prompt-box">
+                    <p>Want to review this dish?</p>
+                    <a asp-controller="Security" asp-action="Login" class="btn-login-redirect">Log in to Review</a>
+                </div>
+            }
+        </div>
     </div>
 </div>

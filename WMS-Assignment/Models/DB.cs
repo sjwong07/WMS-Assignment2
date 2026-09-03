@@ -151,6 +151,8 @@ public class MenuItem
 
     public FoodCategory? Category { get; set; }
     public List<MenuItemPhoto> Photos { get; set; } = new();
+
+    public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
 }
 
 public class MenuItemPhoto
@@ -232,20 +234,9 @@ public class OrderDetail
     public decimal SubTotal { get; set; }
 }
 
-public class Review
-{
-    [Key]
-    public int Id { get; set; }
-    public string MenuItemId { get; set; } = string.Empty;
-    public MenuItem? MenuItem { get; set; }
-    public string UserId { get; set; } = string.Empty;
-    public User? User { get; set; }
-    [Range(1, 5)]
-    public int Rating { get; set; }
-    [MaxLength(500)]
-    public string? Comment { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
-}
+
+
+
 
 public class Favorite
 {

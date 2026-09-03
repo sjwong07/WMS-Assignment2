@@ -12,7 +12,7 @@ using WMS_Assignment.Models;
 namespace WMS_Assignment.Migrations
 {
     [DbContext(typeof(DB))]
-    [Migration("20260902162536_CreateDB")]
+    [Migration("20260902163313_CreateDB")]
     partial class CreateDB
     {
         /// <inheritdoc />

@@ -11,7 +11,10 @@
 <div class="cart-page-container">
     <div class="cart-header-title">
         <h2>🛍️ Your Order</h2>
-        <span class="table-badge">📍 Table: <strong>@tableId</strong></span>
+        @if (hasItems)
+        {
+            <span class="table-badge">📍 Table: <strong>@tableId</strong></span>
+        }
     </div>
 
     @if (TempData["Error"] != null)

@@ -71,6 +71,8 @@ public class ProductController(DB db, Helper hp) : Controller
         var item = db.MenuItems
             .Include(x => x.Category)
             .Include(x => x.Photos)
+            .Include(x => x.Reviews)
+                .ThenInclude(r => r.User)
             .FirstOrDefault(x => x.Id == id);
 
         if (item == null) return NotFound();
@@ -101,6 +103,7 @@ public class ProductController(DB db, Helper hp) : Controller
 
         var review = new WMS_Assignment.Models.Review
         {
+        
             MenuItemId = menuItemId,
             UserId = userId,
             Rating = Math.Clamp(rating, 1, 5),
@@ -140,5 +143,24 @@ public class ProductController(DB db, Helper hp) : Controller
 
         await db.SaveChangesAsync();
         return Json(new { success = true, isFavorite });
+    }
+
+    // GET: /Product/Wishlist
+    [Authorize(Roles = "Member")]
+    public async Task<IActionResult> Wishlist()
+    {
+        var userId = GetCurrentUserId();
+        if (userId == null) return RedirectToAction("Login", "Security");
+
+        var favorites = await db.Favorites
+            .Where(f => f.UserId == userId)
+            .Include(f => f.MenuItem)
+                .ThenInclude(m => m.Category)
+            .Include(f => f.MenuItem)
+                .ThenInclude(m => m.Photos)
+            .Select(f => f.MenuItem)
+            .ToListAsync();
+
+        return View(favorites);
     }
 }

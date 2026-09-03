@@ -2016,3 +2016,76 @@ body {
         background: #b87739;
         color: #fff;
     }
+
+/* ==========================================
+   Stacked Navbar Layout (Two-Row Header)
+========================================== */
+.navbar-main.stacked-navbar {
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 12px 30px !important;
+    background: #fffaf5 !important;
+    border-bottom: 1px solid #f3ece4 !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 1000 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.navbar-top-row {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100% !important;
+    padding-bottom: 10px !important;
+    border-bottom: 1px solid #f3ece4 !important;
+}
+
+.navbar-bottom-row {
+    display: flex !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+    padding-top: 10px !important;
+    overflow-x: auto !important;
+}
+
+    .navbar-bottom-row .nav-center-links {
+        display: flex !important;
+        gap: 2rem !important;
+        list-style: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        align-items: center !important;
+    }
+
+.food-img-wrapper {
+    position: relative !important;
+    overflow: hidden;
+    height: 180px;
+    background-color: #f9f3ec;
+}
+
+.favorite-btn {
+    position: absolute !important;
+    top: 12px !important;
+    left: 12px !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    border: none !important;
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 50% !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15) !important;
+    z-index: 10 !important;
+    font-size: 1.1rem !important;
+    transition: transform 0.2s ease !important;
+}
+
+    .favorite-btn:hover {
+        transform: scale(1.15) !important;
+        background: #ffffff !important;
+    }

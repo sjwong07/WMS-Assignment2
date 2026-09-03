@@ -47,7 +47,7 @@
                                         </div>
                                     }
                                 </td>
-                                <td>@order.OrderDate.ToString("dd MMM yyyy, hh:mm tt")</td>
+                                <td>@order.OrderDate.ToString("dd MMM yyyy, hh:mm tt", System.Globalization.CultureInfo.InvariantCulture)</td>
                                 <td>@order.PaymentStatus</td>
                                 <td>RM @order.TotalAmount.ToString("0.00")</td>
                                 <td>

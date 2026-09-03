@@ -4,8 +4,8 @@
     ViewData["Title"] = "Checkout";
     var subtotal = Model.OrderDetails.Sum(od => od.SubTotal);
     var totalAmount = Model.TotalAmount;
+    var tableId = Model.TableId ?? Model.Table?.Id ?? "";
 }
-
 <div class="checkout-page">
     <div class="checkout-layout">
 
@@ -53,19 +53,16 @@
 
             <form asp-action="Checkout" method="post">
                 <input type="hidden" name="orderId" value="@Model.Id" />
+                <input type="hidden" name="tableId" value="@tableId" />
+                <input type="hidden" name="tableNumber" value="@tableId" />
 
                 <!-- Dining Option Selection -->
                 <div style="margin-bottom: 20px; background: #fdfbf7; padding: 15px; border-radius: 10px; border: 1px solid #f0e6db;">
                     <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #665c54; margin-bottom: 8px;">Dining Option</label>
-                    <select name="diningOption" id="diningOptionSelect" class="form-control" onchange="toggleTableInput()" style="width: 100%; padding: 10px; border: 1px solid #dcd0c0; border-radius: 8px; margin-bottom: 12px; background: #fff;">
-                        <option value="Dine-In">Dine-In</option>
+                    <select name="diningOption" id="diningOptionSelect" class="form-control" onchange="toggleDiningOption()" style="width: 100%; padding: 10px; border: 1px solid #dcd0c0; border-radius: 8px; margin-bottom: 12px; background: #fff;">
+                        <option value="Dine-In">Dine-In (@tableId)</option>
                         <option value="Takeaway">Takeaway</option>
                     </select>
-
-                    <div id="tableNumberContainer">
-                        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #665c54; margin-bottom: 5px;">Table Number</label>
-                        <input type="text" name="tableNumber" id="tableNumberInput" placeholder="e.g. Table 4" style="width: 100%; padding: 10px; border: 1px solid #dcd0c0; border-radius: 8px;" />
-                    </div>
                 </div>
 
                 <div class="checkout-panel-title" style="margin-top: 15px; margin-bottom: 10px;">Select Payment Method</div>
@@ -121,18 +118,15 @@
 
 @section Scripts {
     <script>
-        function toggleTableInput() {
+        function toggleDiningOption() {
             const option = document.getElementById('diningOptionSelect').value;
-            const container = document.getElementById('tableNumberContainer');
-            const input = document.getElementById('tableNumberInput');
+            const hiddenTableInput = document.querySelector('input[name="tableId"]');
+            const originalTableId = '@tableId';
 
-            if (option === 'Dine-In') {
-                container.style.display = 'block';
-                input.required = true;
+            if (option === 'Takeaway') {
+                hiddenTableInput.value = ''; // Clear table for takeaway if needed
             } else {
-                container.style.display = 'none';
-                input.required = false;
-                input.value = '';
+                hiddenTableInput.value = originalTableId;
             }
         }
 

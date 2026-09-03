@@ -36,15 +36,9 @@ builder.Services.AddAuthorization();
 builder.Services.AddScoped<Helper>();
 
 // 5. Database Connection
-var databasePath = Path.Combine(
-    builder.Environment.ContentRootPath,
-    "Restaurant.mdf"
-);
-
 builder.Services.AddSqlServer<DB>($@"
     Data Source=(LocalDB)\MSSQLLocalDB;
-    AttachDbFilename={databasePath};
-    Integrated Security=True;
+    AttachDbFilename={builder.Environment.ContentRootPath}\Restaurant.mdf;
 ");
 
 // 6. Configure Authentication with Cookie & Persistent Login Support

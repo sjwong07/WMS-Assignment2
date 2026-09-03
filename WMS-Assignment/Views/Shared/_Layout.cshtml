@@ -74,6 +74,7 @@
     <link rel="stylesheet" href="~/css/product-form.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/report.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/order-tables.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/product-detail.css" asp-append-version="true" />
 </head>
 <body>
 
@@ -81,96 +82,101 @@
     <div id="google_translate_element" style="display:none;"></div>
 
     <!-- Header / Navbar -->
-    <header class="navbar-main">
-        <!-- Logo -->
-        <a href="/" class="brand-logo notranslate">
-            <span>☕</span> WagEat •
-        </a>
+    <header class="navbar-main stacked-navbar">
+        <!-- Top Row: Logo & User Profile / Login -->
+        <div class="navbar-top-row">
+            <a href="/" class="brand-logo notranslate">
+                <span>☕</span> WagEat •
+            </a>
 
-        <!-- Navigation Links -->
-        <ul class="nav-center-links">
-            <li><a href="/">🏠 Home</a></li>
-            <li><a href="/Product/Menu">📋 Menu</a></li>
-            <li><a href="/Order/History">🧾 Order History</a></li>
+            <!-- Right Side User Section -->
+            <div class="nav-right-actions">
+                @if (!string.IsNullOrEmpty(username))
+                {
+                    <div class="nav-user-pill notranslate" id="userDropdownTrigger" onclick="toggleUserDropdown(event)">
+                        <img src="@userPhotoUrl"
+                             alt="@username"
+                             class="user-avatar-img"
+                             onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=@Uri.EscapeDataString(username ?? "User")&background=E5A96A&color=fff';" />
 
-            @if (User.IsInRole("Member") || User.IsInRole("Admin") || User.IsInRole("SuperAdmin"))
-            {
-                <li><a href="/Home/Cart">🛒 Cart</a></li>
-            }
+                        <span class="username-text">@username</span>
 
-            @if (User.IsInRole("Admin") || User.IsInRole("SuperAdmin"))
-            {
-                <li><a href="/Admin/AdminMenu">Admin Menu</a></li>
-                <li><a href="/Order/Maintenance">🍳 Order Maintenance</a></li>
-                <li><a href="/Order/Report">📊 Revenue Report</a></li>
-                <li><a href="/Admin/BannedUser"><span>🚪</span> Ban List</a></li>
-                <li><a href="/Admin/MemberList"><span>🚪</span> Member List</a></li>
-            }
+                        <!-- Language Selector Dropdown -->
+                        <select id="langSelector" class="lang-select" onclick="event.stopPropagation()" onmousedown="event.stopPropagation()" onchange="changeLanguage(this.value, event)">
+                            <option value="en">EN</option>
+                            <option value="ms">BM</option>
+                            <option value="zh-CN">中文</option>
+                        </select>
 
-            @if (User.IsInRole("SuperAdmin"))
-            {
-                <li><a href="/Admin/AdminList"><span>🚪</span> Admin List</a></li>
-            }
-        </ul>
+                        <span class="caret-icon">▼</span>
 
-        <!-- Right Side User Section -->
-        <div class="nav-right-actions">
-            @if (!string.IsNullOrEmpty(username))
-            {
-                <div class="nav-user-pill notranslate" id="userDropdownTrigger" onclick="toggleUserDropdown(event)">
-                    <img src="@userPhotoUrl"
-                         alt="@username"
-                         class="user-avatar-img"
-                         onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=@Uri.EscapeDataString(username ?? "User")&background=E5A96A&color=fff';" />
+                        <!-- Dropdown Content -->
+                        <div class="user-dropdown-menu" id="userMenu">
+                            @if (User.IsInRole("Admin") || User.IsInRole("SuperAdmin"))
+                            {
+                                <a href="/Admin/Profile">
+                                    <span>👤</span> Profile
+                                </a>
+                                <a href="/Admin/Dashboard">
+                                    <span>⚙️</span> Dashboard
+                                </a>
+                            }
+                            else
+                            {
+                                <a href="/Member/Profile">
+                                    <span>👤</span> Profile
+                                </a>
+                                <a href="/Member/Dashboard">
+                                    <span>📊</span> Dashboard
+                                </a>
+                            }
 
-                    <span class="username-text">@username</span>
+                            <div class="user-dropdown-divider"></div>
 
-                    <!-- Language Selector Dropdown -->
-                    <select id="langSelector" class="lang-select" onclick="event.stopPropagation()" onmousedown="event.stopPropagation()" onchange="changeLanguage(this.value, event)">
-                        <option value="en">EN</option>
-                        <option value="ms">BM</option>
-                        <option value="zh-CN">中文</option>
-                    </select>
-
-                    <span class="caret-icon">▼</span>
-
-                    <!-- Dropdown Content -->
-                    <div class="user-dropdown-menu" id="userMenu">
-                        @if (User.IsInRole("Admin") || User.IsInRole("SuperAdmin"))
-                        {
-                            <a href="/Admin/Profile">
-                                <span>👤</span> Profile
+                            <a href="/Member/UpdatePassword" class="UpdatePassword-btn">
+                                <span>🔑</span> Update Password
                             </a>
-                            <a href="/Admin/Dashboard">
-                                <span>⚙️</span> Dashboard
-                            </a>
-                        }
-                        else
-                        {
-                            <a href="/Member/Profile">
-                                <span>👤</span> Profile
-                            </a>
-                            <a href="/Member/Dashboard">
-                                <span>📊</span> Dashboard
-                            </a>
-                        }
 
-                        <div class="user-dropdown-divider"></div>
-
-                        <a href="/Member/UpdatePassword" class="UpdatePassword-btn">
-                            <span>🔑</span> Update Password
-                        </a>
-
-                        <a href="/Security/Logout" class="logout-btn">
-                            <span>🚪</span> Logout
-                        </a>
+                            <a href="/Security/Logout" class="logout-btn">
+                                <span>🚪</span> Logout
+                            </a>
+                        </div>
                     </div>
-                </div>
-            }
-            else if (!isAuthPage)
-            {
-                <a href="/Security/Login" class="btn btn-sm btn-primary" style="text-decoration:none;">Login</a>
-            }
+                }
+                else if (!isAuthPage)
+                {
+                    <a href="/Security/Login" class="btn btn-sm btn-primary" style="text-decoration:none;">Login</a>
+                }
+            </div>
+        </div>
+
+        <!-- Bottom Row: Navigation Links Function Bar -->
+        <div class="navbar-bottom-row">
+            <ul class="nav-center-links">
+                <li><a href="/">🏠 Home</a></li>
+                <li><a href="/Product/Menu">📋 Menu</a></li>
+                <li><a href="/Order/History">🧾 Order History</a></li>
+
+                @if (User.IsInRole("Member") || User.IsInRole("Admin") || User.IsInRole("SuperAdmin"))
+                {
+                    <li><a href="/Home/Cart">🛒 Cart</a></li>
+                    <li><a href="/Product/Wishlist">❤️ Wishlist</a></li>
+                }
+
+                @if (User.IsInRole("Admin") || User.IsInRole("SuperAdmin"))
+                {
+                    <li><a href="/Admin/AdminMenu">Admin Menu</a></li>
+                    <li><a href="/Order/Maintenance">🍳 Order Maintenance</a></li>
+                    <li><a href="/Order/Report">📊 Revenue Report</a></li>
+                    <li><a href="/Admin/BannedUser"><span>🚪</span> Ban List</a></li>
+                    <li><a href="/Admin/MemberList"><span>🚪</span> Member List</a></li>
+                }
+
+                @if (User.IsInRole("SuperAdmin"))
+                {
+                    <li><a href="/Admin/AdminList"><span>🚪</span> Admin List</a></li>
+                }
+            </ul>
         </div>
     </header>
 
