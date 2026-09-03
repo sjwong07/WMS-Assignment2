@@ -3,7 +3,6 @@
 @{
     var hasPhoto = Model?.CurrentPhotoURL != null && Model.CurrentPhotoURL.Count > 0;
 }
-
 <div class="product-form-container">
 
     <h2>Update Menu Item</h2>
@@ -14,21 +13,40 @@
         <input type="hidden" asp-for="Id" />
         <input type="hidden" asp-for="CurrentPhotoURL" />
 
-        <div class="form-photo-preview" id="photoPreviewContainer">
-            @if (hasPhoto)
-            {
-                foreach (var photo in Model.CurrentPhotoURL)
+        <div class="form-group text-center" style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 25px;">
+            <label class="font-weight-bold mb-2">Item Photo</label>
+
+            <div class="form-photo-preview" id="photoPreviewContainer">
+                @if (hasPhoto)
                 {
-                    <div class="photo-item">
-                        <img src="@Url.Content("~/" + photo.PhotoURL.TrimStart('/'))" class="preview-thumb" alt="Existing photo" />
-                        <button type="submit" form="deleteForm_@photo.Id" class="delete-photo-btn">✕</button>
+                    foreach (var photo in Model.CurrentPhotoURL)
+                    {
+                        var cleanPhotoUrl = photo.PhotoURL.StartsWith("~/") ? photo.PhotoURL : "~/" + photo.PhotoURL.TrimStart('/');
+                        <div class="photo-item" style="position: relative;">
+                            <img src="@Url.Content(cleanPhotoUrl)" class="preview-thumb" alt="Existing photo" />
+                            <button type="submit" form="deleteForm_@photo.Id" class="delete-photo-btn">✕</button>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div id="noPhotoPlaceholder" class="no-photo-placeholder-box">
+                        <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 6px; animation: bounce 2s infinite;">
+                            <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+                            <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+                            <line x1="6" y1="1" x2="6" y2="4"></line>
+                            <line x1="10" y1="1" x2="10" y2="4"></line>
+                            <line x1="14" y1="1" x2="14" y2="4"></line>
+                        </svg>
+                        <span>No Food Photo</span>
                     </div>
                 }
-            }
-            else
-            {
-                <img src="~/images/no-photo.png" class="preview-thumb" alt="No photo" id="noPhotoPlaceholder" />
-            }
+            </div>
+
+            <label class="upload-photo-btn">
+                Upload Photo <input asp-for="Photos" type="file" multiple accept="image/*" style="display: none;" onchange="previewPhoto(event)" />
+            </label>
+            <span asp-validation-for="Photos" class="text-danger d-block mt-1"></span>
         </div>
 
         <div class="form-group">
@@ -58,12 +76,6 @@
             <span asp-validation-for="CategoryId" class="text-danger"></span>
         </div>
 
-        <div class="form-group">
-            <label asp-for="Photos"></label>
-            <input asp-for="Photos" type="file" multiple accept="image/*" class="form-control" onchange="previewPhoto(event)" />
-            <span asp-validation-for="Photos" class="text-danger"></span>
-        </div>
-
         <div class="form-actions">
             <button type="submit" class="btn-action btn-update">Save Changes</button>
             <a asp-action="AdminMenu" asp-controller="Admin" class="btn-action btn-cancel">Cancel</a>
@@ -81,7 +93,6 @@
             </form>
         }
     }
-
 </div>
 
 <script>

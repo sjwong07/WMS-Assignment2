@@ -199,14 +199,13 @@ public class AdminController(DB db, Helper hp) : Controller
             CategoryId = vm.CategoryId,
         };
 
-        if (vm.Photos != null)
+        if (vm.Photos != null && vm.Photos.Any())
         {
-            foreach (var photo in vm.Photos)
+            // Set the first uploaded photo as the main persistent PhotoURL in the database
+            var primaryFile = vm.Photos.First();
+            if (primaryFile != null && primaryFile.Length > 0)
             {
-                if (photo == null || photo.Length == 0) continue;
-
-                var error = hp.ValidatePhoto(photo);
-
+                var error = hp.ValidatePhoto(primaryFile);
                 if (!string.IsNullOrEmpty(error))
                 {
                     ModelState.AddModelError("Photos", error);
@@ -214,8 +213,18 @@ public class AdminController(DB db, Helper hp) : Controller
                     return View(vm);
                 }
 
-                var url = hp.SavePhoto(photo, "Menu");
+                item.PhotoURL = hp.SavePhoto(primaryFile, "photos");
+            }
 
+            // Also keep multi-photo support for the MenuItemPhotos gallery table if used
+            foreach (var photo in vm.Photos)
+            {
+                if (photo == null || photo.Length == 0) continue;
+
+                var error = hp.ValidatePhoto(photo);
+                if (!string.IsNullOrEmpty(error)) continue;
+
+                var url = hp.SavePhoto(photo, "photos");
                 item.Photos.Add(new MenuItemPhoto { PhotoURL = url });
             }
         }
@@ -279,13 +288,13 @@ public class AdminController(DB db, Helper hp) : Controller
         item.Price = decimal.Parse(vm.Price);
         item.CategoryId = vm.CategoryId;
 
-        if (vm.Photos != null)
+        if (vm.Photos != null && vm.Photos.Any())
         {
-            foreach (var photo in vm.Photos)
+            // Update primary PhotoURL with the newly uploaded image
+            var primaryFile = vm.Photos.First();
+            if (primaryFile != null && primaryFile.Length > 0)
             {
-                if (photo == null || photo.Length == 0) continue;
-
-                var error = hp.ValidatePhoto(photo);
+                var error = hp.ValidatePhoto(primaryFile);
                 if (!string.IsNullOrEmpty(error))
                 {
                     ModelState.AddModelError("Photos", error);
@@ -294,7 +303,23 @@ public class AdminController(DB db, Helper hp) : Controller
                     return View(vm);
                 }
 
-                var url = hp.SavePhoto(photo, "Menu");
+                if (!string.IsNullOrEmpty(item.PhotoURL))
+                {
+                    hp.DeletePhoto(item.PhotoURL, "");
+                }
+
+                item.PhotoURL = hp.SavePhoto(primaryFile, "photos");
+            }
+
+            // Append extra photos to gallery
+            foreach (var photo in vm.Photos)
+            {
+                if (photo == null || photo.Length == 0) continue;
+
+                var error = hp.ValidatePhoto(photo);
+                if (!string.IsNullOrEmpty(error)) continue;
+
+                var url = hp.SavePhoto(photo, "photos");
                 item.Photos.Add(new MenuItemPhoto { PhotoURL = url });
             }
         }
@@ -324,6 +349,11 @@ public class AdminController(DB db, Helper hp) : Controller
         var item = db.MenuItems.Include(x => x.Photos).FirstOrDefault(x => x.Id == id);
         if (item != null)
         {
+            if (!string.IsNullOrEmpty(item.PhotoURL))
+            {
+                hp.DeletePhoto(item.PhotoURL, "");
+            }
+
             foreach (var photo in item.Photos)
             {
                 hp.DeletePhoto(photo.PhotoURL, "");

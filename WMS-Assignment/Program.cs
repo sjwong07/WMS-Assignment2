@@ -1,7 +1,12 @@
 global using WMS_Assignment.Models;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
-using System.Globalization;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Globalization;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,6 +66,7 @@ builder.Services.AddAuthentication(options =>
 });
 
 QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+
 var app = builder.Build();
 
 // 7. Seed Roles and Default Admin Account Automatically on Startup
@@ -69,12 +75,9 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<DB>();
     var hp = scope.ServiceProvider.GetRequiredService<Helper>();
 
-
-
-
     var superadmin = db.SuperAdmins.FirstOrDefault(
-    sa => sa.Username.ToLower() == "superadmin123"
-);
+        sa => sa.Username.ToLower() == "superadmin123"
+    );
 
     if (superadmin == null)
     {
@@ -116,16 +119,12 @@ using (var scope = app.Services.CreateScope())
         db.Members.Add(testMember);
         db.SaveChanges();
     }
-    
-
-
-
 
     // Find existing admin or create a new one
     var admin = db.Admins.FirstOrDefault(u => u.Username.ToLower() == "admin123")
                 ?? db.Users.OfType<Admin>().FirstOrDefault(u => u.Username.ToLower() == "admin123");
 
-  if (admin == null)
+    if (admin == null)
     {
         admin = new Admin
         {
@@ -144,7 +143,6 @@ using (var scope = app.Services.CreateScope())
         db.Admins.Add(admin);
         db.SaveChanges();
     }
-   
 }
 
 // 8. Configure Supported Languages (Cultures)
@@ -174,7 +172,6 @@ app.UseRouting();
 app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapDefaultControllerRoute();
 
 app.Run();

@@ -1,6 +1,6 @@
 /* ============================================
-   --- WagEat - Combined & Upgraded Styles ---
-   ============================================ */
+    --- WagEat - Combined & Upgraded Styles ---
+    ============================================ */
 
 /* --- Reset & Base --- */
 * {
@@ -17,8 +17,8 @@ body {
 }
 
 /* ============================================
-   --- Page Container ---
-   ============================================ */
+    --- Page Container ---
+    ============================================ */
 .menu-page-container {
     max-width: 1200px;
     margin: 2rem auto;
@@ -26,8 +26,8 @@ body {
 }
 
 /* ============================================
-   --- Search & Filter Controls ---
-   ============================================ */
+    --- Search & Filter Controls ---
+    ============================================ */
 .menu-controls {
     display: flex;
     flex-wrap: wrap;
@@ -148,8 +148,8 @@ body {
     }
 
 /* ============================================
-   --- Food Grid Layout ---
-   ============================================ */
+    --- Food Grid Layout ---
+    ============================================ */
 .food-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -157,8 +157,8 @@ body {
 }
 
 /* ============================================
-   --- Food Card Component ---
-   ============================================ */
+    --- Food Card Component ---
+    ============================================ */
 .food-card {
     background: #fcfaf8;
     border-radius: 20px;
@@ -357,8 +357,8 @@ body {
     }
 
 /* ============================================
-   --- Cart & Checkout Redesign Styles ---
-   ============================================ */
+    --- Cart & Checkout Redesign Styles ---
+    ============================================ */
 .cart-page-container {
     max-width: 1200px;
     margin: 2.5rem auto;
@@ -613,8 +613,8 @@ body {
 }
 
 /* ============================================
-   --- Login Container ---
-   ============================================ */
+    --- Login Container ---
+    ============================================ */
 .login-container {
     min-height: calc(100vh - 72px);
     display: flex;
@@ -1217,8 +1217,8 @@ body {
     }
 
 /* ============================================
-   --- Global Dropdown Menu ---
-   ============================================ */
+    --- Global Dropdown Menu ---
+    ============================================ */
 .dropdown-menu {
     display: none;
     position: absolute;
@@ -1270,8 +1270,8 @@ body {
 }
 
 /* ============================================
-   --- Navbar & Header Top Navigation ---
-   ============================================ */
+    --- Navbar & Header Top Navigation ---
+    ============================================ */
 .navbar-main {
     display: flex !important;
     flex-direction: row !important;
@@ -1468,8 +1468,8 @@ body {
 }
 
 /* ============================================
-   --- Responsive Media Queries ---
-   ============================================ */
+    --- Responsive Media Queries ---
+    ============================================ */
 @media (max-width: 860px) {
     .cart-grid-layout {
         grid-template-columns: 1fr;
@@ -2039,7 +2039,7 @@ body {
     align-items: center !important;
     width: 100% !important;
     padding-bottom: 10px !important;
-    border-bottom: 1px solid #f3ece4 !important;
+    border-bottom: 1px solid #f3ected !important;
 }
 
 .navbar-bottom-row {
@@ -2088,4 +2088,38 @@ body {
     .favorite-btn:hover {
         transform: scale(1.15) !important;
         background: #ffffff !important;
+    }
+
+/* --- Added Styles for Photo Upload Button --- */
+@@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-4px);
+    }
+}
+
+.upload-photo-btn {
+    background: #f8f9fa;
+    border: 1px solid #ced4da;
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #4b5563;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+    .upload-photo-btn:hover {
+        background: #e9ecef;
+        border-color: #adb5bd;
+        color: #212529;
+        transform: translateY(-1px);
     }

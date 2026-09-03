@@ -9,11 +9,11 @@ namespace WMS_Assignment.Controllers;
 
 public class ProductController(DB db, Helper hp) : Controller
 {
-    private string GetCurrentUserId()
+    private string? GetCurrentUserId()
     {
         var username = HttpContext.Session.GetString("User") ?? User.Identity?.Name;
         if (username == null) return null;
-        var user = db.Users.FirstOrDefault(u => u.Username.ToLower() == username.ToLower());
+        var user = db.Users.FirstOrDefault(u => u.Username != null && u.Username.ToLower() == username.ToLower());
         return user?.Id;
     }
 
@@ -103,7 +103,6 @@ public class ProductController(DB db, Helper hp) : Controller
 
         var review = new WMS_Assignment.Models.Review
         {
-        
             MenuItemId = menuItemId,
             UserId = userId,
             Rating = Math.Clamp(rating, 1, 5),
@@ -116,51 +115,5 @@ public class ProductController(DB db, Helper hp) : Controller
 
         TempData["Success"] = "Review submitted successfully!";
         return RedirectToAction("Detail", new { id = menuItemId });
-    }
-
-    // POST: /Product/ToggleFavorite
-    [HttpPost]
-    [Authorize(Roles = "Member")]
-    public async Task<IActionResult> ToggleFavorite(string menuItemId)
-    {
-        var userId = GetCurrentUserId();
-        if (userId == null) return Json(new { success = false, message = "Unauthorized" });
-
-        var existing = await db.Favorites
-            .FirstOrDefaultAsync(f => f.UserId == userId && f.MenuItemId == menuItemId);
-
-        bool isFavorite;
-        if (existing != null)
-        {
-            db.Favorites.Remove(existing);
-            isFavorite = false;
-        }
-        else
-        {
-            db.Favorites.Add(new WMS_Assignment.Models.Favorite { UserId = userId, MenuItemId = menuItemId });
-            isFavorite = true;
-        }
-
-        await db.SaveChangesAsync();
-        return Json(new { success = true, isFavorite });
-    }
-
-    // GET: /Product/Wishlist
-    [Authorize(Roles = "Member")]
-    public async Task<IActionResult> Wishlist()
-    {
-        var userId = GetCurrentUserId();
-        if (userId == null) return RedirectToAction("Login", "Security");
-
-        var favorites = await db.Favorites
-            .Where(f => f.UserId == userId)
-            .Include(f => f.MenuItem)
-                .ThenInclude(m => m.Category)
-            .Include(f => f.MenuItem)
-                .ThenInclude(m => m.Photos)
-            .Select(f => f.MenuItem)
-            .ToListAsync();
-
-        return View(favorites);
     }
 }

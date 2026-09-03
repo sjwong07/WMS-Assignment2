@@ -21,7 +21,6 @@ public class DB(DbContextOptions options) : DbContext(options)
     public DbSet<MenuItemPhoto> MenuItemPhotos { get; set; }
     public DbSet<BannedUser> BannedUsers { get; set; }
     public DbSet<Review> Reviews { get; set; }
-    public DbSet<Favorite> Favorites { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -149,12 +148,14 @@ public class MenuItem
     [MaxLength(10)]
     public string CategoryId { get; set; } = string.Empty;
 
+    // Added property to store primary photo path directly in the table
+    public string? PhotoURL { get; set; }
+
     public FoodCategory? Category { get; set; }
     public List<MenuItemPhoto> Photos { get; set; } = new();
 
     public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
 }
-
 public class MenuItemPhoto
 {
     [Key]
@@ -232,18 +233,4 @@ public class OrderDetail
     public decimal UnitPrice { get; set; }
 
     public decimal SubTotal { get; set; }
-}
-
-
-
-
-
-public class Favorite
-{
-    [Key]
-    public int Id { get; set; }
-    public string UserId { get; set; } = string.Empty;
-    public User? User { get; set; }
-    public string MenuItemId { get; set; } = string.Empty;
-    public MenuItem? MenuItem { get; set; }
 }

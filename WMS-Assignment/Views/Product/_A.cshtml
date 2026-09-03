@@ -15,7 +15,8 @@
             items = list;
         }
     }
-}<div class="food-grid">
+}
+<div class="food-grid">
     @if (items != null && items.Any())
     {
         @foreach (var item in items)
@@ -91,13 +92,6 @@
                 <div class="food-info">
                     <div class="food-header" style="align-items: center;">
                         <div style="display: flex; align-items: center; gap: 8px;">
-                            <!-- Wishlist Heart Button Placed Safely Here -->
-                            <button type="button"
-                                    onclick="toggleFav('@itemId', this)"
-                                    style="background: #fff8f0; border: 1px solid #fed7aa; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 0.9rem;"
-                                    title="Save to Wishlist">
-                                ❤️
-                            </button>
                             <h3 class="food-title" style="margin: 0;">@itemName</h3>
                         </div>
                         <div class="food-price">RM @price.ToString("0.00")</div>
@@ -116,9 +110,9 @@
                             </a>
 
                             <div class="qty-counter">
-                                <button type="button" class="qty-btn">-</button>
+                                <button type="button" class="qty-btn" onclick="decrementQty('@itemId')">-</button>
                                 <input type="number" name="quantity" id="qty-@itemId" class="qty-input" value="1" min="1" max="99" readonly />
-                                <button type="button" class="qty-btn">+</button>
+                                <button type="button" class="qty-btn" onclick="incrementQty('@itemId')">+</button>
                             </div>
 
                             <button type="submit" class="add-to-cart-btn">Add</button>
