@@ -19,7 +19,6 @@
         else categoryName = "Drink / Dessert";
     }
 
-    // Matching animated SVG fallback graphic based on category
     string fallbackSvg = categoryName.Contains("Main", StringComparison.OrdinalIgnoreCase) || itemId.StartsWith("M", StringComparison.OrdinalIgnoreCase)
         ? "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><style>.bowl{animation:bounce 2s ease-in-out infinite;}@keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}</style><circle cx='100' cy='100' r='90' fill='%23f9f3ec'/><g class='bowl'><path d='M50 110 Q100 150 150 110 Z' fill='%23e5a96a'/><ellipse cx='100' cy='110' rx='50' ry='15' fill='%23d08c47'/><path d='M70 90 Q100 70 130 90' stroke='%23fff' stroke-width='4' fill='none' stroke-linecap='round'/></g><text x='50% ' y='170' text-anchor='middle' fill='%238a7b6b' font-family='sans-serif' font-size='14' font-weight='bold'>🍲 Fresh Dish</text></svg>"
         : categoryName.Contains("Side", StringComparison.OrdinalIgnoreCase) || itemId.StartsWith("S", StringComparison.OrdinalIgnoreCase)
@@ -63,75 +62,60 @@
 </div>
 
 <!-- Customer Reviews & Ratings Section -->
-<div class="product-reviews-wrapper">
-    <div class="reviews-header-block">
+<div class="product-reviews-wrapper" style="max-width: 600px; margin: 3rem auto 0 auto;">
+    <div class="reviews-header-block text-center mb-4">
         <h3>Customer Reviews & Ratings</h3>
-        <p class="reviews-subtitle">Real feedback from verified patrons</p>
+        <p class="reviews-subtitle text-muted">Real feedback from verified patrons</p>
     </div>
 
-    <div class="reviews-grid-layout">
-        <!-- Left Side: Existing Reviews List -->
-        <div class="reviews-display-area">
-            @if (Model.Reviews != null && Model.Reviews.Any())
-            {
-                <div class="reviews-scroll-list">
-                    @foreach (var review in Model.Reviews)
-                    {
-                        <div class="modern-review-card">
-                            <div class="review-card-top">
-                                <span class="reviewer-name">@review.User?.Name</span>
-                                <span class="review-stars">@String.Concat(Enumerable.Repeat("★", review.Rating))</span>
-                            </div>
-                            <p class="review-text">@review.Comment</p>
-                            <span class="review-timestamp">@review.CreatedAt.ToString("MMM dd, yyyy - HH:mm")</span>
-                        </div>
-                    }
-                </div>
-            }
-            else
-            {
-                <div class="no-reviews-box">
-                    <span class="no-reviews-icon">💬</span>
-                    <p>No reviews yet. Be the first to share your experience!</p>
-                </div>
-            }
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert mb-4" style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; padding: 12px 16px; border-radius: 12px; font-weight: 500; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 8px rgba(22, 101, 52, 0.05);">
+            <span>✅</span> @TempData["Success"]
         </div>
-
-        <!-- Right Side: Add Review Form -->
-        <div class="review-form-container">
-            @if (Context.Session.GetString("User") != null)
-            {
-                <h4>Leave a Review</h4>
-                <form asp-controller="Product" asp-action="SubmitReview" method="post">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="menuItemId" value="@Model.Id" />
-
-                    <div class="form-field-group">
-                        <label>Rating</label>
-                        <select name="rating" class="modern-select">
-                            <option value="5">★★★★★ (5/5)</option>
-                            <option value="4">★★★★☆ (4/5)</option>
-                            <option value="3">★★★☆☆ (3/5)</option>
-                            <option value="2">★★☆☆☆ (2/5)</option>
-                            <option value="1">★☆☆☆☆ (1/5)</option>
-                        </select>
-                    </div>
-
-                    <div class="form-field-group">
-                        <label>Your Thoughts</label>
-                        <textarea name="comment" rows="4" class="modern-textarea" placeholder="How was the flavor, temperature, or presentation?" maxlength="500" required></textarea>
-                    </div>
-
-                    <button type="submit" class="btn-modern-submit">Post Review</button>
-                </form>
-            }
-            else
-            {
-                <div class="login-prompt-box">
-                    <p>Want to review this dish?</p>
-                    <a asp-controller="Security" asp-action="Login" class="btn-login-redirect">Log in to Review</a>
-                </div>
-            }
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert mb-4" style="background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 12px 16px; border-radius: 12px; font-weight: 500; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 8px rgba(153, 27, 27, 0.05);">
+            <span>⚠️</span> @TempData["Error"]
         </div>
+    }
+
+    <div class="review-form-container" style="background: #ffffff; border: 1px solid #eee8e1; border-radius: 16px; padding: 1.75rem; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+        @if (Context.Session.GetString("User") != null)
+        {
+            <h4 style="font-size: 1.25rem; font-weight: 700; color: #2a261f; margin-bottom: 1.25rem;">Leave a Review</h4>
+            <form asp-controller="Product" asp-action="SubmitReview" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="menuItemId" value="@Model.Id" />
+
+                <div class="form-field-group mb-3">
+                    <label class="form-label fw-semibold" style="font-size: 0.875rem; color: #2a261f;">Rating</label>
+                    <select name="rating" class="form-select modern-select" style="border-radius: 10px; border-color: #e5dcd2;">
+                        <option value="5">★★★★★ (5/5)</option>
+                        <option value="4">★★★★☆ (4/5)</option>
+                        <option value="3">★★★☆☆ (3/5)</option>
+                        <option value="2">★★☆☆☆ (2/5)</option>
+                        <option value="1">★☆☆☆☆ (1/5)</option>
+                    </select>
+                </div>
+
+                <div class="form-field-group mb-3">
+                    <label class="form-label fw-semibold" style="font-size: 0.875rem; color: #2a261f;">Your Thoughts</label>
+                    <textarea name="comment" rows="4" class="form-control modern-textarea" placeholder="How was the flavor, temperature, or presentation?" maxlength="500" required style="border-radius: 10px; border-color: #e5dcd2; resize: none;"></textarea>
+                </div>
+
+                <button type="submit" class="w-100 py-2 btn-modern-submit" style="background: linear-gradient(135deg, #d98c5f, #b86a3e); color: #fff; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(217,140,95,0.25);">
+                    Post Review
+                </button>
+            </form>
+        }
+        else
+        {
+            <div class="login-prompt-box text-center p-4">
+                <p class="mb-3">Want to review this dish?</p>
+                <a asp-controller="Security" asp-action="Login" class="btn btn-primary btn-login-redirect">Log in to Review</a>
+            </div>
+        }
     </div>
 </div>

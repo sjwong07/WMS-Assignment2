@@ -1,0 +1,37 @@
+﻿@{
+    ViewBag.Title = "Customer Reviews";
+    var reviews = ViewBag.Reviews as List<WMS_Assignment.Models.Review> ?? new List<WMS_Assignment.Models.Review>();
+}
+
+<div class="container my-5" style="max-width: 800px;">
+    <div class="mb-4 text-center">
+        <h2>Customer Reviews & Ratings</h2>
+        <p class="text-muted">Real feedback from verified patrons</p>
+    </div>
+
+    <div style="background: #ffffff; border: 1px solid #eee8e1; border-radius: 16px; padding: 1.75rem; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+        @if (reviews.Any())
+        {
+            @foreach (var review in reviews)
+            {
+                <div style="border-bottom: 1px dashed #f3ece4; padding-bottom: 1rem; margin-bottom: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.3rem;">
+                        <strong style="color: #2a261f; font-size: 0.95rem;">@(review.User?.Username ?? "Anonymous Patron")</strong>
+                        <span style="color: #d98c5f; font-size: 0.85rem;">@(new string('⭐', review.Rating))</span>
+                    </div>
+                    @if (!string.IsNullOrEmpty(review.Comment))
+                    {
+                        <p style="color: #6b5f52; font-size: 0.9rem; margin: 0 0 0.5rem 0;">@review.Comment</p>
+                    }
+                    <small style="color: #b09a88; font-size: 0.75rem;">@review.CreatedAt.ToString("dd MMM yyyy, h:mm tt")</small>
+                </div>
+            }
+        }
+        else
+        {
+            <div style="text-align: center; color: #b09a88; padding: 3rem 1rem;">
+                <p style="margin: 0;">No reviews yet. Be the first to share your experience!</p>
+            </div>
+        }
+    </div>
+</div>

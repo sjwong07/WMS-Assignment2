@@ -68,6 +68,51 @@ public class HomeController(DB db, Helper hp) : Controller
         return View();
     }
 
+    // GET: /Home/Reviews
+    public async Task<IActionResult> Reviews()
+    {
+        var reviews = await db.Reviews
+            .Include(r => r.User)
+            .OrderByDescending(r => r.CreatedAt)
+            .ToListAsync();
+
+        ViewBag.Reviews = reviews;
+        return View();
+    }
+
+    // POST: /Home/PostReview
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> PostReview(int rating, string? comment)
+    {
+        var userId = GetCurrentUserId();
+        if (userId == null)
+        {
+            TempData["Error"] = "You must be logged in to post a review. (userId was null)";
+            return RedirectToAction("Reviews");
+        }
+
+        if (rating < 1 || rating > 5)
+        {
+            TempData["Error"] = "Please select a rating.";
+            return RedirectToAction("Reviews");
+        }
+
+        var review = new Review
+        {
+            UserId = userId,
+            Rating = rating,
+            Comment = string.IsNullOrWhiteSpace(comment) ? null : comment.Trim(),
+            CreatedAt = DateTime.Now
+        };
+
+        db.Reviews.Add(review);
+        int rowsSaved = await db.SaveChangesAsync();
+
+        TempData["Success"] = $"Review saved! Rows affected: {rowsSaved}, New Review Id: {review.Id}";
+
+        return RedirectToAction("Reviews");
+    }
     public async Task<IActionResult> Receipt(string id)
     {
         var order = await db.Orders
@@ -83,6 +128,8 @@ public class HomeController(DB db, Helper hp) : Controller
     {
         return View("~/Views/Security/Login.cshtml");
     }
+
+
 
     [HttpPost]
     public async Task<IActionResult> Login(string Username, string Password)

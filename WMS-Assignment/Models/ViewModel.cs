@@ -8,24 +8,19 @@ namespace WMS_Assignment.Models;
 
 public class BanVM
 {
-    public string Id {  get; set; }
-    public string Username {  get; set; }
-    [Required(ErrorMessage ="Please write reason for ban")]
+    public string Id { get; set; }
+    public string Username { get; set; }
+    [Required(ErrorMessage = "Please write reason for ban")]
     [MaxLength(400)]
-    public string BanReason {  get; set; }
+    public string BanReason { get; set; }
 }
-
 
 public class RoleVM
 {
-    
     public string? Id { get; set; }
 
     [MaxLength(100)]
     public string Description { get; set; }
-
-
-
 }
 
 public class LoginVM
@@ -37,7 +32,7 @@ public class LoginVM
     [DataType(DataType.Password)]
     public string Password { get; set; }
 
-    public bool RememberMe {  get; set; }
+    public bool RememberMe { get; set; }
 }
 
 public class RegisterAdminVM
@@ -63,11 +58,7 @@ public class RegisterAdminVM
     [DataType(DataType.Password)]
     [Compare("Password", ErrorMessage = "Passwords do not match.")]
     public string ConfirmPassword { get; set; } = "";
-
 }
-
-
-
 
 public class RegisterVM
 {
@@ -95,93 +86,59 @@ public class RegisterVM
 
     public IFormFile? ProfilePhoto { get; set; }
 }
+
 public class MenuItemVM
-    {
-        public string? Search { get; set; }
-        public List<string> SelectCategories { get; set; }
-        public decimal? MinPrice { get; set; }
-        public decimal? MaxPrice { get; set; }
+{
+    public string? Search { get; set; }
+    public List<string> SelectCategories { get; set; }
+    public decimal? MinPrice { get; set; }
+    public decimal? MaxPrice { get; set; }
 
-        public IEnumerable<FoodCategory> FoodCategories { get; set; }
-        public IEnumerable<MenuItem> MenuItems { get; set; }
-
-
-    }
+    public IEnumerable<FoodCategory> FoodCategories { get; set; }
+    public IEnumerable<MenuItem> MenuItems { get; set; }
+}
 
 public class ProfileVM
 {
-    public string UserId {  get; set; }
-    public string Username {  get; set; }
+    public string UserId { get; set; }
+    public string Username { get; set; }
     public string Password { get; set; }
-    public string Email { get; set;}
-    public string ProfilePhoto {  get; set; }
-
-
+    public string Email { get; set; }
+    public string ProfilePhoto { get; set; }
 }
 
-    public class OrderVM
-    {
+public class OrderVM
+{
+    public string? Id { get; set; }
 
-        public string? Id { get; set; }
+    [MaxLength(100)]
+    public string UserId { get; set; }
+    public User User { get; set; }
 
-        [MaxLength(100)]
-        public string UserId { get; set; }
-        public User User { get; set; }
+    [MaxLength(100)]
+    public string TableId { get; set; }
+    public Table Table { get; set; }
 
-        [MaxLength(100)]
-        public string TableId { get; set; }
-        public Table Table { get; set; }
+    public DateTime OrderDate { get; set; }
 
-        public DateTime OrderDate { get; set; }
+    [MaxLength(20)]
+    public string Status { get; set; }
 
+    public decimal TotalAmount { get; set; }
 
-        [MaxLength(20)]
-        public string Status { get; set; }
+    [MaxLength(20)]
+    public string PaymentMethod { get; set; }
 
-        public decimal TotalAmount { get; set; }
+    [MaxLength(20)]
+    public string PaymentStatus { get; set; }
 
+    public List<OrderDetail> OrderDetails { get; set; }
+}
 
-        [MaxLength(20)]
-        public string PaymentMethod { get; set; }
-
-        // e.g. Unpaid, Paid
-        [MaxLength(20)]
-        public string PaymentStatus { get; set; }
-
-        public List<OrderDetail> OrderDetails { get; set; }
-    }
-
-    public class ProductInsertVM
+public class ProductInsertVM
 {
     [ValidateNever]
     public string Id { get; set; }
-
-    [StringLength(100)]
-   
-    public string Name { get; set; }
-
-    [StringLength(200)]
-    public string  description{ get; set; }
-
-
-    [Range(0.01,999.99)]
-    [RegularExpression(@"\d+(\.\d{1,2})?", ErrorMessage = "Invalid {0} format.")]
-    public string Price { get; set; }
-    [Required]
-    public string CategoryId { get; set; }
-
-    public List<IFormFile> Photos { get; set; }
-    [ValidateNever]
-
-    public IEnumerable<FoodCategory> FoodCategories { get; set; }
-
-}
-
-
-    public class ProductUpdateVM
-{
-    [ValidateNever]
-    public string Id {  get; set; }
 
     [StringLength(100)]
     public string Name { get; set; }
@@ -189,6 +146,29 @@ public class ProfileVM
     [StringLength(200)]
     public string description { get; set; }
 
+    [Range(0.01, 999.99)]
+    [RegularExpression(@"\d+(\.\d{1,2})?", ErrorMessage = "Invalid {0} format.")]
+    public string Price { get; set; }
+
+    [Required]
+    public string CategoryId { get; set; }
+
+    public List<IFormFile> Photos { get; set; }
+
+    [ValidateNever]
+    public IEnumerable<FoodCategory> FoodCategories { get; set; }
+}
+
+public class ProductUpdateVM
+{
+    [ValidateNever]
+    public string Id { get; set; }
+
+    [StringLength(100)]
+    public string Name { get; set; }
+
+    [StringLength(200)]
+    public string description { get; set; }
 
     [Range(0.01, 999.99)]
     [RegularExpression(@"\d+(\.\d{1,2})?", ErrorMessage = "Invalid {0} format.")]
@@ -199,47 +179,43 @@ public class ProfileVM
 
     [ValidateNever]
     public List<IFormFile> Photos { get; set; }
+
     [ValidateNever]
     public List<MenuItemPhoto> CurrentPhotoURL { get; set; }
 
     [ValidateNever]
     public IEnumerable<FoodCategory> FoodCategories { get; set; }
-
 }
 
 public class OrderDetailVM
-    {
+{
+    public string? Id { get; set; }
 
-        public string? Id { get; set; }
+    [MaxLength(100)]
+    public string OrderId { get; set; }
+    public Order Order { get; set; }
 
-        [MaxLength(100)]
-        public string OrderId { get; set; }
-        public Order Order { get; set; }
+    [MaxLength(100)]
+    public string MenuItemId { get; set; }
+    public MenuItem MenuItem { get; set; }
 
-        [MaxLength(100)]
-        public string MenuItemId { get; set; }
-        public MenuItem MenuItem { get; set; }
+    public int Quantity { get; set; }
+    public decimal UnitPrice { get; set; }
+    public decimal SubTotal { get; set; }
+}
 
-        public int Quantity { get; set; }
+public class forgotPasswordVM
+{
+    [MaxLength(50)]
+    [EmailAddress]
+    public string Email { get; set; }
+}
 
-        public decimal UnitPrice { get; set; }
-
-        public decimal SubTotal { get; set; }
-    }
-
-    public class forgotPasswordVM
-    {
-        [MaxLength(50)]
-        [EmailAddress]
-        public string Email { get; set; }
-
-    }
-    
-    public class UpdatePasswordVM
+public class UpdatePasswordVM
 {
     [DataType(DataType.Password)]
     [MaxLength(20)]
-    public string CurrentPassword {  get; set; }
+    public string CurrentPassword { get; set; }
 
     [DataType(DataType.Password)]
     [MaxLength(20)]
@@ -247,12 +223,8 @@ public class OrderDetailVM
 
     [DataType(DataType.Password)]
     [MaxLength(20)]
-    public string ConfirmPassword {  get; set; }
+    public string ConfirmPassword { get; set; }
 }
-
-
-
-
 
 public class AdminListVM
 {
@@ -272,17 +244,11 @@ public class MemberListVM
     public bool IsBanned { get; set; }
 }
 
-public class Review
+public class ReviewVM
 {
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int Id { get; set; }
-
-    public string MenuItemId { get; set; }
-    public MenuItem MenuItem { get; set; }
-    public string UserId { get; set; }
-    public User User { get; set; }
+    [Range(1, 5, ErrorMessage = "Please select a rating between 1 and 5 stars.")]
     public int Rating { get; set; }
-    public string Comment { get; set; }
-    public DateTime CreatedAt { get; set; }
+
+    [MaxLength(500, ErrorMessage = "Comment cannot exceed 500 characters.")]
+    public string? Comment { get; set; }
 }
