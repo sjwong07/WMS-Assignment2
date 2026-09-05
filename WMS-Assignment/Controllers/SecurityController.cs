@@ -122,6 +122,13 @@ public class SecurityController(DB db, Helper hp, IConfiguration cf, IWebHostEnv
             return View();
         }
 
+        // 2. Check ban status BEFORE verifying password
+        if (user.IsBanned)
+        {
+            ViewBag.Error = "This account has been locked. Please contact support.";
+            return View();
+        }
+
         bool isPasswordValid = hp.VerifyPassword(user.Hash ?? "", password);
 
         if(!isPasswordValid && user.Hash == password)
